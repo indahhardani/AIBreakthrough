@@ -12,7 +12,7 @@
   <!-- Supabase JS SDK CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased h-screen overflow-hidden flex">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex">
 
   <!-- ========================================== -->
   <!-- 1. LOGIN CONTAINER (PURE SUPABASE DATABASE) -->
@@ -73,18 +73,24 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 2. MAIN APP DASHBOARD (SETELAH LOGIN) -->
+  <!-- 2. MAIN APP DASHBOARD (RESPONSIVE VIEW) -->
   <!-- ========================================== -->
-  <div id="app-view" class="hidden flex-1 flex h-screen overflow-hidden">
+  <div id="app-view" class="hidden flex-1 flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
     
     <!-- Sidebar Navigation -->
-    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-4">
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-4 flex-shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out">
       <div class="space-y-6">
-        <div class="flex items-center gap-3 px-2 py-2">
-          <div class="p-2 bg-blue-600 rounded-lg text-white">
-            <i data-lucide="shield-check" class="w-5 h-5"></i>
+        <div class="flex items-center justify-between px-2 py-2">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-600 rounded-lg text-white">
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+            <span class="font-bold text-base tracking-wide">LegalOps AI</span>
           </div>
-          <span class="font-bold text-base tracking-wide">LegalOps AI</span>
+          <!-- Close Button Mobile -->
+          <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
         </div>
 
         <nav class="space-y-1">
@@ -101,39 +107,49 @@
       </div>
 
       <!-- User Profile & Logout -->
-      <div class="border-t border-slate-800 pt-3 space-y-3">
+      <div class="border-t border-slate-800 pt-3 space-y-3 mt-auto">
         <div class="flex items-center gap-3 px-1">
           <div class="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 flex items-center justify-center font-bold text-xs" id="user-avatar">
             U
           </div>
           <div class="overflow-hidden">
             <p class="text-xs font-semibold text-slate-200 truncate" id="user-display">username</p>
-            <p class="text-[10px] uppercase font-bold text-blue-400 tracking-wider" id="role-display">ROLE</p>
+            <p class="text-[10px] uppercase font-bold text-blue-400 tracking-wider truncate" id="role-display">ROLE</p>
           </div>
         </div>
 
-        <button onclick="handleLogout()" class="w-full bg-slate-800 hover:bg-rose-900/30 hover:text-rose-400 text-slate-400 border border-slate-700 py-1.5 rounded-lg text-xs font-medium transition flex items-center justify-center gap-2">
+        <button onclick="handleLogout()" class="w-full bg-slate-800 hover:bg-rose-900/30 hover:text-rose-400 text-slate-400 border border-slate-700 py-2 rounded-lg text-xs font-medium transition flex items-center justify-center gap-2">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Keluar
         </button>
       </div>
     </aside>
 
+    <!-- Overlay Mobile Sidebar Background -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-950/80 z-30 hidden md:hidden"></div>
+
     <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col bg-slate-950 overflow-y-auto">
-      <header class="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur flex items-center justify-between px-6">
-        <h1 class="text-base font-semibold text-slate-100">Vendor Agreement Matrix</h1>
-        <div class="text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
-          Akses Saat Ini: <span class="font-bold text-slate-200" id="access-badge">-</span>
+    <main class="flex-1 flex flex-col bg-slate-950 overflow-y-auto w-full">
+      <header class="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur flex items-center justify-between px-4 md:px-6 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <!-- Toggle Hamburger Mobile -->
+          <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          <h1 class="text-sm md:text-base font-semibold text-slate-100 truncate">Vendor Agreement Matrix</h1>
+        </div>
+
+        <div class="text-[10px] md:text-xs text-slate-400 bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-800">
+          Akses: <span class="font-bold text-slate-200" id="access-badge">-</span>
         </div>
       </header>
 
-      <div class="p-6">
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center space-y-3">
+      <div class="p-4 md:p-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 md:p-8 text-center space-y-3">
           <div class="inline-flex p-3 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">
             <i data-lucide="check-circle-2" class="w-8 h-8"></i>
           </div>
-          <h3 class="text-lg font-bold text-white">Login Berhasil via Supabase Database!</h3>
-          <p class="text-sm text-slate-400 max-w-md mx-auto">
+          <h3 class="text-base md:text-lg font-bold text-white">Login Berhasil via Supabase Database!</h3>
+          <p class="text-xs md:text-sm text-slate-400 max-w-md mx-auto">
             Data pengguna berhasil diverifikasi langsung dari tabel <code class="text-blue-400">public.users</code> di Supabase PostgreSQL.
           </p>
         </div>
@@ -146,19 +162,27 @@
   <!-- 3. PURE SUPABASE INTEGRATION SCRIPT -->
   <!-- ========================================== -->
   <script>
-    // MASUKKAN KREDENSIAL SUPABASE ANDA DI SINI:
-    const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV';
+    // ⚠️ KREDENSIAL SUPABASE
+    // Catatan: Pastikan Anda mengganti ANON KEY di bawah ini dengan anon key dari Supabase Dashboard
+    // (Project Settings -> API -> Project API Keys -> anon public)
+    const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co'; // <--- URL Proyek Supabase Anda
+    const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV';                // <--- Silakan ganti dengan ANON Key dari Supabase Settings -> API
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     lucide.createIcons();
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden');
+    }
 
     function fillDemo(username, password) {
       document.getElementById('username-input').value = username;
       document.getElementById('password-input').value = password;
     }
 
-    // Login Murni Query ke Supabase Table 'public.users'
     async function handlePureSupabaseLogin(e) {
       e.preventDefault();
       const usernameInput = document.getElementById('username-input').value.trim();
@@ -168,7 +192,6 @@
       btnSubmit.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa Supabase DB...`;
       lucide.createIcons();
 
-      // Query langsung ke tabel public.users di Supabase PostgreSQL
       const { data: users, error } = await supabaseClient
         .from('users')
         .select('*')
@@ -191,7 +214,6 @@
         };
         localStorage.setItem('supabase_session', JSON.stringify(sessionData));
         
-        // Reset tombol sebelum berpindah view
         btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
         lucide.createIcons();
         
@@ -233,7 +255,6 @@
       }
     }
 
-    // Cek Session saat Halaman Dimuat
     document.addEventListener('DOMContentLoaded', () => {
       const savedSession = localStorage.getItem('supabase_session');
       if (savedSession) {
