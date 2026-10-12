@@ -15,7 +15,7 @@
 <body class="bg-slate-950 text-slate-100 font-sans antialiased h-screen overflow-hidden flex">
 
   <!-- ========================================== -->
-  <!-- 1. LOGIN CONTAINER (HYBRID DEMO & DB AUTH) -->
+  <!-- 1. LOGIN CONTAINER (PURE SUPABASE DATABASE) -->
   <!-- ========================================== -->
   <div id="login-view" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-6">
@@ -26,11 +26,11 @@
           <i data-lucide="shield-check" class="w-8 h-8"></i>
         </div>
         <h2 class="text-2xl font-bold tracking-tight text-white">LegalOps Intelligence</h2>
-        <p class="text-xs text-slate-400">Masuk menggunakan Username & Password Demo</p>
+        <p class="text-xs text-slate-400">Masuk via Supabase Database (`public.users`)</p>
       </div>
 
       <!-- Form Login -->
-      <form id="form-login" onsubmit="handleUniversalLogin(event)" class="space-y-4">
+      <form id="form-login" onsubmit="handlePureSupabaseLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Username</label>
           <input type="text" id="username-input" required placeholder="Masukkan username (misal: admin)" 
@@ -43,7 +43,7 @@
         </div>
 
         <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
-          <i data-lucide="log-in" class="w-4 h-4"></i> Masuk ke Sistem
+          <i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB
         </button>
       </form>
 
@@ -132,9 +132,9 @@
           <div class="inline-flex p-3 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">
             <i data-lucide="check-circle-2" class="w-8 h-8"></i>
           </div>
-          <h3 class="text-lg font-bold text-white">Login Berhasil!</h3>
+          <h3 class="text-lg font-bold text-white">Login Berhasil via Supabase Database!</h3>
           <p class="text-sm text-slate-400 max-w-md mx-auto">
-            Selamat datang di Portal LegalOps. Anda dapat menavigasi menu dan mencoba fitur portal sesuai hak akses peran Anda.
+            Data pengguna berhasil diverifikasi langsung dari tabel <code class="text-blue-400">public.users</code> di Supabase PostgreSQL.
           </p>
         </div>
       </div>
@@ -143,88 +143,63 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 3. UNIVERSAL AUTHENTICATION ENGINE -->
+  <!-- 3. PURE SUPABASE INTEGRATION SCRIPT -->
   <!-- ========================================== -->
   <script>
-    // MASUKKAN KREDENSIAL SUPABASE ANDA DI SINI (OPSIONAL):
+    // ⚠️ MASUKKAN KREDENSIAL SUPABASE ANDA DI SINI:
     const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
     const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-    let supabaseClient = null;
-    if (SUPABASE_URL.startsWith('https://') && !SUPABASE_URL.includes('YOUR-PROJECT')) {
-      try {
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      } catch (e) {
-        console.warn("Supabase tidak terkonfigurasi, menggunakan autentikasi lokal.");
-      }
-    }
-
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     lucide.createIcons();
-
-    // Data Akun Demo Lokal (Fail-safe)
-    const DEMO_LOCAL_USERS = {
-      'admin': { pass: 'admin123', role: 'ADMIN MASTER' },
-      'legal': { pass: 'legal123', role: 'LEGAL TEAM' },
-      'npd': { pass: 'npd123', role: 'NPD / R&D' },
-      'purchasing': { pass: 'purchase123', role: 'PURCHASING' },
-      'auditor': { pass: 'audit123', role: 'AUDITOR (READ-ONLY)' }
-    };
 
     function fillDemo(username, password) {
       document.getElementById('username-input').value = username;
       document.getElementById('password-input').value = password;
     }
 
-    async function handleUniversalLogin(e) {
+    // Login Murni Query ke Supabase Table 'public.users'
+    async function handlePureSupabaseLogin(e) {
       e.preventDefault();
-      const username = document.getElementById('username-input').value.trim().toLowerCase();
-      const password = document.getElementById('password-input').value.trim();
+      const usernameInput = document.getElementById('username-input').value.trim();
+      const passwordInput = document.getElementById('password-input').value.trim();
       const btnSubmit = document.getElementById('btn-submit');
 
-      btnSubmit.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa...`;
+      btnSubmit.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa Supabase DB...`;
       lucide.createIcons();
 
-      // 1. Coba Autentikasi via Supabase Database (Jika Client Aktif)
-      if (supabaseClient) {
-        try {
-          const { data: users, error } = await supabaseClient
-            .from('users')
-            .select('*')
-            .ilike('username', username)
-            .eq('password', password);
+      // Query langsung ke tabel public.users di Supabase PostgreSQL
+      const { data: users, error } = await supabaseClient
+        .from('users')
+        .select('*')
+        .ilike('username', usernameInput)
+        .eq('password', passwordInput);
 
-          if (!error && users && users.length > 0) {
-            loginSuccess(users[0].username, users[0].role);
-            return;
-          }
-        } catch (err) {
-          console.warn("Pemeriksaan Supabase gagal, beralih ke autentikasi lokal...");
-        }
+      if (error) {
+        alert('Gagal Terhubung ke Supabase Database:\n' + error.message);
+        btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
+        lucide.createIcons();
+        return;
       }
 
-      // 2. Fallback Autentikasi Lokal (DIJAMIN MASUK)
-      const localAccount = DEMO_LOCAL_USERS[username];
-      if (localAccount && localAccount.pass === password) {
-        loginSuccess(username, localAccount.role);
+      if (users && users.length > 0) {
+        const user = users[0];
+        const sessionData = { 
+          username: user.username, 
+          role: user.role, 
+          avatar: user.username.substring(0, 2).toUpperCase() 
+        };
+        localStorage.setItem('supabase_session', JSON.stringify(sessionData));
+        showApp(sessionData);
       } else {
-        alert('Username atau Password salah! Gunakan tombol Quick Fill Demo.');
-        btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk ke Sistem`;
+        alert('Username atau Password tidak cocok dengan data di tabel public.users Supabase!');
+        btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
         lucide.createIcons();
       }
     }
 
-    function loginSuccess(username, role) {
-      const sessionData = { 
-        username: username, 
-        role: role, 
-        avatar: username.substring(0, 2).toUpperCase() 
-      };
-      localStorage.setItem('active_session', JSON.stringify(sessionData));
-      showApp(sessionData);
-    }
-
     function handleLogout() {
-      localStorage.removeItem('active_session');
+      localStorage.removeItem('supabase_session');
       document.getElementById('login-view').classList.remove('hidden');
       document.getElementById('app-view').classList.add('hidden');
     }
@@ -241,7 +216,7 @@
 
     // Cek Session saat Halaman Dimuat
     document.addEventListener('DOMContentLoaded', () => {
-      const savedSession = localStorage.getItem('active_session');
+      const savedSession = localStorage.getItem('supabase_session');
       if (savedSession) {
         showApp(JSON.parse(savedSession));
       }
