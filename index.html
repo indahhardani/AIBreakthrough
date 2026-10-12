@@ -20,7 +20,6 @@
   <div id="login-view" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-6">
       
-      <!-- Brand Header -->
       <div class="text-center space-y-2">
         <div class="inline-flex p-3 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/20 mb-1">
           <i data-lucide="shield-check" class="w-8 h-8"></i>
@@ -29,7 +28,6 @@
         <p class="text-xs text-slate-400">Masuk via Supabase Database (`public.users`)</p>
       </div>
 
-      <!-- Form Login -->
       <form id="form-login" onsubmit="handlePureSupabaseLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Username</label>
@@ -47,7 +45,6 @@
         </button>
       </form>
 
-      <!-- Quick Fill Demo Accounts -->
       <div class="border-t border-slate-800 pt-4 space-y-2">
         <p class="text-xs text-slate-400 text-center font-medium">⚡ Klik tombol di bawah untuk Auto-Fill Demo:</p>
         <div class="grid grid-cols-2 gap-2">
@@ -92,7 +89,6 @@
           </button>
         </div>
 
-        <!-- Dynamic Navigation Links -->
         <nav class="space-y-1">
           <button onclick="switchTab('vendor-contracts')" id="nav-vendor-contracts" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition">
             <i data-lucide="file-text" class="w-4 h-4"></i> Vendor Contracts
@@ -106,7 +102,6 @@
         </nav>
       </div>
 
-      <!-- User Profile & Logout -->
       <div class="border-t border-slate-800 pt-3 space-y-3 mt-auto">
         <div class="flex items-center gap-3 px-1">
           <div class="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 flex items-center justify-center font-bold text-xs" id="user-avatar">
@@ -141,32 +136,37 @@
         </div>
       </header>
 
-      <!-- Dynamic Tab Views -->
       <div class="p-4 md:p-6 space-y-6">
         
-        <!-- ================= TAB 1: VENDOR CONTRACTS ================= -->
+        <!-- VENDOR CONTRACTS TAB -->
         <section id="view-vendor-contracts" class="space-y-4">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 class="text-lg font-bold text-white">Vendor Contract Matrix</h2>
-              <p class="text-xs text-slate-400">Daftar perjanjian kerjasama vendor dan verifikasi klausa penting.</p>
+              <p class="text-xs text-slate-400">Pindai folder Google Drive via Supabase Edge Function secara otomatis & aman.</p>
             </div>
-            <button onclick="openModalContract()" id="btn-add-contract" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2">
-              <i data-lucide="plus" class="w-4 h-4"></i> Tambah Kontrak Baru
-            </button>
+
+            <div class="flex items-center gap-2">
+              <button onclick="handleScanGoogleDriveEdge()" id="btn-scan-drive" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2">
+                <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)
+              </button>
+
+              <button onclick="openModalContract()" id="btn-add-contract" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> Input Manual
+              </button>
+            </div>
           </div>
 
-          <!-- Table Vendor Contracts -->
           <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
             <table class="w-full text-left text-xs text-slate-300">
               <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
                 <tr>
-                  <th class="px-4 py-3">Nama Vendor</th>
+                  <th class="px-4 py-3">Nama Vendor / Dokumen</th>
                   <th class="px-4 py-3">No. Kontrak</th>
                   <th class="px-4 py-3">Masa Berlaku</th>
                   <th class="px-4 py-3">Terms Payment</th>
-                  <th class="px-4 py-3">Klausa AI</th>
-                  <th class="px-4 py-3 text-center">G-Drive Link</th>
+                  <th class="px-4 py-3">Status Sync</th>
+                  <th class="px-4 py-3 text-center">Aksi G-Drive</th>
                 </tr>
               </thead>
               <tbody id="table-contracts-body" class="divide-y divide-slate-800/60">
@@ -178,25 +178,25 @@
           </div>
         </section>
 
-        <!-- ================= TAB 2: ARTWORK PRE-SCREENING ================= -->
+        <!-- ARTWORK PRE-SCREENING TAB -->
         <section id="view-artwork-prescreening" class="hidden space-y-4">
           <div class="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center space-y-3">
             <div class="inline-flex p-3 bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/20">
               <i data-lucide="scan-line" class="w-8 h-8"></i>
             </div>
-            <h3 class="text-base md:text-lg font-bold text-white">Artwork & Packaging Pre-Screening Module</h3>
+            <h3 class="text-base md:text-lg font-bold text-white">Artwork & Packaging Pre-Screening</h3>
             <p class="text-xs md:text-sm text-slate-400 max-w-md mx-auto">
-              Modul pengujian kepatuhan klaim BPOM & Halal untuk tim NPD/R&D sedang dalam tahap persiapan integrasi.
+              Modul verifikasi otomatis klaim kemasan BPOM & Halal untuk tim NPD.
             </p>
           </div>
         </section>
 
-        <!-- ================= TAB 3: AUDIT TRAIL LOG ================= -->
+        <!-- AUDIT TRAIL LOG TAB -->
         <section id="view-audit-trail" class="hidden space-y-4">
           <div class="flex justify-between items-center">
             <div>
               <h2 class="text-lg font-bold text-white">Audit Trail Logs</h2>
-              <p class="text-xs text-slate-400">Catatan riwayat aktivitas perubahan sistem yang tidak dapat diubah (Immutable Logs).</p>
+              <p class="text-xs text-slate-400">Catatan aktivitas perubahan data real-time.</p>
             </div>
             <button onclick="loadAuditLogs()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
@@ -227,9 +227,7 @@
 
   </div>
 
-  <!-- ========================================== -->
-  <!-- MODAL: ADD VENDOR CONTRACT -->
-  <!-- ========================================== -->
+  <!-- MODAL MANUAL INPUT -->
   <div id="modal-contract" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-xl p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -280,19 +278,47 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 3. SUPABASE INTERACTIVE ENGINE -->
+  <!-- 3. SUPABASE ENGINE SCRIPT -->
   <!-- ========================================== -->
   <script>
-    // ⚠️ KREDENSIAL SUPABASE:
+    // ⚠️ KREDENSIAL DATABASE SUPABASE:
     const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV'; // Silakan isi dengan anon public key milik Anda
+    const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV'; // Salin anon public key dari Supabase Settings -> API
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let currentUserSession = null;
 
     lucide.createIcons();
 
-    // Toggle Mobile Sidebar
+    // Trigger Pemindaian via Supabase Edge Function
+    async function handleScanGoogleDriveEdge() {
+      if (currentUserSession.role.includes('AUDITOR')) {
+        alert('Akses Ditolak: Peran Auditor hanya memiliki akses Read-Only!');
+        return;
+      }
+
+      const btnScan = document.getElementById('btn-scan-drive');
+      btnScan.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Edge Function Memindai...`;
+      lucide.createIcons();
+
+      try {
+        const { data, error } = await supabaseClient.functions.invoke('scan-gdrive');
+
+        if (error) {
+          alert('Gagal mengeksekusi Edge Function: ' + error.message);
+        } else {
+          logAuditAction(currentUserSession.username, 'SYNC_GOOGLE_DRIVE_EDGE', 'vendor_contracts', null);
+          alert(`Edge Function Sukses! ${data.count} dokumen kontrak baru ditambahkan dari Google Drive.`);
+          loadContracts();
+        }
+      } catch (err) {
+        alert('Terjadi kesalahan jaringan: ' + err.message);
+      }
+
+      btnScan.innerHTML = `<i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)`;
+      lucide.createIcons();
+    }
+
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('sidebar-overlay');
@@ -300,7 +326,6 @@
       overlay.classList.toggle('hidden');
     }
 
-    // Dynamic Navigation Tab Switcher
     function switchTab(tabName) {
       document.getElementById('view-vendor-contracts').classList.add('hidden');
       document.getElementById('view-artwork-prescreening').classList.add('hidden');
@@ -337,7 +362,6 @@
       document.getElementById('password-input').value = password;
     }
 
-    // Authentic Pure Supabase Login
     async function handlePureSupabaseLogin(e) {
       e.preventDefault();
       const usernameInput = document.getElementById('username-input').value.trim();
@@ -381,7 +405,6 @@
       }
     }
 
-    // Load Contracts from Supabase
     async function loadContracts() {
       const tbody = document.getElementById('table-contracts-body');
       tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil data dari Supabase...</td></tr>`;
@@ -398,7 +421,7 @@
       }
 
       if (!contracts || contracts.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500">Belum ada data kontrak vendor. Klik "Tambah Kontrak Baru".</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500">Belum ada data kontrak vendor. Klik "Scan Google Drive (Edge)" atau "Input Manual".</td></tr>`;
         return;
       }
 
@@ -409,10 +432,10 @@
           <td class="px-4 py-3 text-slate-400">${c.effective_date || '-'} s/d ${c.expiration_date || '-'}</td>
           <td class="px-4 py-3"><span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium">${c.payment_terms || 'TOP 30'}</span></td>
           <td class="px-4 py-3">
-            <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[10px]">Verified</span>
+            <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[10px]">Synced via Edge</span>
           </td>
           <td class="px-4 py-3 text-center">
-            <a href="${c.gdrive_web_link}" target="_blank" class="inline-flex p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded transition">
+            <a href="${c.gdrive_web_link}" target="_blank" class="inline-flex p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded transition" title="Buka Dokumen">
               <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
             </a>
           </td>
@@ -421,10 +444,9 @@
       lucide.createIcons();
     }
 
-    // Modal Control & Contract Save
     function openModalContract() {
-      if (currentUserSession.role.includes('AUDITOR') || currentUserSession.role.includes('NPD')) {
-        alert('Akses Ditolak: Peran Anda (' + currentUserSession.role + ') hanya memiliki akses Read-Only!');
+      if (currentUserSession.role.includes('AUDITOR')) {
+        alert('Akses Ditolak: Peran Auditor hanya memiliki akses Read-Only!');
         return;
       }
       document.getElementById('modal-contract').classList.remove('hidden');
@@ -447,7 +469,7 @@
       btnSave.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Menyimpan...`;
       lucide.createIcons();
 
-      const fakeDriveId = 'DRV-' + Date.now();
+      const fakeDriveId = 'MANUAL-' + Date.now();
 
       const { data, error } = await supabaseClient
         .from('vendor_contracts')
@@ -474,7 +496,6 @@
       lucide.createIcons();
     }
 
-    // Load & Log Audit Trail
     async function loadAuditLogs() {
       const tbody = document.getElementById('table-audit-body');
       tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil log...</td></tr>`;
