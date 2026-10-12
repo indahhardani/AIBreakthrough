@@ -304,8 +304,15 @@
       try {
         const { data, error } = await supabaseClient.functions.invoke('Scan-gdrive');
 
-        if (error) {
-          alert('Gagal mengeksekusi Edge Function: ' + error.message);
+if (error) {
+  let detail = error.message;
+  try {
+    const b = await error.context.json();
+    detail = b.error || b.message || JSON.stringify(b);
+  } catch (e) {}
+  alert('Gagal mengeksekusi Edge Function: ' + detail);
+}
+
         } else {
           logAuditAction(currentUserSession.username, 'SYNC_GOOGLE_DRIVE_EDGE', 'vendor_contracts', null);
           alert(`Edge Function Sukses! ${data.count} dokumen kontrak baru ditambahkan dari Google Drive.`);
