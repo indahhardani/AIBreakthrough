@@ -393,4 +393,187 @@
           username: user.username, 
           role: user.role, 
           avatar: user.username.substring(0, 2).toUpperCase() 
+        };
+        localStorage.setItem('supabase_session', JSON.stringify(sessionData));
         
+        btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
+        lucide.createIcons();
+        
+        showApp(sessionData);
+        logAuditAction(user.username, 'LOGIN', 'users', user.id);
+      } else {
+        alert('Username atau Password tidak cocok dengan data di tabel public.users Supabase!');
+        btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
+        lucide.createIcons();
+      }
+    }
+
+    async function loadContracts() {
+      const tbody = document.getElementById('table-contracts-body');
+      tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil data dari Supabase...</td></tr>`;
+      lucide.createIcons();
+
+      const { data: contracts, error } = await supabaseClient
+        .from('vendor_contracts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-4 text-center text-rose-400">Gagal memuat data: ${error.message}</td></tr>`;
+        return;
+      }
+
+      if (!contracts || contracts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500">Belum ada data kontrak vendor. Klik "Scan Google Drive (Edge)" atau "Input Manual".</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = contracts.map(c => `
+        <tr class="hover:bg-slate-800/40 transition">
+          <td class="px-4 py-3 font-semibold text-slate-100">${c.vendor_name}</td>
+          <td class="px-4 py-3 font-mono text-slate-400">${c.contract_number || '-'}</td>
+          <td class="px-4 py-3 text-slate-400">${c.effective_date || '-'} s/d ${c.expiration_date || '-'}</td>
+          <td class="px-4 py-3"><span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium">${c.payment_terms || 'TOP 30'}</span></td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[10px]">Synced via Edge</span>
+          </td>
+          <td class="px-4 py-3 text-center">
+            <a href="${c.gdrive_web_link}" target="_blank" class="inline-flex p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded transition" title="Buka Dokumen">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+          </td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function openModalContract() {
+      if (currentUserSession && currentUserSession.role.includes('AUDITOR')) {
+        alert('Akses Ditolak: Peran Auditor hanya memiliki akses Read-Only!');
+        return;
+      }
+      document.getElementById('modal-contract').classList.remove('hidden');
+    }
+
+    function closeModalContract() {
+      document.getElementById('modal-contract').classList.add('hidden');
+    }
+
+    async function handleSaveContract(e) {
+      e.preventDefault();
+      const vendorName = document.getElementById('input-vendor-name').value;
+      const contractNum = document.getElementById('input-contract-num').value;
+      const effDate = document.getElementById('input-eff-date').value;
+      const expDate = document.getElementById('input-exp-date').value;
+      const paymentTerms = document.getElementById('input-payment-terms').value;
+      const gdriveLink = document.getElementById('input-gdrive-link').value;
+
+      const btnSave = document.getElementById('btn-save-contract');
+      btnSave.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Menyimpan...`;
+      lucide.createIcons();
+
+      const fakeDriveId = 'MANUAL-' + Date.now();
+
+      const { data, error } = await supabaseClient
+        .from('vendor_contracts')
+        .insert([{
+          gdrive_file_id: fakeDriveId,
+          gdrive_web_link: gdriveLink,
+          vendor_name: vendorName,
+          contract_number: contractNum,
+          effective_date: effDate,
+          expiration_date: expDate,
+          payment_terms: paymentTerms,
+          is_verified_by_legal: true
+        }]);
+
+      if (error) {
+        alert('Gagal menyimpan kontrak: ' + error.message);
+      } else {
+        logAuditAction(currentUserSession.username, 'CREATE_CONTRACT', 'vendor_contracts', null);
+        closeModalContract();
+        loadContracts();
+      }
+
+      btnSave.innerHTML = `<i data-lucide="save" class="w-3.5 h-3.5"></i> Simpan Kontrak`;
+      lucide.createIcons();
+    }
+
+    async function loadAuditLogs() {
+      const tbody = document.getElementById('table-audit-body');
+      tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil log...</td></tr>`;
+      lucide.createIcons();
+
+      const { data: logs, error } = await supabaseClient
+        .from('audit_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error || !logs || logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">Belum ada riwayat aktivitas tercatat.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = logs.map(l => `
+        <tr class="hover:bg-slate-800/40 transition">
+          <td class="px-4 py-2.5 font-mono text-[11px] text-slate-400">${new Date(l.created_at).toLocaleString('id-ID')}</td>
+          <td class="px-4 py-2.5 font-semibold text-slate-200">${l.actor_username}</td>
+          <td class="px-4 py-2.5"><span class="px-2 py-0.5 bg-slate-800 text-blue-400 border border-slate-700 rounded text-[10px] font-bold">${l.action}</span></td>
+          <td class="px-4 py-2.5 text-slate-400">${l.entity_type}</td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    async function logAuditAction(username, action, entityType, entityId) {
+      await supabaseClient.from('audit_logs').insert([{
+        actor_username: username,
+        action: action,
+        entity_type: entityType,
+        entity_id: entityId
+      }]);
+    }
+
+    function handleLogout() {
+      if (currentUserSession) {
+        logAuditAction(currentUserSession.username, 'LOGOUT', 'users', null);
+      }
+      localStorage.removeItem('supabase_session');
+      currentUserSession = null;
+      
+      const btnSubmit = document.getElementById('btn-submit');
+      if (btnSubmit) {
+        btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
+      }
+      
+      document.getElementById('login-view').classList.remove('hidden');
+      document.getElementById('app-view').classList.add('hidden');
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    function showApp(session) {
+      currentUserSession = session;
+      document.getElementById('login-view').classList.add('hidden');
+      document.getElementById('app-view').classList.remove('hidden');
+
+      document.getElementById('user-display').innerText = session.username;
+      document.getElementById('role-display').innerText = session.role;
+      document.getElementById('user-avatar').innerText = session.avatar;
+      document.getElementById('access-badge').innerText = session.role;
+      
+      switchTab('vendor-contracts');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedSession = localStorage.getItem('supabase_session');
+      if (savedSession) {
+        showApp(JSON.parse(savedSession));
+      }
+    });
+  </script>
+</body>
+</html>
