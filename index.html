@@ -302,7 +302,7 @@
       lucide.createIcons();
 
       try {
-        const { data, error } = await supabaseClient.functions.invoke('scan-gdrive');
+        const { data, error } = await supabaseClient.functions.invoke('Scan-gdrive');
 
         if (error) {
           alert('Gagal mengeksekusi Edge Function: ' + error.message);
