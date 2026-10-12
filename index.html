@@ -87,22 +87,22 @@
             </div>
             <span class="font-bold text-base tracking-wide">LegalOps AI</span>
           </div>
-          <!-- Close Button Mobile -->
           <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
 
+        <!-- Dynamic Navigation Links -->
         <nav class="space-y-1">
-          <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium">
+          <button onclick="switchTab('vendor-contracts')" id="nav-vendor-contracts" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition">
             <i data-lucide="file-text" class="w-4 h-4"></i> Vendor Contracts
-          </a>
-          <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+          </button>
+          <button onclick="switchTab('artwork-prescreening')" id="nav-artwork-prescreening" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
             <i data-lucide="scan-line" class="w-4 h-4"></i> Artwork Pre-Screening
-          </a>
-          <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+          </button>
+          <button onclick="switchTab('audit-trail')" id="nav-audit-trail" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
             <i data-lucide="history" class="w-4 h-4"></i> Audit Trail Log
-          </a>
+          </button>
         </nav>
       </div>
 
@@ -124,18 +124,16 @@
       </div>
     </aside>
 
-    <!-- Overlay Mobile Sidebar Background -->
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-950/80 z-30 hidden md:hidden"></div>
 
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col bg-slate-950 overflow-y-auto w-full">
       <header class="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur flex items-center justify-between px-4 md:px-6 flex-shrink-0">
         <div class="flex items-center gap-3">
-          <!-- Toggle Hamburger Mobile -->
           <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
-          <h1 class="text-sm md:text-base font-semibold text-slate-100 truncate">Vendor Agreement Matrix</h1>
+          <h1 class="text-sm md:text-base font-semibold text-slate-100 truncate" id="page-title">Vendor Agreement Matrix</h1>
         </div>
 
         <div class="text-[10px] md:text-xs text-slate-400 bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-800">
@@ -143,34 +141,158 @@
         </div>
       </header>
 
-      <div class="p-4 md:p-6">
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 md:p-8 text-center space-y-3">
-          <div class="inline-flex p-3 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">
-            <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+      <!-- Dynamic Tab Views -->
+      <div class="p-4 md:p-6 space-y-6">
+        
+        <!-- ================= TAB 1: VENDOR CONTRACTS ================= -->
+        <section id="view-vendor-contracts" class="space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-white">Vendor Contract Matrix</h2>
+              <p class="text-xs text-slate-400">Daftar perjanjian kerjasama vendor dan verifikasi klausa penting.</p>
+            </div>
+            <button onclick="openModalContract()" id="btn-add-contract" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2">
+              <i data-lucide="plus" class="w-4 h-4"></i> Tambah Kontrak Baru
+            </button>
           </div>
-          <h3 class="text-base md:text-lg font-bold text-white">Login Berhasil via Supabase Database!</h3>
-          <p class="text-xs md:text-sm text-slate-400 max-w-md mx-auto">
-            Data pengguna berhasil diverifikasi langsung dari tabel <code class="text-blue-400">public.users</code> di Supabase PostgreSQL.
-          </p>
-        </div>
+
+          <!-- Table Vendor Contracts -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                <tr>
+                  <th class="px-4 py-3">Nama Vendor</th>
+                  <th class="px-4 py-3">No. Kontrak</th>
+                  <th class="px-4 py-3">Masa Berlaku</th>
+                  <th class="px-4 py-3">Terms Payment</th>
+                  <th class="px-4 py-3">Klausa AI</th>
+                  <th class="px-4 py-3 text-center">G-Drive Link</th>
+                </tr>
+              </thead>
+              <tbody id="table-contracts-body" class="divide-y divide-slate-800/60">
+                <tr>
+                  <td colspan="6" class="px-4 py-6 text-center text-slate-500">Memuat data dari Supabase...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= TAB 2: ARTWORK PRE-SCREENING ================= -->
+        <section id="view-artwork-prescreening" class="hidden space-y-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center space-y-3">
+            <div class="inline-flex p-3 bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/20">
+              <i data-lucide="scan-line" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-white">Artwork & Packaging Pre-Screening Module</h3>
+            <p class="text-xs md:text-sm text-slate-400 max-w-md mx-auto">
+              Modul pengujian kepatuhan klaim BPOM & Halal untuk tim NPD/R&D sedang dalam tahap persiapan integrasi.
+            </p>
+          </div>
+        </section>
+
+        <!-- ================= TAB 3: AUDIT TRAIL LOG ================= -->
+        <section id="view-audit-trail" class="hidden space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <h2 class="text-lg font-bold text-white">Audit Trail Logs</h2>
+              <p class="text-xs text-slate-400">Catatan riwayat aktivitas perubahan sistem yang tidak dapat diubah (Immutable Logs).</p>
+            </div>
+            <button onclick="loadAuditLogs()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+            </button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                <tr>
+                  <th class="px-4 py-3">Waktu</th>
+                  <th class="px-4 py-3">Pengguna</th>
+                  <th class="px-4 py-3">Aksi</th>
+                  <th class="px-4 py-3">Entitas</th>
+                </tr>
+              </thead>
+              <tbody id="table-audit-body" class="divide-y divide-slate-800/60">
+                <tr>
+                  <td colspan="4" class="px-4 py-6 text-center text-slate-500">Memuat log aktivitas...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
       </div>
     </main>
 
   </div>
 
   <!-- ========================================== -->
-  <!-- 3. PURE SUPABASE INTEGRATION SCRIPT -->
+  <!-- MODAL: ADD VENDOR CONTRACT -->
+  <!-- ========================================== -->
+  <div id="modal-contract" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="file-plus" class="w-4 h-4 text-blue-400"></i> Tambah Kontrak Vendor
+        </h3>
+        <button onclick="closeModalContract()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveContract(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Nama Vendor</label>
+          <input type="text" id="input-vendor-name" required placeholder="Contoh: PT Logistik Nusantara" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Nomor Kontrak</label>
+          <input type="text" id="input-contract-num" required placeholder="Contoh: 003/LEG-VND/2026" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tanggal Mulai</label>
+            <input type="date" id="input-eff-date" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tanggal Berakhir</label>
+            <input type="date" id="input-exp-date" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Terms of Payment (TOP)</label>
+          <input type="text" id="input-payment-terms" placeholder="Contoh: TOP 30 Days" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tautan Google Drive Kontrak</label>
+          <input type="url" id="input-gdrive-link" required placeholder="https://drive.google.com/file/d/..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-800">
+          <button type="button" onclick="closeModalContract()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs">Batal</button>
+          <button type="submit" id="btn-save-contract" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-medium flex items-center gap-1.5">
+            <i data-lucide="save" class="w-3.5 h-3.5"></i> Simpan Kontrak
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. SUPABASE INTERACTIVE ENGINE -->
   <!-- ========================================== -->
   <script>
-    // ⚠️ KREDENSIAL SUPABASE
-    // Catatan: Pastikan Anda mengganti ANON KEY di bawah ini dengan anon key dari Supabase Dashboard
-    // (Project Settings -> API -> Project API Keys -> anon public)
-    const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co'; // <--- URL Proyek Supabase Anda
-    const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV';                // <--- Silakan ganti dengan ANON Key dari Supabase Settings -> API
+    // ⚠️ KREDENSIAL SUPABASE:
+    const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV'; // Silakan isi dengan anon public key milik Anda
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentUserSession = null;
+
     lucide.createIcons();
 
+    // Toggle Mobile Sidebar
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('sidebar-overlay');
@@ -178,11 +300,44 @@
       overlay.classList.toggle('hidden');
     }
 
+    // Dynamic Navigation Tab Switcher
+    function switchTab(tabName) {
+      document.getElementById('view-vendor-contracts').classList.add('hidden');
+      document.getElementById('view-artwork-prescreening').classList.add('hidden');
+      document.getElementById('view-audit-trail').classList.add('hidden');
+
+      document.getElementById('nav-vendor-contracts').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+      document.getElementById('nav-artwork-prescreening').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+      document.getElementById('nav-audit-trail').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+
+      if (tabName === 'vendor-contracts') {
+        document.getElementById('view-vendor-contracts').classList.remove('hidden');
+        document.getElementById('nav-vendor-contracts').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition";
+        document.getElementById('page-title').innerText = "Vendor Agreement Matrix";
+        loadContracts();
+      } else if (tabName === 'artwork-prescreening') {
+        document.getElementById('view-artwork-prescreening').classList.remove('hidden');
+        document.getElementById('nav-artwork-prescreening').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-purple-400 text-sm font-medium transition";
+        document.getElementById('page-title').innerText = "Artwork Pre-Screening Module";
+      } else if (tabName === 'audit-trail') {
+        document.getElementById('view-audit-trail').classList.remove('hidden');
+        document.getElementById('nav-audit-trail').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-emerald-400 text-sm font-medium transition";
+        document.getElementById('page-title').innerText = "Audit Trail System";
+        loadAuditLogs();
+      }
+
+      if (window.innerWidth < 768) {
+        toggleSidebar();
+      }
+      lucide.createIcons();
+    }
+
     function fillDemo(username, password) {
       document.getElementById('username-input').value = username;
       document.getElementById('password-input').value = password;
     }
 
+    // Authentic Pure Supabase Login
     async function handlePureSupabaseLogin(e) {
       e.preventDefault();
       const usernameInput = document.getElementById('username-input').value.trim();
@@ -218,6 +373,7 @@
         lucide.createIcons();
         
         showApp(sessionData);
+        logAuditAction(user.username, 'LOGIN', 'users', user.id);
       } else {
         alert('Username atau Password tidak cocok dengan data di tabel public.users Supabase!');
         btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
@@ -225,8 +381,142 @@
       }
     }
 
+    // Load Contracts from Supabase
+    async function loadContracts() {
+      const tbody = document.getElementById('table-contracts-body');
+      tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil data dari Supabase...</td></tr>`;
+      lucide.createIcons();
+
+      const { data: contracts, error } = await supabaseClient
+        .from('vendor_contracts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-4 text-center text-rose-400">Gagal memuat data: ${error.message}</td></tr>`;
+        return;
+      }
+
+      if (!contracts || contracts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500">Belum ada data kontrak vendor. Klik "Tambah Kontrak Baru".</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = contracts.map(c => `
+        <tr class="hover:bg-slate-800/40 transition">
+          <td class="px-4 py-3 font-semibold text-slate-100">${c.vendor_name}</td>
+          <td class="px-4 py-3 font-mono text-slate-400">${c.contract_number || '-'}</td>
+          <td class="px-4 py-3 text-slate-400">${c.effective_date || '-'} s/d ${c.expiration_date || '-'}</td>
+          <td class="px-4 py-3"><span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium">${c.payment_terms || 'TOP 30'}</span></td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[10px]">Verified</span>
+          </td>
+          <td class="px-4 py-3 text-center">
+            <a href="${c.gdrive_web_link}" target="_blank" class="inline-flex p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded transition">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+          </td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // Modal Control & Contract Save
+    function openModalContract() {
+      if (currentUserSession.role.includes('AUDITOR') || currentUserSession.role.includes('NPD')) {
+        alert('Akses Ditolak: Peran Anda (' + currentUserSession.role + ') hanya memiliki akses Read-Only!');
+        return;
+      }
+      document.getElementById('modal-contract').classList.remove('hidden');
+    }
+
+    function closeModalContract() {
+      document.getElementById('modal-contract').classList.add('hidden');
+    }
+
+    async function handleSaveContract(e) {
+      e.preventDefault();
+      const vendorName = document.getElementById('input-vendor-name').value;
+      const contractNum = document.getElementById('input-contract-num').value;
+      const effDate = document.getElementById('input-eff-date').value;
+      const expDate = document.getElementById('input-exp-date').value;
+      const paymentTerms = document.getElementById('input-payment-terms').value;
+      const gdriveLink = document.getElementById('input-gdrive-link').value;
+
+      const btnSave = document.getElementById('btn-save-contract');
+      btnSave.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Menyimpan...`;
+      lucide.createIcons();
+
+      const fakeDriveId = 'DRV-' + Date.now();
+
+      const { data, error } = await supabaseClient
+        .from('vendor_contracts')
+        .insert([{
+          gdrive_file_id: fakeDriveId,
+          gdrive_web_link: gdriveLink,
+          vendor_name: vendorName,
+          contract_number: contractNum,
+          effective_date: effDate,
+          expiration_date: expDate,
+          payment_terms: paymentTerms,
+          is_verified_by_legal: true
+        }]);
+
+      if (error) {
+        alert('Gagal menyimpan kontrak: ' + error.message);
+      } else {
+        logAuditAction(currentUserSession.username, 'CREATE_CONTRACT', 'vendor_contracts', null);
+        closeModalContract();
+        loadContracts();
+      }
+
+      btnSave.innerHTML = `<i data-lucide="save" class="w-3.5 h-3.5"></i> Simpan Kontrak`;
+      lucide.createIcons();
+    }
+
+    // Load & Log Audit Trail
+    async function loadAuditLogs() {
+      const tbody = document.getElementById('table-audit-body');
+      tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil log...</td></tr>`;
+      lucide.createIcons();
+
+      const { data: logs, error } = await supabaseClient
+        .from('audit_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error || !logs || logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">Belum ada riwayat aktivitas tercatat.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = logs.map(l => `
+        <tr class="hover:bg-slate-800/40 transition">
+          <td class="px-4 py-2.5 font-mono text-[11px] text-slate-400">${new Date(l.created_at).toLocaleString('id-ID')}</td>
+          <td class="px-4 py-2.5 font-semibold text-slate-200">${l.actor_username}</td>
+          <td class="px-4 py-2.5"><span class="px-2 py-0.5 bg-slate-800 text-blue-400 border border-slate-700 rounded text-[10px] font-bold">${l.action}</span></td>
+          <td class="px-4 py-2.5 text-slate-400">${l.entity_type}</td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    async function logAuditAction(username, action, entityType, entityId) {
+      await supabaseClient.from('audit_logs').insert([{
+        actor_username: username,
+        action: action,
+        entity_type: entityType,
+        entity_id: entityId
+      }]);
+    }
+
     function handleLogout() {
+      if (currentUserSession) {
+        logAuditAction(currentUserSession.username, 'LOGOUT', 'users', null);
+      }
       localStorage.removeItem('supabase_session');
+      currentUserSession = null;
       
       const btnSubmit = document.getElementById('btn-submit');
       if (btnSubmit) {
@@ -242,6 +532,7 @@
     }
 
     function showApp(session) {
+      currentUserSession = session;
       document.getElementById('login-view').classList.add('hidden');
       document.getElementById('app-view').classList.remove('hidden');
 
@@ -250,9 +541,7 @@
       document.getElementById('user-avatar').innerText = session.avatar;
       document.getElementById('access-badge').innerText = session.role;
       
-      if (window.lucide) {
-        lucide.createIcons();
-      }
+      switchTab('vendor-contracts');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
