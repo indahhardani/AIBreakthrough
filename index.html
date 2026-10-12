@@ -140,38 +140,56 @@
         
         <!-- VENDOR CONTRACTS TAB -->
         <section id="view-vendor-contracts" class="space-y-4">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <div>
               <h2 class="text-lg font-bold text-white">Vendor Contract Matrix</h2>
-              <p class="text-xs text-slate-400">Pindai folder Google Drive via Supabase Edge Function secara otomatis & aman.</p>
+              <p class="text-xs text-slate-400">Pindai folder Google Drive & kelola klausul perjanjian vendor secara otomatis via Supabase Edge Function.</p>
             </div>
 
-            <div class="flex items-center gap-2">
-              <button onclick="handleScanGoogleDriveEdge()" id="btn-scan-drive" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2">
-                <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)
-              </button>
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- DROPDOWN SORTING -->
+              <div class="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg text-xs">
+                <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-blue-400"></i>
+                <span class="text-slate-400 font-medium">Urutkan:</span>
+                <select id="sort-filter" onchange="loadContracts()" class="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer">
+                  <option value="created_at-desc" class="bg-slate-900 text-slate-200">Terbaru Ditambahkan</option>
+                  <option value="vendor_name-asc" class="bg-slate-900 text-slate-200">Nama Vendor (A-Z)</option>
+                  <option value="vendor_name-desc" class="bg-slate-900 text-slate-200">Nama Vendor (Z-A)</option>
+                  <option value="expiration_date-asc" class="bg-slate-900 text-slate-200">Masa Berlaku (Hampir Expired)</option>
+                  <option value="expiration_date-desc" class="bg-slate-900 text-slate-200">Masa Berlaku (Terlama)</option>
+                  <option value="status-asc" class="bg-slate-900 text-slate-200">Status (Aktif Dulu)</option>
+                </select>
+              </div>
 
-              <button onclick="openModalContract()" id="btn-add-contract" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2">
-                <i data-lucide="plus" class="w-4 h-4"></i> Input Manual
+              <!-- SATU-SATUNYA TOMBOL AKSI OTOMATIS -->
+              <button onclick="handleScanGoogleDriveEdge()" id="btn-scan-drive" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+                <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)
               </button>
             </div>
           </div>
 
+          <!-- TABEL 10 KOLOM -->
           <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
             <table class="w-full text-left text-xs text-slate-300">
               <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
                 <tr>
-                  <th class="px-4 py-3">Nama Vendor / Dokumen</th>
-                  <th class="px-4 py-3">No. Kontrak</th>
-                  <th class="px-4 py-3">Masa Berlaku</th>
-                  <th class="px-4 py-3">Terms Payment</th>
-                  <th class="px-4 py-3">Status Sync</th>
-                  <th class="px-4 py-3 text-center">Aksi G-Drive</th>
+                  <th class="px-3.5 py-3">Vendor</th>
+                  <th class="px-3.5 py-3">Jenis Vendor</th>
+                  <th class="px-3.5 py-3">Para Pihak</th>
+                  <th class="px-3.5 py-3">Jenis Perjanjian</th>
+                  <th class="px-3.5 py-3">Masa Berlaku</th>
+                  <th class="px-3.5 py-3">Terms Payment</th>
+                  <th class="px-3.5 py-3">Denda Keterlambatan</th>
+                  <th class="px-3.5 py-3">Pemutusan Perjanjian</th>
+                  <th class="px-3.5 py-3">Kerahasiaan</th>
+                  <th class="px-3.5 py-3">Hukum</th>
+                  <th class="px-3.5 py-3">Status</th>
+                  <th class="px-3.5 py-3 text-center">Aksi G-Drive</th>
                 </tr>
               </thead>
               <tbody id="table-contracts-body" class="divide-y divide-slate-800/60">
                 <tr>
-                  <td colspan="6" class="px-4 py-6 text-center text-slate-500">Memuat data dari Supabase...</td>
+                  <td colspan="12" class="px-4 py-6 text-center text-slate-500">Memuat data dari Supabase...</td>
                 </tr>
               </tbody>
             </table>
@@ -227,56 +245,6 @@
 
   </div>
 
-  <!-- MODAL MANUAL INPUT -->
-  <div id="modal-contract" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-xl p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i data-lucide="file-plus" class="w-4 h-4 text-blue-400"></i> Tambah Kontrak Vendor
-        </h3>
-        <button onclick="closeModalContract()" class="text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <form onsubmit="handleSaveContract(event)" class="space-y-3">
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Nama Vendor</label>
-          <input type="text" id="input-vendor-name" required placeholder="Contoh: PT Logistik Nusantara" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Nomor Kontrak</label>
-          <input type="text" id="input-contract-num" required placeholder="Contoh: 003/LEG-VND/2026" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tanggal Mulai</label>
-            <input type="date" id="input-eff-date" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tanggal Berakhir</label>
-            <input type="date" id="input-exp-date" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-          </div>
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Terms of Payment (TOP)</label>
-          <input type="text" id="input-payment-terms" placeholder="Contoh: TOP 30 Days" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tautan Google Drive Kontrak</label>
-          <input type="url" id="input-gdrive-link" required placeholder="https://drive.google.com/file/d/..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-        </div>
-
-        <div class="pt-3 flex justify-end gap-2 border-t border-slate-800">
-          <button type="button" onclick="closeModalContract()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs">Batal</button>
-          <button type="submit" id="btn-save-contract" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-medium flex items-center gap-1.5">
-            <i data-lucide="save" class="w-3.5 h-3.5"></i> Simpan Kontrak
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <!-- ========================================== -->
   <!-- 3. SUPABASE ENGINE SCRIPT -->
   <!-- ========================================== -->
@@ -302,7 +270,6 @@
       lucide.createIcons();
 
       try {
-        // Panggil Edge Function 'Scan-gdrive'
         const { data, error } = await supabaseClient.functions.invoke('Scan-gdrive');
 
         if (error) {
@@ -408,94 +375,55 @@
       }
     }
 
+    // FUNGSI LOAD & SORT CONTRACTS (10 KOLOM)
     async function loadContracts() {
       const tbody = document.getElementById('table-contracts-body');
-      tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil data dari Supabase...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="12" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil data dari Supabase...</td></tr>`;
       lucide.createIcons();
+
+      const sortVal = document.getElementById('sort-filter') ? document.getElementById('sort-filter').value : 'created_at-desc';
+      const [sortColumn, sortOrder] = sortVal.split('-');
+      const isAscending = sortOrder === 'asc';
 
       const { data: contracts, error } = await supabaseClient
         .from('vendor_contracts')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order(sortColumn, { ascending: isAscending });
 
       if (error) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-4 text-center text-rose-400">Gagal memuat data: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="px-4 py-4 text-center text-rose-400">Gagal memuat data: ${error.message}</td></tr>`;
         return;
       }
 
       if (!contracts || contracts.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500">Belum ada data kontrak vendor. Klik "Scan Google Drive (Edge)" atau "Input Manual".</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="px-4 py-6 text-center text-slate-500">Belum ada data kontrak vendor. Klik tombol "Scan Google Drive (Edge)" untuk memindai berkas.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = contracts.map(c => `
-        <tr class="hover:bg-slate-800/40 transition">
-          <td class="px-4 py-3 font-semibold text-slate-100">${c.vendor_name}</td>
-          <td class="px-4 py-3 font-mono text-slate-400">${c.contract_number || '-'}</td>
-          <td class="px-4 py-3 text-slate-400">${c.effective_date || '-'} s/d ${c.expiration_date || '-'}</td>
-          <td class="px-4 py-3"><span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium">${c.payment_terms || 'TOP 30'}</span></td>
-          <td class="px-4 py-3">
-            <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[10px]">Synced via Edge</span>
+        <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40">
+          <td class="px-3.5 py-3 font-semibold text-slate-100 whitespace-nowrap">${c.vendor_name}</td>
+          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${c.vendor_type || '-'}</td>
+          <td class="px-3.5 py-3 text-slate-400 min-w-[150px]">${c.parties || '-'}</td>
+          <td class="px-3.5 py-3 text-slate-300 font-medium whitespace-nowrap">${c.agreement_type || 'SPK / PKS'}</td>
+          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${c.effective_date || '-'} s/d ${c.expiration_date || '-'}</td>
+          <td class="px-3.5 py-3 whitespace-nowrap"><span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium">${c.payment_terms || 'TOP 30'}</span></td>
+          <td class="px-3.5 py-3 text-slate-400 min-w-[140px]">${c.late_penalty || '-'}</td>
+          <td class="px-3.5 py-3 text-slate-400 min-w-[150px]">${c.termination_clause || '-'}</td>
+          <td class="px-3.5 py-3 text-slate-400 min-w-[140px]">${c.confidentiality_clause || '-'}</td>
+          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${c.governing_law || 'Indonesia'}</td>
+          <td class="px-3.5 py-3 whitespace-nowrap">
+            <span class="px-2 py-0.5 ${c.status === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded text-[10px] font-bold">
+              ${c.status || 'Aktif'}
+            </span>
           </td>
-          <td class="px-4 py-3 text-center">
+          <td class="px-3.5 py-3 text-center whitespace-nowrap">
             <a href="${c.gdrive_web_link}" target="_blank" class="inline-flex p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded transition" title="Buka Dokumen">
               <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
             </a>
           </td>
         </tr>
       `).join('');
-      lucide.createIcons();
-    }
-
-    function openModalContract() {
-      if (currentUserSession && currentUserSession.role.includes('AUDITOR')) {
-        alert('Akses Ditolak: Peran Auditor hanya memiliki akses Read-Only!');
-        return;
-      }
-      document.getElementById('modal-contract').classList.remove('hidden');
-    }
-
-    function closeModalContract() {
-      document.getElementById('modal-contract').classList.add('hidden');
-    }
-
-    async function handleSaveContract(e) {
-      e.preventDefault();
-      const vendorName = document.getElementById('input-vendor-name').value;
-      const contractNum = document.getElementById('input-contract-num').value;
-      const effDate = document.getElementById('input-eff-date').value;
-      const expDate = document.getElementById('input-exp-date').value;
-      const paymentTerms = document.getElementById('input-payment-terms').value;
-      const gdriveLink = document.getElementById('input-gdrive-link').value;
-
-      const btnSave = document.getElementById('btn-save-contract');
-      btnSave.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Menyimpan...`;
-      lucide.createIcons();
-
-      const fakeDriveId = 'MANUAL-' + Date.now();
-
-      const { data, error } = await supabaseClient
-        .from('vendor_contracts')
-        .insert([{
-          gdrive_file_id: fakeDriveId,
-          gdrive_web_link: gdriveLink,
-          vendor_name: vendorName,
-          contract_number: contractNum,
-          effective_date: effDate,
-          expiration_date: expDate,
-          payment_terms: paymentTerms,
-          is_verified_by_legal: true
-        }]);
-
-      if (error) {
-        alert('Gagal menyimpan kontrak: ' + error.message);
-      } else {
-        logAuditAction(currentUserSession.username, 'CREATE_CONTRACT', 'vendor_contracts', null);
-        closeModalContract();
-        loadContracts();
-      }
-
-      btnSave.innerHTML = `<i data-lucide="save" class="w-3.5 h-3.5"></i> Simpan Kontrak`;
       lucide.createIcons();
     }
 
