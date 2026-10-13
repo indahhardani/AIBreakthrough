@@ -5,15 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enterprise LegalOps & Compliance Intelligence</title>
   
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Supabase JS SDK CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
-    /* Custom Scrollbar untuk Tabel */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -22,9 +18,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex">
 
-  <!-- ========================================== -->
-  <!-- 1. LOGIN CONTAINER (SUPABASE DB) -->
-  <!-- ========================================== -->
+  <!-- LOGIN CONTAINER -->
   <div id="login-view" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-6">
       
@@ -33,7 +27,7 @@
           <i data-lucide="shield-check" class="w-8 h-8"></i>
         </div>
         <h2 class="text-2xl font-bold tracking-tight text-white">LegalOps Intelligence</h2>
-        <p class="text-xs text-slate-400">Masuk via Supabase Database (`public.users`)[span_3](start_span)[span_3](end_span)</p>
+        <p class="text-xs text-slate-400">Masuk via Supabase Database (`public.users`)</p>
       </div>
 
       <form id="form-login" onsubmit="handlePureSupabaseLogin(event)" class="space-y-4">
@@ -77,9 +71,7 @@
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 2. MAIN APP DASHBOARD -->
-  <!-- ========================================== -->
+  <!-- MAIN APP DASHBOARD -->
   <div id="app-view" class="hidden flex-1 flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
     
     <!-- Sidebar -->
@@ -129,7 +121,6 @@
 
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-950/80 z-30 hidden md:hidden"></div>
 
-    <!-- Main Content Area -->
     <main class="flex-1 flex flex-col bg-slate-950 overflow-y-auto w-full">
       <header class="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur flex items-center justify-between px-4 md:px-6 flex-shrink-0">
         <div class="flex items-center gap-3">
@@ -146,21 +137,19 @@
 
       <div class="p-4 md:p-6 space-y-6">
         
-        <!-- VENDOR CONTRACTS TAB -->
         <section id="view-vendor-contracts" class="space-y-4">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 class="text-lg font-bold text-white">Vendor Contract Matrix</h2>
-              <p class="text-xs text-slate-400">Pindai folder Google Drive & kelola klausul perjanjian vendor secara otomatis via Supabase Edge Function.[span_4](start_span)[span_4](end_span)</p>
+              <p class="text-xs text-slate-400">Pindai folder Google Drive & kelola klausul perjanjian vendor secara otomatis via Supabase Edge Function.</p>
             </div>
 
-            <!-- TOMBOL UTAMA -->
             <button onclick="handleScanGoogleDriveEdge()" id="btn-scan-drive" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
               <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)
             </button>
           </div>
 
-          <!-- TABEL VENDOR (CLEAN & COMPACT) -->
+          <!-- TABEL RINGKAS (TANPA JENIS VENDOR & PARA PIHAK) -->
           <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
             <div class="overflow-x-auto max-h-[70vh]">
               <table class="w-full text-left text-xs text-slate-300 border-collapse">
@@ -169,10 +158,8 @@
                     <th class="px-3.5 py-3.5 text-center w-8">
                       <input type="checkbox" onchange="toggleSelectAllContracts(this)" class="rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
                     </th>
-                    <th class="px-4 py-3.5 font-bold min-w-[160px]">Vendor</th>
-                    <th class="px-3.5 py-3.5 font-bold min-w-[130px]">Jenis Vendor</th>
-                    <th class="px-3.5 py-3.5 font-bold min-w-[160px]">Para Pihak</th>
-                    <th class="px-3.5 py-3.5 font-bold min-w-[140px]">Jenis Perjanjian</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[180px]">Vendor</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[150px]">Jenis Perjanjian</th>
                     <th class="px-3.5 py-3.5 font-bold min-w-[170px]">Masa Berlaku</th>
                     <th class="px-3.5 py-3.5 font-bold min-w-[130px]">Payment Terms</th>
                     <th class="px-3.5 py-3.5 font-bold min-w-[180px]">Denda Keterlambatan</th>
@@ -185,7 +172,7 @@
                 </thead>
                 <tbody id="table-contracts-body" class="divide-y divide-slate-800/60">
                   <tr>
-                    <td colspan="13" class="px-4 py-10 text-center text-slate-500">
+                    <td colspan="11" class="px-4 py-10 text-center text-slate-500">
                       <div class="flex flex-col items-center justify-center gap-2">
                         <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-blue-500"></i>
                         <span>Memuat data dari Supabase...</span>
@@ -198,7 +185,6 @@
           </div>
         </section>
 
-        <!-- ARTWORK PRE-SCREENING TAB -->
         <section id="view-artwork-prescreening" class="hidden space-y-4">
           <div class="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center space-y-3">
             <div class="inline-flex p-3 bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/20">
@@ -211,7 +197,6 @@
           </div>
         </section>
 
-        <!-- AUDIT TRAIL LOG TAB -->
         <section id="view-audit-trail" class="hidden space-y-4">
           <div class="flex justify-between items-center">
             <div>
@@ -247,7 +232,7 @@
 
   </div>
 
-  <!-- FLOATING ACTION BAR FOR COMPARISON -->
+  <!-- FLOATING BAR FOR COMPARISON -->
   <div id="compare-floating-bar" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur border border-blue-500/30 px-6 py-3 rounded-2xl shadow-2xl z-40 hidden flex items-center gap-4">
     <div class="flex items-center gap-2">
       <span class="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span>
@@ -262,11 +247,10 @@
     </button>
   </div>
 
-  <!-- MODAL POPUP COMPARE SIDE-BY-SIDE -->
+  <!-- MODAL COMPARE SIDE-BY-SIDE -->
   <div id="compare-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-6xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       
-      <!-- Modal Header -->
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
         <div class="flex items-center gap-2.5">
           <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/20">
@@ -282,10 +266,8 @@
         </button>
       </div>
 
-      <!-- Modal Content (Table Side-by-Side) -->
       <div class="p-6 overflow-y-auto overflow-x-auto flex-1" id="compare-modal-content"></div>
 
-      <!-- Modal Footer -->
       <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-end">
         <button onclick="closeCompareModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
           Tutup
@@ -294,9 +276,6 @@
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 3. SUPABASE ENGINE SCRIPT -->
-  <!-- ========================================== -->
   <script>
     const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV'; 
@@ -456,12 +435,11 @@
       }
     }
 
-    // FUNGSI LOAD CONTRACTS (ORDER CREATED_AT DESC)
     async function loadContracts() {
       const tbody = document.getElementById('table-contracts-body');
       tbody.innerHTML = `
         <tr>
-          <td colspan="13" class="px-4 py-8 text-center text-slate-500">
+          <td colspan="11" class="px-4 py-8 text-center text-slate-500">
             <div class="flex flex-col items-center justify-center gap-2">
               <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-blue-400"></i>
               <span class="text-xs">Mengambil data dari Supabase...</span>
@@ -476,14 +454,14 @@
         .order('created_at', { ascending: false });
 
       if (error) {
-        tbody.innerHTML = `<tr><td colspan="13" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat data: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat data: ${error.message}</td></tr>`;
         return;
       }
 
       if (!contracts || contracts.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="13" class="px-4 py-10 text-center text-slate-500">
+            <td colspan="11" class="px-4 py-10 text-center text-slate-500">
               <div class="flex flex-col items-center justify-center gap-2">
                 <i data-lucide="file-x" class="w-8 h-8 text-slate-600"></i>
                 <p class="text-xs">Belum ada data kontrak vendor.</p>
@@ -503,12 +481,10 @@
 
         return `
         <tr class="hover:bg-slate-800/50 transition border-b border-slate-800/40 text-xs">
-          <!-- Checkbox Selection -->
           <td class="px-3.5 py-3 text-center">
             <input type="checkbox" value="${c.id}" ${isChecked} onchange="toggleSelectContract('${c.id}')" class="contract-checkbox rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
           </td>
 
-          <!-- Vendor Name -->
           <td class="px-4 py-3 font-semibold text-slate-100 whitespace-nowrap">
             <div class="flex flex-col">
               <span>${esc(c.vendor_name)}</span>
@@ -516,26 +492,12 @@
             </div>
           </td>
           
-          <!-- Vendor Type -->
-          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">
-            <span class="px-2 py-0.5 bg-slate-800 border border-slate-700/60 rounded text-[11px]">
-              ${esc(c.vendor_type) || '-'}
-            </span>
-          </td>
-          
-          <!-- Parties -->
-          <td class="px-3.5 py-3 text-slate-300 min-w-[160px] max-w-[200px]" title="${esc(c.parties)}">
-            <p class="line-clamp-2 leading-relaxed">${esc(c.parties) || '-'}</p>
-          </td>
-          
-          <!-- Agreement Type -->
           <td class="px-3.5 py-3 text-slate-200 font-medium whitespace-nowrap">
             <span class="px-2 py-0.5 bg-purple-500/10 text-purple-300 border border-purple-500/20 rounded font-semibold text-[10px]">
               ${esc(c.agreement_type) || '-'}
             </span>
           </td>
           
-          <!-- Masa Berlaku -->
           <td class="px-3.5 py-3 text-slate-300 whitespace-nowrap">
             <div class="flex flex-col text-[11px] font-mono">
               <span class="text-slate-400">Mul: ${esc(c.effective_date) || '-'}</span>
@@ -543,34 +505,28 @@
             </div>
           </td>
           
-          <!-- Payment Terms -->
           <td class="px-3.5 py-3 whitespace-nowrap">
             <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium text-[11px]">
               ${esc(c.payment_terms) || '-'}
             </span>
           </td>
           
-          <!-- Late Penalty -->
           <td class="px-3.5 py-3 text-slate-400 min-w-[180px] max-w-[220px]" title="${esc(c.late_penalty)}">
             <p class="line-clamp-2 leading-relaxed">${esc(c.late_penalty) || '-'}</p>
           </td>
           
-          <!-- Termination Clause -->
           <td class="px-3.5 py-3 text-slate-400 min-w-[180px] max-w-[220px]" title="${esc(c.termination_clause)}">
             <p class="line-clamp-2 leading-relaxed">${esc(c.termination_clause) || '-'}</p>
           </td>
           
-          <!-- Confidentiality Clause -->
           <td class="px-3.5 py-3 text-slate-400 min-w-[160px] max-w-[200px]" title="${esc(c.confidentiality_clause)}">
             <p class="line-clamp-2 leading-relaxed">${esc(c.confidentiality_clause) || '-'}</p>
           </td>
           
-          <!-- Governing Law -->
           <td class="px-3.5 py-3 text-slate-300 whitespace-nowrap">
             <span class="text-[11px]">${esc(c.governing_law) || '-'}</span>
           </td>
           
-          <!-- Status -->
           <td class="px-3.5 py-3 whitespace-nowrap">
             <span class="px-2.5 py-1 ${c.status === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold inline-flex items-center gap-1">
               <span class="w-1.5 h-1.5 rounded-full ${c.status === 'Aktif' ? 'bg-emerald-400' : 'bg-rose-400'}"></span>
@@ -578,7 +534,6 @@
             </span>
           </td>
           
-          <!-- Action Button -->
           <td class="px-4 py-3 text-center whitespace-nowrap sticky right-0 bg-slate-900/95 backdrop-blur shadow-l">
             <a href="${esc(c.gdrive_web_link)}" target="_blank" class="p-1.5 bg-slate-800 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg transition inline-flex items-center gap-1" title="Buka Dokumen di Google Drive">
               <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
@@ -589,7 +544,6 @@
       lucide.createIcons();
     }
 
-    // LOGIKA SELEKSI KOMPARASI
     function toggleSelectContract(id) {
       if (selectedContractIds.includes(id)) {
         selectedContractIds = selectedContractIds.filter(item => item !== id);
@@ -630,7 +584,6 @@
       }
     }
 
-    // RENDER MODAL TAMPILAN SIDE-BY-SIDE
     function openCompareModal() {
       if (selectedContractIds.length < 2) {
         alert('Pilih minimal 2 vendor untuk dibandingkan!');
@@ -642,8 +595,6 @@
 
       const clauses = [
         { label: "Nama Vendor", key: "vendor_name" },
-        { label: "Jenis Vendor", key: "vendor_type" },
-        { label: "Para Pihak", key: "parties" },
         { label: "Jenis Perjanjian", key: "agreement_type" },
         { label: "Masa Berlaku", custom: c => `${c.effective_date || '-'} s/d ${c.expiration_date || '-'}` },
         { label: "Payment Terms", key: "payment_terms", badge: "blue" },
