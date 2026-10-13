@@ -886,7 +886,7 @@
           username: currentUserSession ? currentUserSession.username : 'guest'
         };
 
-        const { data, error } = await supabaseClient.functions.invoke('Scan-npd-permit', { body: payload });
+        const { data, error } = await supabaseClient.functions.invoke('scan-npd-permit', { body: payload });
 
         if (error || (data && data.error)) {
           alert("Gagal melakukan skrining perizinan NPD: " + (error?.message || data?.error));
