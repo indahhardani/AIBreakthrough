@@ -22,7 +22,9 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex">
 
-  <!-- LOGIN CONTAINER -->
+  <!-- ========================================== -->
+  <!-- 1. LOGIN CONTAINER (SUPABASE DB) -->
+  <!-- ========================================== -->
   <div id="login-view" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-6">
       
@@ -31,7 +33,7 @@
           <i data-lucide="shield-check" class="w-8 h-8"></i>
         </div>
         <h2 class="text-2xl font-bold tracking-tight text-white">LegalOps Intelligence</h2>
-        <p class="text-xs text-slate-400">Masuk via Supabase Database (`public.users`)</p>
+        <p class="text-xs text-slate-400">Masuk via Supabase Database (`public.users`)[span_3](start_span)[span_3](end_span)</p>
       </div>
 
       <form id="form-login" onsubmit="handlePureSupabaseLogin(event)" class="space-y-4">
@@ -75,7 +77,9 @@
     </div>
   </div>
 
-  <!-- MAIN APP DASHBOARD -->
+  <!-- ========================================== -->
+  <!-- 2. MAIN APP DASHBOARD -->
+  <!-- ========================================== -->
   <div id="app-view" class="hidden flex-1 flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
     
     <!-- Sidebar -->
@@ -125,7 +129,7 @@
 
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-950/80 z-30 hidden md:hidden"></div>
 
-    <!-- Main Content -->
+    <!-- Main Content Area -->
     <main class="flex-1 flex flex-col bg-slate-950 overflow-y-auto w-full">
       <header class="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur flex items-center justify-between px-4 md:px-6 flex-shrink-0">
         <div class="flex items-center gap-3">
@@ -144,38 +148,27 @@
         
         <!-- VENDOR CONTRACTS TAB -->
         <section id="view-vendor-contracts" class="space-y-4">
-          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 class="text-lg font-bold text-white">Vendor Contract Matrix</h2>
-              <p class="text-xs text-slate-400">Pindai folder Google Drive & kelola klausul perjanjian vendor secara otomatis via Supabase Edge Function.</p>
+              <p class="text-xs text-slate-400">Pindai folder Google Drive & kelola klausul perjanjian vendor secara otomatis via Supabase Edge Function.[span_4](start_span)[span_4](end_span)</p>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2">
-              <div class="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg text-xs">
-                <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-blue-400"></i>
-                <span class="text-slate-400 font-medium">Urutkan:</span>
-                <select id="sort-filter" onchange="loadContracts()" class="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer">
-                  <option value="created_at-desc" class="bg-slate-900 text-slate-200">Terbaru Ditambahkan</option>
-                  <option value="vendor_name-asc" class="bg-slate-900 text-slate-200">Nama Vendor (A-Z)</option>
-                  <option value="vendor_name-desc" class="bg-slate-900 text-slate-200">Nama Vendor (Z-A)</option>
-                  <option value="expiration_date-asc" class="bg-slate-900 text-slate-200">Masa Berlaku (Hampir Expired)</option>
-                  <option value="expiration_date-desc" class="bg-slate-900 text-slate-200">Masa Berlaku (Terlama)</option>
-                  <option value="status-asc" class="bg-slate-900 text-slate-200">Status (Aktif Dulu)</option>
-                </select>
-              </div>
-
-              <button onclick="handleScanGoogleDriveEdge()" id="btn-scan-drive" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
-                <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)
-              </button>
-            </div>
+            <!-- TOMBOL UTAMA -->
+            <button onclick="handleScanGoogleDriveEdge()" id="btn-scan-drive" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+              <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)
+            </button>
           </div>
 
-          <!-- TABEL DENGAN TAMPILAN BARU (COMPACT & CLEAN) -->
+          <!-- TABEL VENDOR (CLEAN & COMPACT) -->
           <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
             <div class="overflow-x-auto max-h-[70vh]">
               <table class="w-full text-left text-xs text-slate-300 border-collapse">
                 <thead class="bg-slate-950/90 backdrop-blur text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px] sticky top-0 z-10">
                   <tr>
+                    <th class="px-3.5 py-3.5 text-center w-8">
+                      <input type="checkbox" onchange="toggleSelectAllContracts(this)" class="rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+                    </th>
                     <th class="px-4 py-3.5 font-bold min-w-[160px]">Vendor</th>
                     <th class="px-3.5 py-3.5 font-bold min-w-[130px]">Jenis Vendor</th>
                     <th class="px-3.5 py-3.5 font-bold min-w-[160px]">Para Pihak</th>
@@ -192,7 +185,7 @@
                 </thead>
                 <tbody id="table-contracts-body" class="divide-y divide-slate-800/60">
                   <tr>
-                    <td colspan="12" class="px-4 py-10 text-center text-slate-500">
+                    <td colspan="13" class="px-4 py-10 text-center text-slate-500">
                       <div class="flex flex-col items-center justify-center gap-2">
                         <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-blue-500"></i>
                         <span>Memuat data dari Supabase...</span>
@@ -254,12 +247,64 @@
 
   </div>
 
+  <!-- FLOATING ACTION BAR FOR COMPARISON -->
+  <div id="compare-floating-bar" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur border border-blue-500/30 px-6 py-3 rounded-2xl shadow-2xl z-40 hidden flex items-center gap-4">
+    <div class="flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span>
+      <span id="compare-count" class="text-xs font-semibold text-slate-200">0 Vendor Dipilih</span>
+    </div>
+    <div class="h-4 w-px bg-slate-700"></div>
+    <button onclick="openCompareModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-lg shadow-blue-600/20">
+      <i data-lucide="columns-2" class="w-3.5 h-3.5"></i> Bandingkan Vendor
+    </button>
+    <button onclick="clearCompareSelection()" class="text-slate-400 hover:text-rose-400 p-1">
+      <i data-lucide="x-circle" class="w-4 h-4"></i>
+    </button>
+  </div>
+
+  <!-- MODAL POPUP COMPARE SIDE-BY-SIDE -->
+  <div id="compare-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-6xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/20">
+            <i data-lucide="columns-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Komparasi Klausul Perjanjian Vendor</h3>
+            <p class="text-xs text-slate-400">Analisis perbandingan klausul hukum secara berdampingan.</p>
+          </div>
+        </div>
+        <button onclick="closeCompareModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Content (Table Side-by-Side) -->
+      <div class="p-6 overflow-y-auto overflow-x-auto flex-1" id="compare-modal-content"></div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-end">
+        <button onclick="closeCompareModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. SUPABASE ENGINE SCRIPT -->
+  <!-- ========================================== -->
   <script>
     const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV'; 
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let currentUserSession = null;
+    let selectedContractIds = [];
+    let cachedContractsList = [];
 
     lucide.createIcons();
 
@@ -411,12 +456,12 @@
       }
     }
 
-    // FUNGSI LOAD CONTRACTS DENGAN FORMAT TABEL BARU
+    // FUNGSI LOAD CONTRACTS (ORDER CREATED_AT DESC)
     async function loadContracts() {
       const tbody = document.getElementById('table-contracts-body');
       tbody.innerHTML = `
         <tr>
-          <td colspan="12" class="px-4 py-8 text-center text-slate-500">
+          <td colspan="13" class="px-4 py-8 text-center text-slate-500">
             <div class="flex flex-col items-center justify-center gap-2">
               <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-blue-400"></i>
               <span class="text-xs">Mengambil data dari Supabase...</span>
@@ -425,24 +470,20 @@
         </tr>`;
       lucide.createIcons();
 
-      const sortVal = document.getElementById('sort-filter') ? document.getElementById('sort-filter').value : 'created_at-desc';
-      const [sortColumn, sortOrder] = sortVal.split('-');
-      const isAscending = sortOrder === 'asc';
-
       const { data: contracts, error } = await supabaseClient
         .from('vendor_contracts')
         .select('*')
-        .order(sortColumn, { ascending: isAscending });
+        .order('created_at', { ascending: false });
 
       if (error) {
-        tbody.innerHTML = `<tr><td colspan="12" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat data: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="13" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat data: ${error.message}</td></tr>`;
         return;
       }
 
       if (!contracts || contracts.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="12" class="px-4 py-10 text-center text-slate-500">
+            <td colspan="13" class="px-4 py-10 text-center text-slate-500">
               <div class="flex flex-col items-center justify-center gap-2">
                 <i data-lucide="file-x" class="w-8 h-8 text-slate-600"></i>
                 <p class="text-xs">Belum ada data kontrak vendor.</p>
@@ -454,10 +495,19 @@
         return;
       }
 
+      cachedContractsList = contracts;
+
       tbody.innerHTML = contracts.map(c => {
         const isExpired = c.status !== 'Aktif';
+        const isChecked = selectedContractIds.includes(c.id) ? 'checked' : '';
+
         return `
         <tr class="hover:bg-slate-800/50 transition border-b border-slate-800/40 text-xs">
+          <!-- Checkbox Selection -->
+          <td class="px-3.5 py-3 text-center">
+            <input type="checkbox" value="${c.id}" ${isChecked} onchange="toggleSelectContract('${c.id}')" class="contract-checkbox rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+          </td>
+
           <!-- Vendor Name -->
           <td class="px-4 py-3 font-semibold text-slate-100 whitespace-nowrap">
             <div class="flex flex-col">
@@ -528,7 +578,7 @@
             </span>
           </td>
           
-          <!-- Action Button (Fixed Sticky Right) -->
+          <!-- Action Button -->
           <td class="px-4 py-3 text-center whitespace-nowrap sticky right-0 bg-slate-900/95 backdrop-blur shadow-l">
             <a href="${esc(c.gdrive_web_link)}" target="_blank" class="p-1.5 bg-slate-800 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg transition inline-flex items-center gap-1" title="Buka Dokumen di Google Drive">
               <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
@@ -537,6 +587,119 @@
         </tr>
       `}).join('');
       lucide.createIcons();
+    }
+
+    // LOGIKA SELEKSI KOMPARASI
+    function toggleSelectContract(id) {
+      if (selectedContractIds.includes(id)) {
+        selectedContractIds = selectedContractIds.filter(item => item !== id);
+      } else {
+        selectedContractIds.push(id);
+      }
+      updateCompareBar();
+    }
+
+    function toggleSelectAllContracts(masterCheckbox) {
+      const checkboxes = document.querySelectorAll('.contract-checkbox');
+      checkboxes.forEach(cb => {
+        cb.checked = masterCheckbox.checked;
+        if (masterCheckbox.checked) {
+          if (!selectedContractIds.includes(cb.value)) selectedContractIds.push(cb.value);
+        } else {
+          selectedContractIds = [];
+        }
+      });
+      updateCompareBar();
+    }
+
+    function clearCompareSelection() {
+      selectedContractIds = [];
+      document.querySelectorAll('.contract-checkbox').forEach(cb => cb.checked = false);
+      updateCompareBar();
+    }
+
+    function updateCompareBar() {
+      const bar = document.getElementById('compare-floating-bar');
+      const countSpan = document.getElementById('compare-count');
+      
+      if (selectedContractIds.length > 0) {
+        countSpan.innerText = `${selectedContractIds.length} Vendor Dipilih`;
+        bar.classList.remove('hidden');
+      } else {
+        bar.classList.add('hidden');
+      }
+    }
+
+    // RENDER MODAL TAMPILAN SIDE-BY-SIDE
+    function openCompareModal() {
+      if (selectedContractIds.length < 2) {
+        alert('Pilih minimal 2 vendor untuk dibandingkan!');
+        return;
+      }
+
+      const selectedData = cachedContractsList.filter(c => selectedContractIds.includes(c.id));
+      const container = document.getElementById('compare-modal-content');
+
+      const clauses = [
+        { label: "Nama Vendor", key: "vendor_name" },
+        { label: "Jenis Vendor", key: "vendor_type" },
+        { label: "Para Pihak", key: "parties" },
+        { label: "Jenis Perjanjian", key: "agreement_type" },
+        { label: "Masa Berlaku", custom: c => `${c.effective_date || '-'} s/d ${c.expiration_date || '-'}` },
+        { label: "Payment Terms", key: "payment_terms", badge: "blue" },
+        { label: "Denda Keterlambatan", key: "late_penalty" },
+        { label: "Pemutusan Perjanjian", key: "termination_clause" },
+        { label: "Kerahasiaan (NDA)", key: "confidentiality_clause" },
+        { label: "Hukum yang Berlaku", key: "governing_law" },
+        { label: "Status Perjanjian", key: "status", badge: "status" }
+      ];
+
+      let tableHtml = `
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800">
+              <th class="p-3 bg-slate-950 font-bold text-slate-400 uppercase w-48 sticky left-0 z-20">Klausul Perjanjian</th>
+              ${selectedData.map(v => `
+                <th class="p-3 bg-slate-950 font-bold text-blue-400 min-w-[220px] text-sm border-l border-slate-800/80">
+                  ${esc(v.vendor_name)}
+                </th>
+              `).join('')}
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60">
+            ${clauses.map(clause => `
+              <tr class="hover:bg-slate-800/30">
+                <td class="p-3 font-semibold text-slate-300 bg-slate-900/90 sticky left-0 z-10 border-r border-slate-800">
+                  ${clause.label}
+                </td>
+                ${selectedData.map(v => {
+                  let val = clause.custom ? clause.custom(v) : esc(v[clause.key] || '-');
+                  
+                  if (clause.badge === "blue") {
+                    val = `<span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium">${val}</span>`;
+                  } else if (clause.badge === "status") {
+                    val = `<span class="px-2 py-0.5 ${v.status === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded font-bold">${val}</span>`;
+                  }
+
+                  return `
+                    <td class="p-3 text-slate-300 border-l border-slate-800/60 align-top leading-relaxed">
+                      ${val}
+                    </td>
+                  `;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = tableHtml;
+      document.getElementById('compare-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCompareModal() {
+      document.getElementById('compare-modal').classList.add('hidden');
     }
 
     async function loadAuditLogs() {
