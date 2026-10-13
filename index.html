@@ -11,12 +11,18 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Supabase JS SDK CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    /* Custom Scrollbar untuk Tabel */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex">
 
-  <!-- ========================================== -->
-  <!-- 1. LOGIN CONTAINER (PURE SUPABASE DATABASE) -->
-  <!-- ========================================== -->
+  <!-- LOGIN CONTAINER -->
   <div id="login-view" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-6">
       
@@ -31,7 +37,7 @@
       <form id="form-login" onsubmit="handlePureSupabaseLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Username</label>
-          <input type="text" id="username-input" required placeholder="Masukkan username (misal: admin)" 
+          <input type="text" id="username-input" required placeholder="Masukkan username" 
                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition">
         </div>
         <div>
@@ -46,7 +52,7 @@
       </form>
 
       <div class="border-t border-slate-800 pt-4 space-y-2">
-        <p class="text-xs text-slate-400 text-center font-medium">⚡ Klik tombol di bawah untuk Auto-Fill Demo:</p>
+        <p class="text-xs text-slate-400 text-center font-medium">⚡ Auto-Fill Demo:</p>
         <div class="grid grid-cols-2 gap-2">
           <button onclick="fillDemo('admin', 'admin123')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-lg text-xs text-amber-400 font-medium text-left flex items-center gap-1.5">
             <i data-lucide="crown" class="w-3.5 h-3.5"></i> Admin Master
@@ -69,12 +75,10 @@
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 2. MAIN APP DASHBOARD -->
-  <!-- ========================================== -->
+  <!-- MAIN APP DASHBOARD -->
   <div id="app-view" class="hidden flex-1 flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
     
-    <!-- Sidebar Navigation -->
+    <!-- Sidebar -->
     <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-4 flex-shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out">
       <div class="space-y-6">
         <div class="flex items-center justify-between px-2 py-2">
@@ -121,7 +125,7 @@
 
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-950/80 z-30 hidden md:hidden"></div>
 
-    <!-- Main Content Area -->
+    <!-- Main Content -->
     <main class="flex-1 flex flex-col bg-slate-950 overflow-y-auto w-full">
       <header class="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur flex items-center justify-between px-4 md:px-6 flex-shrink-0">
         <div class="flex items-center gap-3">
@@ -147,7 +151,6 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-              <!-- DROPDOWN SORTING -->
               <div class="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg text-xs">
                 <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-blue-400"></i>
                 <span class="text-slate-400 font-medium">Urutkan:</span>
@@ -161,38 +164,44 @@
                 </select>
               </div>
 
-              <!-- SATU-SATUNYA TOMBOL AKSI OTOMATIS -->
-              <button onclick="handleScanGoogleDriveEdge()" id="btn-scan-drive" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+              <button onclick="handleScanGoogleDriveEdge()" id="btn-scan-drive" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
                 <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)
               </button>
             </div>
           </div>
 
-          <!-- TABEL 10 KOLOM -->
-          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300">
-              <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
-                <tr>
-                  <th class="px-3.5 py-3">Vendor</th>
-                  <th class="px-3.5 py-3">Jenis Vendor</th>
-                  <th class="px-3.5 py-3">Para Pihak</th>
-                  <th class="px-3.5 py-3">Jenis Perjanjian</th>
-                  <th class="px-3.5 py-3">Masa Berlaku</th>
-                  <th class="px-3.5 py-3">Terms Payment</th>
-                  <th class="px-3.5 py-3">Denda Keterlambatan</th>
-                  <th class="px-3.5 py-3">Pemutusan Perjanjian</th>
-                  <th class="px-3.5 py-3">Kerahasiaan</th>
-                  <th class="px-3.5 py-3">Hukum</th>
-                  <th class="px-3.5 py-3">Status</th>
-                  <th class="px-3.5 py-3 text-center">Aksi G-Drive</th>
-                </tr>
-              </thead>
-              <tbody id="table-contracts-body" class="divide-y divide-slate-800/60">
-                <tr>
-                  <td colspan="12" class="px-4 py-6 text-center text-slate-500">Memuat data dari Supabase...</td>
-                </tr>
-              </tbody>
-            </table>
+          <!-- TABEL DENGAN TAMPILAN BARU (COMPACT & CLEAN) -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto max-h-[70vh]">
+              <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                <thead class="bg-slate-950/90 backdrop-blur text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px] sticky top-0 z-10">
+                  <tr>
+                    <th class="px-4 py-3.5 font-bold min-w-[160px]">Vendor</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[130px]">Jenis Vendor</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[160px]">Para Pihak</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[140px]">Jenis Perjanjian</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[170px]">Masa Berlaku</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[130px]">Payment Terms</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[180px]">Denda Keterlambatan</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[180px]">Pemutusan Perjanjian</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[160px]">Kerahasiaan</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[130px]">Hukum</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[100px]">Status</th>
+                    <th class="px-4 py-3.5 font-bold text-center sticky right-0 bg-slate-950/90 min-w-[80px]">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="table-contracts-body" class="divide-y divide-slate-800/60">
+                  <tr>
+                    <td colspan="12" class="px-4 py-10 text-center text-slate-500">
+                      <div class="flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-blue-500"></i>
+                        <span>Memuat data dari Supabase...</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -245,11 +254,7 @@
 
   </div>
 
-  <!-- ========================================== -->
-  <!-- 3. SUPABASE ENGINE SCRIPT -->
-  <!-- ========================================== -->
   <script>
-    // ⚠️ KREDENSIAL PROYEK SUPABASE ANDA:
     const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV'; 
 
@@ -258,8 +263,6 @@
 
     lucide.createIcons();
 
-    // Trigger Pemindaian via Supabase Edge Function 'Scan-gdrive'
-    // Isi kontrak berasal dari AI/dokumen, jadi di-escape sebelum masuk innerHTML
     function esc(v) {
       return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     }
@@ -271,14 +274,13 @@
       }
 
       const btnScan = document.getElementById('btn-scan-drive');
-      btnScan.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Edge Function Memindai...`;
+      btnScan.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memindai Edge...`;
       lucide.createIcons();
 
       try {
         let totalAdded = 0, totalFound = 0, remaining = 0, allErrors = [], failed = false;
-        const skip = []; // file yang sudah gagal, dilewati agar tidak mengulang terus
+        const skip = [];
 
-        // Edge memproses 1 file per panggilan; ulangi otomatis sampai tidak ada sisa
         for (let i = 0; i < 40; i++) {
           const { data, error } = await supabaseClient.functions.invoke('Scan-gdrive', { body: { skip } });
 
@@ -372,7 +374,7 @@
       const passwordInput = document.getElementById('password-input').value.trim();
       const btnSubmit = document.getElementById('btn-submit');
 
-      btnSubmit.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa Supabase DB...`;
+      btnSubmit.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa DB...`;
       lucide.createIcons();
 
       const { data: users, error } = await supabaseClient
@@ -403,16 +405,24 @@
         showApp(sessionData);
         logAuditAction(user.username, 'LOGIN', 'users', user.id);
       } else {
-        alert('Username atau Password tidak cocok dengan data di tabel public.users Supabase!');
+        alert('Username atau Password tidak terdaftar!');
         btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
         lucide.createIcons();
       }
     }
 
-    // FUNGSI LOAD & SORT CONTRACTS (10 KOLOM)
+    // FUNGSI LOAD CONTRACTS DENGAN FORMAT TABEL BARU
     async function loadContracts() {
       const tbody = document.getElementById('table-contracts-body');
-      tbody.innerHTML = `<tr><td colspan="12" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil data dari Supabase...</td></tr>`;
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="12" class="px-4 py-8 text-center text-slate-500">
+            <div class="flex flex-col items-center justify-center gap-2">
+              <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-blue-400"></i>
+              <span class="text-xs">Mengambil data dari Supabase...</span>
+            </div>
+          </td>
+        </tr>`;
       lucide.createIcons();
 
       const sortVal = document.getElementById('sort-filter') ? document.getElementById('sort-filter').value : 'created_at-desc';
@@ -425,39 +435,107 @@
         .order(sortColumn, { ascending: isAscending });
 
       if (error) {
-        tbody.innerHTML = `<tr><td colspan="12" class="px-4 py-4 text-center text-rose-400">Gagal memuat data: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat data: ${error.message}</td></tr>`;
         return;
       }
 
       if (!contracts || contracts.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="px-4 py-6 text-center text-slate-500">Belum ada data kontrak vendor. Klik tombol "Scan Google Drive (Edge)" untuk memindai berkas.</td></tr>`;
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="12" class="px-4 py-10 text-center text-slate-500">
+              <div class="flex flex-col items-center justify-center gap-2">
+                <i data-lucide="file-x" class="w-8 h-8 text-slate-600"></i>
+                <p class="text-xs">Belum ada data kontrak vendor.</p>
+                <p class="text-[11px] text-slate-600">Klik "Scan Google Drive (Edge)" untuk memindai berkas baru.</p>
+              </div>
+            </td>
+          </tr>`;
+        lucide.createIcons();
         return;
       }
 
-      tbody.innerHTML = contracts.map(c => `
-        <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40">
-          <td class="px-3.5 py-3 font-semibold text-slate-100 whitespace-nowrap">${esc(c.vendor_name)}</td>
-          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${esc(c.vendor_type) || '-'}</td>
-          <td class="px-3.5 py-3 text-slate-400 min-w-[150px]">${esc(c.parties) || '-'}</td>
-          <td class="px-3.5 py-3 text-slate-300 font-medium whitespace-nowrap">${esc(c.agreement_type) || '-'}</td>
-          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${esc(c.effective_date) || '-'} s/d ${esc(c.expiration_date) || '-'}</td>
-          <td class="px-3.5 py-3 whitespace-nowrap"><span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium">${esc(c.payment_terms) || '-'}</span></td>
-          <td class="px-3.5 py-3 text-slate-400 min-w-[140px]">${esc(c.late_penalty) || '-'}</td>
-          <td class="px-3.5 py-3 text-slate-400 min-w-[150px]">${esc(c.termination_clause) || '-'}</td>
-          <td class="px-3.5 py-3 text-slate-400 min-w-[140px]">${esc(c.confidentiality_clause) || '-'}</td>
-          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${esc(c.governing_law) || '-'}</td>
+      tbody.innerHTML = contracts.map(c => {
+        const isExpired = c.status !== 'Aktif';
+        return `
+        <tr class="hover:bg-slate-800/50 transition border-b border-slate-800/40 text-xs">
+          <!-- Vendor Name -->
+          <td class="px-4 py-3 font-semibold text-slate-100 whitespace-nowrap">
+            <div class="flex flex-col">
+              <span>${esc(c.vendor_name)}</span>
+              <span class="text-[10px] text-slate-500 font-mono">${esc(c.contract_number) || '-'}</span>
+            </div>
+          </td>
+          
+          <!-- Vendor Type -->
+          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">
+            <span class="px-2 py-0.5 bg-slate-800 border border-slate-700/60 rounded text-[11px]">
+              ${esc(c.vendor_type) || '-'}
+            </span>
+          </td>
+          
+          <!-- Parties -->
+          <td class="px-3.5 py-3 text-slate-300 min-w-[160px] max-w-[200px]" title="${esc(c.parties)}">
+            <p class="line-clamp-2 leading-relaxed">${esc(c.parties) || '-'}</p>
+          </td>
+          
+          <!-- Agreement Type -->
+          <td class="px-3.5 py-3 text-slate-200 font-medium whitespace-nowrap">
+            <span class="px-2 py-0.5 bg-purple-500/10 text-purple-300 border border-purple-500/20 rounded font-semibold text-[10px]">
+              ${esc(c.agreement_type) || '-'}
+            </span>
+          </td>
+          
+          <!-- Masa Berlaku -->
+          <td class="px-3.5 py-3 text-slate-300 whitespace-nowrap">
+            <div class="flex flex-col text-[11px] font-mono">
+              <span class="text-slate-400">Mul: ${esc(c.effective_date) || '-'}</span>
+              <span class="${isExpired ? 'text-rose-400 font-bold' : 'text-emerald-400'}">Exp: ${esc(c.expiration_date) || '-'}</span>
+            </div>
+          </td>
+          
+          <!-- Payment Terms -->
           <td class="px-3.5 py-3 whitespace-nowrap">
-            <span class="px-2 py-0.5 ${c.status === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded text-[10px] font-bold">
+            <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium text-[11px]">
+              ${esc(c.payment_terms) || '-'}
+            </span>
+          </td>
+          
+          <!-- Late Penalty -->
+          <td class="px-3.5 py-3 text-slate-400 min-w-[180px] max-w-[220px]" title="${esc(c.late_penalty)}">
+            <p class="line-clamp-2 leading-relaxed">${esc(c.late_penalty) || '-'}</p>
+          </td>
+          
+          <!-- Termination Clause -->
+          <td class="px-3.5 py-3 text-slate-400 min-w-[180px] max-w-[220px]" title="${esc(c.termination_clause)}">
+            <p class="line-clamp-2 leading-relaxed">${esc(c.termination_clause) || '-'}</p>
+          </td>
+          
+          <!-- Confidentiality Clause -->
+          <td class="px-3.5 py-3 text-slate-400 min-w-[160px] max-w-[200px]" title="${esc(c.confidentiality_clause)}">
+            <p class="line-clamp-2 leading-relaxed">${esc(c.confidentiality_clause) || '-'}</p>
+          </td>
+          
+          <!-- Governing Law -->
+          <td class="px-3.5 py-3 text-slate-300 whitespace-nowrap">
+            <span class="text-[11px]">${esc(c.governing_law) || '-'}</span>
+          </td>
+          
+          <!-- Status -->
+          <td class="px-3.5 py-3 whitespace-nowrap">
+            <span class="px-2.5 py-1 ${c.status === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold inline-flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full ${c.status === 'Aktif' ? 'bg-emerald-400' : 'bg-rose-400'}"></span>
               ${esc(c.status) || '-'}
             </span>
           </td>
-          <td class="px-3.5 py-3 text-center whitespace-nowrap">
-            <a href="${esc(c.gdrive_web_link)}" target="_blank" class="inline-flex p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded transition" title="Buka Dokumen">
+          
+          <!-- Action Button (Fixed Sticky Right) -->
+          <td class="px-4 py-3 text-center whitespace-nowrap sticky right-0 bg-slate-900/95 backdrop-blur shadow-l">
+            <a href="${esc(c.gdrive_web_link)}" target="_blank" class="p-1.5 bg-slate-800 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg transition inline-flex items-center gap-1" title="Buka Dokumen di Google Drive">
               <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
             </a>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
       lucide.createIcons();
     }
 
@@ -503,11 +581,6 @@
       }
       localStorage.removeItem('supabase_session');
       currentUserSession = null;
-      
-      const btnSubmit = document.getElementById('btn-submit');
-      if (btnSubmit) {
-        btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
-      }
       
       document.getElementById('login-view').classList.remove('hidden');
       document.getElementById('app-view').classList.add('hidden');
