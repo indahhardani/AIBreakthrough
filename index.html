@@ -259,6 +259,11 @@
     lucide.createIcons();
 
     // Trigger Pemindaian via Supabase Edge Function 'Scan-gdrive'
+    // Isi kontrak berasal dari AI/dokumen, jadi di-escape sebelum masuk innerHTML
+    function esc(v) {
+      return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
     async function handleScanGoogleDriveEdge() {
       if (currentUserSession && currentUserSession.role.includes('AUDITOR')) {
         alert('Akses Ditolak: Peran Auditor hanya memiliki akses Read-Only!');
@@ -270,15 +275,43 @@
       lucide.createIcons();
 
       try {
-        const { data, error } = await supabaseClient.functions.invoke('Scan-gdrive');
+        let totalAdded = 0, totalFound = 0, remaining = 0, allErrors = [], failed = false;
 
-        if (error) {
-          alert('Gagal mengeksekusi Edge Function:\n' + error.message);
-        } else if (data && data.error) {
-          alert('Error dari Edge Function:\n' + data.error);
-        } else {
+        // Edge memproses beberapa file per panggilan; ulangi otomatis sampai tidak ada sisa
+        for (let i = 0; i < 15; i++) {
+          const { data, error } = await supabaseClient.functions.invoke('Scan-gdrive');
+
+          if (error) {
+            let detail = error.message;
+            try { const b = await error.context.json(); detail = b.error || b.message || JSON.stringify(b); } catch (e) {}
+            alert('Gagal mengeksekusi Edge Function:\n' + detail);
+            failed = true;
+            break;
+          }
+          if (data && data.error) {
+            alert('Error dari Edge Function:\n' + data.error);
+            failed = true;
+            break;
+          }
+
+          totalAdded += data.count || 0;
+          totalFound = data.total_found || 0;
+          remaining = data.remaining || 0;
+          if (data.errors && data.errors.length) allErrors = allErrors.concat(data.errors);
+
+          btnScan.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memindai... (${totalAdded} selesai)`;
+          lucide.createIcons();
+
+          // berhenti bila tidak ada sisa, atau panggilan ini tidak memproses apa pun (hindari loop sia-sia)
+          if (!remaining || !data.count) break;
+        }
+
+        if (!failed) {
           logAuditAction(currentUserSession.username, 'SYNC_GOOGLE_DRIVE_EDGE', 'vendor_contracts', null);
-          alert(`Edge Function Sukses!\n${data.count} dokumen baru ditambahkan dari folder Google Drive.`);
+          let msg = `Pemindaian selesai.\n${totalAdded} dokumen diekstrak AI dari ${totalFound} berkas di folder.`;
+          if (remaining) msg += `\n${remaining} berkas belum diproses, tekan Scan lagi.`;
+          if (allErrors.length) msg += `\n\nGagal diproses:\n- ` + allErrors.join('\n- ');
+          alert(msg);
           loadContracts();
         }
       } catch (err) {
@@ -402,23 +435,23 @@
 
       tbody.innerHTML = contracts.map(c => `
         <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40">
-          <td class="px-3.5 py-3 font-semibold text-slate-100 whitespace-nowrap">${c.vendor_name}</td>
-          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${c.vendor_type || '-'}</td>
-          <td class="px-3.5 py-3 text-slate-400 min-w-[150px]">${c.parties || '-'}</td>
-          <td class="px-3.5 py-3 text-slate-300 font-medium whitespace-nowrap">${c.agreement_type || 'SPK / PKS'}</td>
-          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${c.effective_date || '-'} s/d ${c.expiration_date || '-'}</td>
-          <td class="px-3.5 py-3 whitespace-nowrap"><span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium">${c.payment_terms || 'TOP 30'}</span></td>
-          <td class="px-3.5 py-3 text-slate-400 min-w-[140px]">${c.late_penalty || '-'}</td>
-          <td class="px-3.5 py-3 text-slate-400 min-w-[150px]">${c.termination_clause || '-'}</td>
-          <td class="px-3.5 py-3 text-slate-400 min-w-[140px]">${c.confidentiality_clause || '-'}</td>
-          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${c.governing_law || 'Indonesia'}</td>
+          <td class="px-3.5 py-3 font-semibold text-slate-100 whitespace-nowrap">${esc(c.vendor_name)}</td>
+          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${esc(c.vendor_type) || '-'}</td>
+          <td class="px-3.5 py-3 text-slate-400 min-w-[150px]">${esc(c.parties) || '-'}</td>
+          <td class="px-3.5 py-3 text-slate-300 font-medium whitespace-nowrap">${esc(c.agreement_type) || '-'}</td>
+          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${esc(c.effective_date) || '-'} s/d ${esc(c.expiration_date) || '-'}</td>
+          <td class="px-3.5 py-3 whitespace-nowrap"><span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium">${esc(c.payment_terms) || '-'}</span></td>
+          <td class="px-3.5 py-3 text-slate-400 min-w-[140px]">${esc(c.late_penalty) || '-'}</td>
+          <td class="px-3.5 py-3 text-slate-400 min-w-[150px]">${esc(c.termination_clause) || '-'}</td>
+          <td class="px-3.5 py-3 text-slate-400 min-w-[140px]">${esc(c.confidentiality_clause) || '-'}</td>
+          <td class="px-3.5 py-3 text-slate-400 whitespace-nowrap">${esc(c.governing_law) || '-'}</td>
           <td class="px-3.5 py-3 whitespace-nowrap">
             <span class="px-2 py-0.5 ${c.status === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded text-[10px] font-bold">
-              ${c.status || 'Aktif'}
+              ${esc(c.status) || '-'}
             </span>
           </td>
           <td class="px-3.5 py-3 text-center whitespace-nowrap">
-            <a href="${c.gdrive_web_link}" target="_blank" class="inline-flex p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded transition" title="Buka Dokumen">
+            <a href="${esc(c.gdrive_web_link)}" target="_blank" class="inline-flex p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded transition" title="Buka Dokumen">
               <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
             </a>
           </td>
