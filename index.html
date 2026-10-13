@@ -473,7 +473,7 @@
     </div>
   </div>
 
-  <!-- MODAL ARTWORK & MODAL NPD SCRIPT LENGKAP -->
+  <!-- MODAL POP-UP ARTWORK PRE-SCREENING -->
   <div id="artwork-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
@@ -673,11 +673,253 @@
     let currentUserSession = null;
     let currentActiveTicketId = null;
     let cachedNpdList = [];
+    let cachedContractsList = [];
+
+    // Artwork Variables
+    let artworkSourceMode = 'file';
+    let selectedArtworkBase64 = "";
+    let selectedMimeType = "image/png";
+    let selectedFileName = "";
 
     lucide.createIcons();
 
     function esc(v) {
       return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    // ==========================================
+    // ARTWORK PRE-SCREENING (SAFE LOAD FIX)
+    // ==========================================
+    function openArtworkModal() {
+      document.getElementById('artwork-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeArtworkModal() {
+      document.getElementById('artwork-modal').classList.add('hidden');
+    }
+
+    function setArtworkSourceMode(mode) {
+      artworkSourceMode = mode;
+      const btnFile = document.getElementById('btn-mode-file');
+      const btnWeb = document.getElementById('btn-mode-webpage');
+      const containerFile = document.getElementById('container-file-upload');
+      const containerWeb = document.getElementById('container-webpage-url');
+
+      if (mode === 'file') {
+        btnFile.className = "flex-1 py-1.5 rounded-lg border border-purple-500 bg-purple-600/20 text-purple-400 text-xs font-semibold";
+        btnWeb.className = "flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold";
+        containerFile.classList.remove('hidden');
+        containerWeb.classList.add('hidden');
+      } else {
+        btnWeb.className = "flex-1 py-1.5 rounded-lg border border-purple-500 bg-purple-600/20 text-purple-400 text-xs font-semibold";
+        btnFile.className = "flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold";
+        containerWeb.classList.remove('hidden');
+        containerFile.classList.add('hidden');
+      }
+    }
+
+    function handleArtworkUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      selectedFileName = file.name;
+      selectedMimeType = file.type || "image/png";
+      document.getElementById('file-name-display').innerText = file.name;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const fullBase64 = e.target.result;
+        selectedArtworkBase64 = fullBase64.split(",")[1];
+        document.getElementById("artwork-preview-img").src = fullBase64;
+        document.getElementById("artwork-preview-container").classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function loadArtworkTable() {
+      const tbody = document.getElementById('table-artwork-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-purple-400 inline mr-2"></i> Memuat data artwork...</td></tr>`;
+      lucide.createIcons();
+
+      try {
+        const { data: list, error } = await supabaseClient
+          .from('artwork_prescreenings')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!list || list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat audit artwork. Klik "+ Periksa Artwork Baru".</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = list.map(item => {
+          const bpomStatus = item.bpom_status || 'Pending';
+          const halalStatus = item.halal_status || 'Pending';
+          const score = item.compliance_score !== null && item.compliance_score !== undefined ? item.compliance_score : 0;
+          const materialType = item.material_type || 'Kemasan';
+          const title = item.title || item.product_name || 'Tanpa Judul';
+
+          return `
+            <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+              <td class="px-4 py-3 font-semibold text-slate-100">${esc(title)}</td>
+              <td class="px-4 py-3 text-slate-400 font-mono">${esc(item.design_version || 'v1')}</td>
+              <td class="px-4 py-3 text-slate-300 font-medium">${esc(materialType)}</td>
+              <td class="px-4 py-3 text-slate-300">${esc(item.category || '-')}</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 ${bpomStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded font-bold text-[10px]">
+                  ${esc(bpomStatus)}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 ${halalStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'} border rounded font-bold text-[10px]">
+                  ${esc(halalStatus)}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center font-bold text-slate-200">${score}/100</td>
+              <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</td>
+            </tr>
+          `;
+        }).join('');
+        lucide.createIcons();
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat artwork: ${esc(err.message || err)}</td></tr>`;
+      }
+    }
+
+    async function analyzeArtwork() {
+      const title = document.getElementById('artwork-title-input').value.trim();
+      const designVersion = document.getElementById('artwork-version-input').value.trim();
+      const materialType = document.querySelector('input[name="material_type"]:checked').value;
+      const category = document.getElementById('artwork-category-select').value;
+      const webpageUrl = document.getElementById('artwork-webpage-input').value.trim();
+
+      if (!title) {
+        alert('Mohon isi Judul / Nama Produk terlebih dahulu!');
+        return;
+      }
+
+      if (artworkSourceMode === 'file' && !selectedArtworkBase64) {
+        alert('Mohon pilih file gambar (JPG/PNG) terlebih dahulu!');
+        return;
+      }
+
+      if (artworkSourceMode === 'webpage' && !webpageUrl) {
+        alert('Mohon masukkan URL Webpage terlebih dahulu!');
+        return;
+      }
+
+      const btn = document.getElementById("btn-analyze-artwork");
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa via Gemini...`;
+      lucide.createIcons();
+
+      try {
+        const payload = {
+          title,
+          designVersion,
+          materialType,
+          category,
+          imageBase64: artworkSourceMode === 'file' ? selectedArtworkBase64 : null,
+          mimeType: artworkSourceMode === 'file' ? selectedMimeType : null,
+          fileName: artworkSourceMode === 'file' ? selectedFileName : null,
+          webpageUrl: artworkSourceMode === 'webpage' ? webpageUrl : null
+        };
+
+        const { data, error } = await supabaseClient.functions.invoke("Scan-artwork", { body: payload });
+
+        if (error || (data && data.error)) {
+          alert("Gagal menganalisis compliance: " + (error?.message || data?.error));
+          btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
+          lucide.createIcons();
+          return;
+        }
+
+        logAuditAction(currentUserSession.username, 'PERIKSA_ARTWORK', 'artwork_prescreenings', data.saved_id);
+        closeArtworkModal();
+        alert('Pemeriksaan selesai! Data telah ditambahkan ke tabel riwayat audit.');
+        loadArtworkTable();
+
+      } catch (err) {
+        alert("Terjadi kesalahan sistem: " + err.message);
+      }
+
+      btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // VENDOR CONTRACTS LOAD
+    // ==========================================
+    async function loadContracts() {
+      const tbody = document.getElementById('table-contracts-body');
+      tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-blue-400 inline mr-2"></i> Mengambil data dari Supabase...</td></tr>`;
+      lucide.createIcons();
+
+      try {
+        const { data: contracts, error } = await supabaseClient
+          .from('vendor_contracts')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!contracts || contracts.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-8 text-center text-slate-500">Belum ada data kontrak vendor.</td></tr>`;
+          return;
+        }
+
+        cachedContractsList = contracts;
+
+        tbody.innerHTML = contracts.map(c => {
+          const isExpired = c.status !== 'Aktif';
+
+          return `
+          <tr class="hover:bg-slate-800/50 transition border-b border-slate-800/40 text-xs">
+            <td class="px-3.5 py-3 text-center">
+              <input type="checkbox" value="${c.id}" class="contract-checkbox rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </td>
+            <td class="px-4 py-3 font-semibold text-slate-100 whitespace-nowrap">
+              <div class="flex flex-col">
+                <span>${esc(c.vendor_name)}</span>
+                <span class="text-[10px] text-slate-500 font-mono">${esc(c.contract_number) || '-'}</span>
+              </div>
+            </td>
+            <td class="px-3.5 py-3 text-slate-200 font-medium whitespace-nowrap">
+              <span class="px-2 py-0.5 bg-purple-500/10 text-purple-300 border border-purple-500/20 rounded font-semibold text-[10px]">${esc(c.agreement_type) || '-'}</span>
+            </td>
+            <td class="px-3.5 py-3 text-slate-300 whitespace-nowrap">
+              <div class="flex flex-col text-[11px] font-mono">
+                <span class="text-slate-400">Mul: ${esc(c.effective_date) || '-'}</span>
+                <span class="${isExpired ? 'text-rose-400 font-bold' : 'text-emerald-400'}">Exp: ${esc(c.expiration_date) || '-'}</span>
+              </div>
+            </td>
+            <td class="px-3.5 py-3 whitespace-nowrap">
+              <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium text-[11px]">${esc(c.payment_terms) || '-'}</span>
+            </td>
+            <td class="px-3.5 py-3 text-slate-400 min-w-[180px] max-w-[220px]" title="${esc(c.late_penalty)}"><p class="line-clamp-2 leading-relaxed">${esc(c.late_penalty) || '-'}</p></td>
+            <td class="px-3.5 py-3 text-slate-400 min-w-[180px] max-w-[220px]" title="${esc(c.termination_clause)}"><p class="line-clamp-2 leading-relaxed">${esc(c.termination_clause) || '-'}</p></td>
+            <td class="px-3.5 py-3 text-slate-400 min-w-[160px] max-w-[200px]" title="${esc(c.confidentiality_clause)}"><p class="line-clamp-2 leading-relaxed">${esc(c.confidentiality_clause) || '-'}</p></td>
+            <td class="px-3.5 py-3 text-slate-300 whitespace-nowrap"><span class="text-[11px]">${esc(c.governing_law) || '-'}</span></td>
+            <td class="px-3.5 py-3 whitespace-nowrap">
+              <span class="px-2.5 py-1 ${c.status === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold inline-flex items-center gap-1">
+                ${esc(c.status) || '-'}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-center whitespace-nowrap sticky right-0 bg-slate-900/95 backdrop-blur shadow-l">
+              <a href="${esc(c.gdrive_web_link)}" target="_blank" class="p-1.5 bg-slate-800 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg transition inline-flex items-center gap-1" title="Buka Dokumen di Google Drive">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </a>
+            </td>
+          </tr>`;
+        }).join('');
+        lucide.createIcons();
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat vendor: ${esc(err.message || err)}</td></tr>`;
+      }
     }
 
     // ==========================================
@@ -718,59 +960,64 @@
       tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400 inline mr-2"></i> Memuat data NPD...</td></tr>`;
       lucide.createIcons();
 
-      const { data: list, error } = await supabaseClient
-        .from('npd_permit_screenings')
-        .select('*')
-        .order('created_at', { ascending: false });
+      try {
+        const { data: list, error } = await supabaseClient
+          .from('npd_permit_screenings')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (error || !list || list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Belum ada ide produk yang diskrining. Klik "+ Skrining Produk Baru".</td></tr>`;
-        return;
+        if (error) throw error;
+
+        if (!list || list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Belum ada ide produk yang diskrining. Klik "+ Skrining Produk Baru".</td></tr>`;
+          return;
+        }
+
+        cachedNpdList = list;
+
+        tbody.innerHTML = list.map(item => {
+          const score = item.feasibility_score || 0;
+          const isCompliant = score >= 70;
+
+          return `
+            <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+              <td class="px-4 py-3 font-semibold text-slate-100">${esc(item.product_idea_name)}</td>
+              <td class="px-4 py-3 text-slate-300">${esc(item.category)}</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-mono font-bold text-[10px]">
+                  ${esc(item.matched_permit_code || 'BPOM RI')}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 ${isCompliant ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold">
+                  ${isCompliant ? 'High Feasibility (Lolos BPOM)' : 'Risk / Barrier (Tidak Sesuai)'}
+                </span>
+              </td>
+              <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</td>
+              <td class="px-4 py-3 text-center">
+                ${isCompliant ? `
+                  <button onclick="triggerTicketFromNpd('${item.id}')" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded font-bold text-[10px] shadow flex items-center gap-1 mx-auto">
+                    <i data-lucide="ticket" class="w-3 h-3"></i> Ajukan Tiket Legal
+                  </button>
+                ` : `
+                  <button onclick="rescreenNpdProduct('${item.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-rose-400 border border-rose-500/30 rounded font-bold text-[10px] flex items-center gap-1 mx-auto">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Skrining Ulang
+                  </button>
+                `}
+              </td>
+            </tr>
+          `;
+        }).join('');
+        lucide.createIcons();
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat NPD: ${esc(err.message || err)}</td></tr>`;
       }
-
-      cachedNpdList = list;
-
-      tbody.innerHTML = list.map(item => {
-        const score = item.feasibility_score || 0;
-        const isCompliant = score >= 70; // Skor >= 70 Dianggap Lolos BPOM
-
-        return `
-          <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
-            <td class="px-4 py-3 font-semibold text-slate-100">${esc(item.product_idea_name)}</td>
-            <td class="px-4 py-3 text-slate-300">${esc(item.category)}</td>
-            <td class="px-4 py-3">
-              <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-mono font-bold text-[10px]">
-                ${esc(item.matched_permit_code || 'BPOM RI')}
-              </span>
-            </td>
-            <td class="px-4 py-3">
-              <span class="px-2 py-0.5 ${isCompliant ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold">
-                ${isCompliant ? 'High Feasibility (Lolos BPOM)' : 'Risk / Barrier (Tidak Sesuai)'}
-              </span>
-            </td>
-            <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${new Date(item.created_at).toLocaleDateString('id-ID')}</td>
-            <td class="px-4 py-3 text-center">
-              ${isCompliant ? `
-                <button onclick="triggerTicketFromNpd('${item.id}')" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded font-bold text-[10px] shadow flex items-center gap-1 mx-auto">
-                  <i data-lucide="ticket" class="w-3 h-3"></i> Ajukan Tiket Legal
-                </button>
-              ` : `
-                <button onclick="rescreenNpdProduct('${item.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-rose-400 border border-rose-500/30 rounded font-bold text-[10px] flex items-center gap-1 mx-auto">
-                  <i data-lucide="refresh-cw" class="w-3 h-3"></i> Skrining Ulang
-                </button>
-              `}
-            </td>
-          </tr>
-        `;
-      }).join('');
-      lucide.createIcons();
     }
 
     function rescreenNpdProduct(npdId) {
       const item = cachedNpdList.find(x => x.id === npdId);
-      if (item) {
-        openNpdModal(item);
-      }
+      if (item) openNpdModal(item);
     }
 
     function triggerTicketFromNpd(npdId) {
@@ -877,37 +1124,44 @@
       tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-amber-400 inline mr-2"></i> Memuat data tiket...</td></tr>`;
       lucide.createIcons();
 
-      const { data: tickets, error } = await supabaseClient
-        .from('tickets')
-        .select('*')
-        .order('created_at', { ascending: false });
+      try {
+        const { data: tickets, error } = await supabaseClient
+          .from('tickets')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (error || !tickets || tickets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada tiket compliance yang dibuat.</td></tr>`;
-        return;
+        if (error) throw error;
+
+        if (!tickets || tickets.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada tiket compliance yang dibuat.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = tickets.map(t => `
+          <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+            <td class="px-4 py-3 font-mono font-bold text-amber-400">${esc(t.ticket_number)}</td>
+            <td class="px-4 py-3 font-semibold text-slate-100">${esc(t.title)}</td>
+            <td class="px-4 py-3 text-slate-300">${esc(t.category)}</td>
+            <td class="px-4 py-3 font-bold ${t.priority === 'Urgent' ? 'text-rose-400' : 'text-slate-300'}">${esc(t.priority)}</td>
+            <td class="px-4 py-3 text-slate-300">${esc(t.requested_by)}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-bold text-[10px]">
+                ${esc(t.status)}
+              </span>
+            </td>
+            <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${t.created_at ? new Date(t.created_at).toLocaleDateString('id-ID') : '-'}</td>
+            <td class="px-4 py-3 text-center">
+              <button onclick="openTicketDetailModal('${t.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-semibold text-[10px]">
+                Buka Detail
+              </button>
+            </td>
+          </tr>
+        `).join('');
+        lucide.createIcons();
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat tiket: ${esc(err.message || err)}</td></tr>`;
       }
-
-      tbody.innerHTML = tickets.map(t => `
-        <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
-          <td class="px-4 py-3 font-mono font-bold text-amber-400">${esc(t.ticket_number)}</td>
-          <td class="px-4 py-3 font-semibold text-slate-100">${esc(t.title)}</td>
-          <td class="px-4 py-3 text-slate-300">${esc(t.category)}</td>
-          <td class="px-4 py-3 font-bold ${t.priority === 'Urgent' ? 'text-rose-400' : 'text-slate-300'}">${esc(t.priority)}</td>
-          <td class="px-4 py-3 text-slate-300">${esc(t.requested_by)}</td>
-          <td class="px-4 py-3">
-            <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-bold text-[10px]">
-              ${esc(t.status)}
-            </span>
-          </td>
-          <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${new Date(t.created_at).toLocaleDateString('id-ID')}</td>
-          <td class="px-4 py-3 text-center">
-            <button onclick="openTicketDetailModal('${t.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-semibold text-[10px]">
-              Buka Detail
-            </button>
-          </td>
-        </tr>
-      `).join('');
-      lucide.createIcons();
     }
 
     async function submitNewTicket() {
@@ -978,7 +1232,7 @@
         <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
           <div class="flex justify-between items-center mb-1">
             <span class="font-bold text-amber-400">${esc(c.sender_username)}</span>
-            <span class="text-[10px] text-slate-500">${new Date(c.created_at).toLocaleTimeString('id-ID')}</span>
+            <span class="text-[10px] text-slate-500">${c.created_at ? new Date(c.created_at).toLocaleTimeString('id-ID') : '-'}</span>
           </div>
           <p class="text-slate-300 leading-relaxed">${esc(c.message)}</p>
         </div>
@@ -1010,6 +1264,43 @@
     }
 
     // ==========================================
+    // AUDIT TRAIL LOGS LOAD
+    // ==========================================
+    async function loadAuditLogs() {
+      const tbody = document.getElementById('table-audit-body');
+      tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil log...</td></tr>`;
+      lucide.createIcons();
+
+      try {
+        const { data: logs, error } = await supabaseClient
+          .from('audit_logs')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (error) throw error;
+
+        if (!logs || logs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">Belum ada riwayat aktivitas tercatat.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = logs.map(l => `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="px-4 py-2.5 font-mono text-[11px] text-slate-400">${l.created_at ? new Date(l.created_at).toLocaleString('id-ID') : '-'}</td>
+            <td class="px-4 py-2.5 font-semibold text-slate-200">${esc(l.actor_username)}</td>
+            <td class="px-4 py-2.5"><span class="px-2 py-0.5 bg-slate-800 text-blue-400 border border-slate-700 rounded text-[10px] font-bold">${esc(l.action)}</span></td>
+            <td class="px-4 py-2.5 text-slate-400">${esc(l.entity_type)}</td>
+          </tr>
+        `).join('');
+        lucide.createIcons();
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat log: ${esc(err.message || err)}</td></tr>`;
+      }
+    }
+
+    // ==========================================
     // SYSTEM NAVIGATION & AUTH
     // ==========================================
     function switchTab(tabName) {
@@ -1029,10 +1320,12 @@
         document.getElementById('view-vendor-contracts').classList.remove('hidden');
         document.getElementById('nav-vendor-contracts').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition";
         document.getElementById('page-title').innerText = "Vendor Agreement Matrix";
+        loadContracts();
       } else if (tabName === 'artwork-prescreening') {
         document.getElementById('view-artwork-prescreening').classList.remove('hidden');
         document.getElementById('nav-artwork-prescreening').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-purple-400 text-sm font-medium transition";
         document.getElementById('page-title').innerText = "Artwork & Advertising Pre-Screening";
+        loadArtworkTable();
       } else if (tabName === 'npd-screener') {
         document.getElementById('view-npd-screener').classList.remove('hidden');
         document.getElementById('nav-npd-screener').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-emerald-400 text-sm font-medium transition";
@@ -1047,6 +1340,7 @@
         document.getElementById('view-audit-trail').classList.remove('hidden');
         document.getElementById('nav-audit-trail').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-amber-400 text-sm font-medium transition";
         document.getElementById('page-title').innerText = "Audit Trail System";
+        loadAuditLogs();
       }
 
       if (window.innerWidth < 768) toggleSidebar();
