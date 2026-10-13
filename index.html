@@ -276,10 +276,11 @@
 
       try {
         let totalAdded = 0, totalFound = 0, remaining = 0, allErrors = [], failed = false;
+        const skip = []; // file yang sudah gagal, dilewati agar tidak mengulang terus
 
-        // Edge memproses beberapa file per panggilan; ulangi otomatis sampai tidak ada sisa
-        for (let i = 0; i < 15; i++) {
-          const { data, error } = await supabaseClient.functions.invoke('Scan-gdrive');
+        // Edge memproses 1 file per panggilan; ulangi otomatis sampai tidak ada sisa
+        for (let i = 0; i < 40; i++) {
+          const { data, error } = await supabaseClient.functions.invoke('Scan-gdrive', { body: { skip } });
 
           if (error) {
             let detail = error.message;
@@ -298,12 +299,12 @@
           totalFound = data.total_found || 0;
           remaining = data.remaining || 0;
           if (data.errors && data.errors.length) allErrors = allErrors.concat(data.errors);
+          if (data.failed_ids && data.failed_ids.length) skip.push(...data.failed_ids);
 
-          btnScan.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memindai... (${totalAdded} selesai)`;
+          btnScan.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memindai... (${totalAdded} selesai, sisa ${remaining})`;
           lucide.createIcons();
 
-          // berhenti bila tidak ada sisa, atau panggilan ini tidak memproses apa pun (hindari loop sia-sia)
-          if (!remaining || !data.count) break;
+          if (!remaining) break;
         }
 
         if (!failed) {
