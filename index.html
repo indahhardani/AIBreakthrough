@@ -184,184 +184,53 @@
           </div>
         </section>
 
-        <!-- ARTWORK PRE-SCREENING TAB -->
+        <!-- ARTWORK PRE-SCREENING TAB (SIMPLE HEADER + TABLE UI) -->
         <section id="view-artwork-prescreening" class="hidden space-y-6">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
             <div>
-              <h2 class="text-lg font-bold text-white">Artwork & Advertising Compliance Pre-Screening</h2>
-              <p class="text-xs text-slate-400">Verifikasi penandaan kemasan & materi periklanan sesuai regulasi <span class="text-blue-400 underline">jdih.pom.go.id</span> via Gemini 3.8 Flash.</p>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <i data-lucide="scan-line" class="w-5 h-5 text-purple-400"></i> Artwork & Advertising Pre-Screening
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">Verifikasi kepatuhan kemasan & materi periklanan sesuai regulasi <span class="text-purple-400 underline">jdih.pom.go.id</span> via Gemini 3.8 Flash.</p>
             </div>
+
+            <button onclick="openArtworkModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-purple-600/20">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Periksa Artwork Baru
+            </button>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-1 space-y-4">
-              <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 shadow-xl">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 border-b border-slate-800 pb-2">1. Metadata & Regulasi JDIH</h3>
-
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-400 mb-1">Judul / Nama Produk <span class="text-rose-400">*</span></label>
-                  <input type="text" id="artwork-title-input" required placeholder="Contoh: Susu Steril FitMax 250ml"
-                         class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-                </div>
-
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-400 mb-1">Versi Desain</label>
-                  <input type="text" id="artwork-version-input" placeholder="Contoh: v1.2 / Final-Rev3"
-                         class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-                </div>
-
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tipe Materi <span class="text-rose-400">*</span></label>
-                  <div class="grid grid-cols-2 gap-2">
-                    <label class="cursor-pointer">
-                      <input type="radio" name="material_type" value="Kemasan" checked class="peer hidden">
-                      <div class="p-2 text-center rounded-lg border border-slate-800 bg-slate-950 peer-checked:border-blue-500 peer-checked:bg-blue-600/10 peer-checked:text-blue-400 text-xs font-medium">
-                        Cek Kemasan
+          <!-- TABEL RIWAYAT AUDIT ARTWORK -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                  <tr>
+                    <th class="px-4 py-3.5 font-bold min-w-[180px]">Judul Produk / Desain</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Versi</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[120px]">Tipe Materi</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[140px]">Kategori JDIH</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">BPOM Status</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Halal Status</th>
+                    <th class="px-4 py-3.5 font-bold text-center min-w-[90px]">Score</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Tanggal</th>
+                  </tr>
+                </thead>
+                <tbody id="table-artwork-body" class="divide-y divide-slate-800/60">
+                  <tr>
+                    <td colspan="8" class="px-4 py-10 text-center text-slate-500">
+                      <div class="flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-purple-400"></i>
+                        <span>Memuat riwayat audit artwork...</span>
                       </div>
-                    </label>
-                    <label class="cursor-pointer">
-                      <input type="radio" name="material_type" value="Materi Iklan" class="peer hidden">
-                      <div class="p-2 text-center rounded-lg border border-slate-800 bg-slate-950 peer-checked:border-blue-500 peer-checked:bg-blue-600/10 peer-checked:text-blue-400 text-xs font-medium">
-                        Materi Iklan
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-400 mb-1">Kategori Komoditi (JDIH BPOM) <span class="text-rose-400">*</span></label>
-                  <select id="artwork-category-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer">
-                    <option value="Pangan Olahan">Pangan Olahan</option>
-                    <option value="Suplemen Kesehatan">Suplemen Kesehatan</option>
-                    <option value="Obat Bahan Alam">Obat Bahan Alam (Obat Tradisional/Herbal)</option>
-                    <option value="Obat Kuasi">Obat Kuasi</option>
-                    <option value="Kosmetik">Kosmetik</option>
-                  </select>
-                </div>
-
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 border-b border-slate-800 pb-2 pt-2">2. Pilihan Source / Gambar</h3>
-
-                <div class="flex gap-2">
-                  <button type="button" onclick="setArtworkSourceMode('file')" id="btn-mode-file" class="flex-1 py-1.5 rounded-lg border border-blue-500 bg-blue-600/20 text-blue-400 text-xs font-semibold">
-                    File Gambar (JPG/PNG)
-                  </button>
-                  <button type="button" onclick="setArtworkSourceMode('webpage')" id="btn-mode-webpage" class="flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold">
-                    Webpage URL
-                  </button>
-                </div>
-
-                <div id="container-file-upload" class="space-y-2">
-                  <div onclick="document.getElementById('artwork-input').click()" 
-                       class="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-xl p-4 text-center cursor-pointer transition bg-slate-950/50 flex flex-col items-center justify-center">
-                    <input type="file" id="artwork-input" accept="image/png,image/jpeg,image/jpg" onchange="handleArtworkUpload(event)" class="hidden">
-                    <i data-lucide="image" class="w-7 h-7 text-blue-400 mb-1"></i>
-                    <p class="text-xs font-semibold text-slate-200">Choose File (JPG / PNG)</p>
-                  </div>
-                  <p id="file-name-display" class="text-[10px] text-slate-500 truncate text-center"></p>
-                </div>
-
-                <div id="container-webpage-url" class="hidden space-y-2">
-                  <label class="block text-[11px] font-semibold text-slate-400">Tautan Webpage / Landing Page</label>
-                  <input type="url" id="artwork-webpage-input" placeholder="https://domain-produk.com/iklan"
-                         class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-                </div>
-
-                <div id="artwork-preview-container" class="hidden space-y-2">
-                  <img id="artwork-preview-img" class="w-full max-h-40 object-contain rounded-lg bg-slate-950 border border-slate-800" alt="Preview">
-                </div>
-
-                <button id="btn-analyze-artwork" onclick="analyzeArtwork()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-lg text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20">
-                  <i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE
-                </button>
-              </div>
-            </div>
-
-            <div class="lg:col-span-2 space-y-4">
-              <div id="artwork-result-empty" class="bg-slate-900 border border-slate-800 rounded-xl p-12 text-center text-slate-500 space-y-2">
-                <i data-lucide="shield-alert" class="w-10 h-10 mx-auto text-slate-600"></i>
-                <p class="text-xs font-medium">Belum ada materi kemasan/iklan yang diperiksa.</p>
-                <p class="text-[11px] text-slate-600">Isi metadata dan klik "PERIKSA COMPLIANCE" untuk memulai audit otomatis.</p>
-              </div>
-
-              <div id="artwork-result-content" class="hidden space-y-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center justify-between shadow-xl">
-                  <div>
-                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Merek / Produk Terdeteksi</span>
-                    <h3 class="text-base font-bold text-white" id="res-product-name">-</h3>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <div class="text-right">
-                      <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Compliance Score</span>
-                      <div class="text-xl font-extrabold" id="res-score-text">0/100</div>
-                    </div>
-                    <div id="res-score-badge" class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm bg-slate-800 border">
-                      0%
-                    </div>
-                  </div>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-                  <table class="w-full text-left text-xs border-collapse">
-                    <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
-                      <tr>
-                        <th class="p-3">Elemen Regulasi JDIH</th>
-                        <th class="p-3">Status</th>
-                        <th class="p-3">Detail Temuan</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-800/60">
-                      <tr>
-                        <td class="p-3 font-semibold text-slate-300">Nomor Izin Edar BPOM</td>
-                        <td class="p-3" id="res-bpom-status">-</td>
-                        <td class="p-3 text-slate-400 font-mono" id="res-bpom-val">-</td>
-                      </tr>
-                      <tr>
-                        <td class="p-3 font-semibold text-slate-300">Sertifikasi Halal Indonesia</td>
-                        <td class="p-3" id="res-halal-status">-</td>
-                        <td class="p-3 text-slate-400 font-mono" id="res-halal-val">-</td>
-                      </tr>
-                      <tr>
-                        <td class="p-3 font-semibold text-slate-300">Penjelasan Alergen (Bold)</td>
-                        <td class="p-3" id="res-allergen-status">-</td>
-                        <td class="p-3 text-slate-400">Pencetakan tebal pada bahan alergen</td>
-                      </tr>
-                      <tr>
-                        <td class="p-3 font-semibold text-slate-300">Informasi Nilai Gizi (ING)</td>
-                        <td class="p-3" id="res-ing-status">-</td>
-                        <td class="p-3 text-slate-400">Keberadaan tabel ING standar BPOM</td>
-                      </tr>
-                      <tr>
-                        <td class="p-3 font-semibold text-slate-300">Takaran Netto / Isi Bersih</td>
-                        <td class="p-3" id="res-netto-status">-</td>
-                        <td class="p-3 text-slate-400">Informasi berat/volume bersih produk</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
-                    <span class="text-xs font-bold text-rose-400 flex items-center gap-1.5">
-                      <i data-lucide="alert-triangle" class="w-4 h-4"></i> Klaim Berisiko / Melanggar JDIH
-                    </span>
-                    <ul id="res-risky-claims" class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                      <li class="text-slate-500">Tidak ada klaim berisiko.</li>
-                    </ul>
-                  </div>
-
-                  <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
-                    <span class="text-xs font-bold text-blue-400 flex items-center gap-1.5">
-                      <i data-lucide="file-check" class="w-4 h-4"></i> Catatan Rekomendasi Legal
-                    </span>
-                    <p id="res-recommendations" class="text-xs text-slate-300 leading-relaxed">-</p>
-                  </div>
-                </div>
-              </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </section>
 
-        <!-- 3. NPD PERMIT SCREENER TAB (SIMPLE & CLEAN WITH TABLE) -->
+        <!-- NPD PERMIT SCREENER TAB -->
         <section id="view-npd-screener" class="hidden space-y-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
             <div>
@@ -376,7 +245,6 @@
             </button>
           </div>
 
-          <!-- TABEL KUMPULAN PRODUK TERDAFTAR -->
           <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs text-slate-300 border-collapse">
@@ -405,7 +273,7 @@
           </div>
         </section>
 
-        <!-- 4. AUDIT TRAIL LOG TAB -->
+        <!-- AUDIT TRAIL LOG TAB -->
         <section id="view-audit-trail" class="hidden space-y-4">
           <div class="flex justify-between items-center">
             <div>
@@ -441,7 +309,116 @@
 
   </div>
 
-  <!-- MODAL POP-UP FORM SKRINING PRODUK BARU -->
+  <!-- MODAL POP-UP ARTWORK PRE-SCREENING -->
+  <div id="artwork-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20">
+            <i data-lucide="scan-line" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Audit Artwork & Advertising Compliance</h3>
+            <p class="text-xs text-slate-400">Masukkan metadata & unggah file desain untuk mulai pemeriksaan.</p>
+          </div>
+        </div>
+        <button onclick="closeArtworkModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <!-- Judul -->
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Judul / Nama Produk <span class="text-rose-400">*</span></label>
+          <input type="text" id="artwork-title-input" required placeholder="Contoh: Susu Steril FitMax 250ml"
+                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+        </div>
+
+        <!-- Versi Desain -->
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Versi Desain</label>
+          <input type="text" id="artwork-version-input" placeholder="Contoh: v1.2 / Final-Rev3"
+                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+        </div>
+
+        <!-- Tipe Materi -->
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tipe Materi <span class="text-rose-400">*</span></label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="material_type" value="Kemasan" checked class="peer hidden">
+              <div class="p-2 text-center rounded-lg border border-slate-800 bg-slate-950 peer-checked:border-purple-500 peer-checked:bg-purple-600/10 peer-checked:text-purple-400 text-xs font-medium">
+                Cek Kemasan
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="material_type" value="Materi Iklan" class="peer hidden">
+              <div class="p-2 text-center rounded-lg border border-slate-800 bg-slate-950 peer-checked:border-purple-500 peer-checked:bg-purple-600/10 peer-checked:text-purple-400 text-xs font-medium">
+                Materi Iklan
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Kategori Komoditi BPOM -->
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Kategori Komoditi (JDIH BPOM) <span class="text-rose-400">*</span></label>
+          <select id="artwork-category-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500 cursor-pointer">
+            <option value="Pangan Olahan">Pangan Olahan</option>
+            <option value="Suplemen Kesehatan">Suplemen Kesehatan</option>
+            <option value="Obat Bahan Alam">Obat Bahan Alam (Obat Tradisional/Herbal)</option>
+            <option value="Obat Kuasi">Obat Kuasi</option>
+            <option value="Kosmetik">Kosmetik</option>
+          </select>
+        </div>
+
+        <!-- Pilihan Source File/Webpage -->
+        <div class="space-y-2 pt-2">
+          <label class="block text-[11px] font-semibold text-slate-400">Pilihan Berkas / Webpage <span class="text-rose-400">*</span></label>
+          <div class="flex gap-2">
+            <button type="button" onclick="setArtworkSourceMode('file')" id="btn-mode-file" class="flex-1 py-1.5 rounded-lg border border-purple-500 bg-purple-600/20 text-purple-400 text-xs font-semibold">
+              File Gambar (JPG/PNG)
+            </button>
+            <button type="button" onclick="setArtworkSourceMode('webpage')" id="btn-mode-webpage" class="flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold">
+              Webpage URL
+            </button>
+          </div>
+
+          <div id="container-file-upload" class="space-y-2">
+            <div onclick="document.getElementById('artwork-input').click()" 
+                 class="border-2 border-dashed border-slate-700 hover:border-purple-500 rounded-xl p-4 text-center cursor-pointer transition bg-slate-950/50 flex flex-col items-center justify-center">
+              <input type="file" id="artwork-input" accept="image/png,image/jpeg,image/jpg" onchange="handleArtworkUpload(event)" class="hidden">
+              <i data-lucide="image" class="w-7 h-7 text-purple-400 mb-1"></i>
+              <p class="text-xs font-semibold text-slate-200">Choose File (JPG / PNG)</p>
+            </div>
+            <p id="file-name-display" class="text-[10px] text-slate-500 truncate text-center"></p>
+          </div>
+
+          <div id="container-webpage-url" class="hidden space-y-2">
+            <input type="url" id="artwork-webpage-input" placeholder="https://domain-produk.com/iklan"
+                   class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+          </div>
+
+          <div id="artwork-preview-container" class="hidden space-y-2">
+            <img id="artwork-preview-img" class="w-full max-h-40 object-contain rounded-lg bg-slate-950 border border-slate-800" alt="Preview">
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-end gap-3">
+        <button onclick="closeArtworkModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
+          Batal
+        </button>
+        <button id="btn-analyze-artwork" onclick="analyzeArtwork()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+          <i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL POP-UP NPD SCREENER -->
   <div id="npd-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       
@@ -461,14 +438,12 @@
       </div>
 
       <div class="p-6 overflow-y-auto space-y-4 flex-1">
-        <!-- Nama / Ide Produk -->
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Nama / Ide Produk <span class="text-rose-400">*</span></label>
           <input type="text" id="npd-product-name" required placeholder="Contoh: Collagen Drink Stroberi 250ml"
                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
         </div>
 
-        <!-- Kategori Komoditi BPOM -->
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Kategori Komoditi (JDIH BPOM) <span class="text-rose-400">*</span></label>
           <select id="npd-category-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer">
@@ -480,7 +455,6 @@
           </select>
         </div>
 
-        <!-- Rencana Klaim -->
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Klaim yang Direncanakan</label>
           <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
@@ -511,14 +485,12 @@
           </div>
         </div>
 
-        <!-- Bahan Utama -->
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Bahan Utama (Key Ingredients)</label>
           <input type="text" id="npd-ingredients-input" placeholder="Contoh: Marine Collagen 5000mg, Stevia..."
                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
         </div>
 
-        <!-- Skema Produksi -->
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Skema Produksi <span class="text-rose-400">*</span></label>
           <select id="npd-scheme-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer">
@@ -528,7 +500,6 @@
           </select>
         </div>
 
-        <!-- Negara Asal -->
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Negara Asal <span class="text-rose-400">*</span></label>
           <div class="flex gap-4 text-xs text-slate-300 mb-2">
@@ -543,7 +514,6 @@
                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 hidden">
         </div>
 
-        <!-- Kanal Penjualan -->
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Kanal Penjualan (Sales Channels)</label>
           <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
@@ -641,6 +611,154 @@
 
     function esc(v) {
       return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    // ==========================================
+    // ARTWORK PRE-SCREENING MODAL & TABLE
+    // ==========================================
+    function openArtworkModal() {
+      document.getElementById('artwork-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeArtworkModal() {
+      document.getElementById('artwork-modal').classList.add('hidden');
+    }
+
+    function setArtworkSourceMode(mode) {
+      artworkSourceMode = mode;
+      const btnFile = document.getElementById('btn-mode-file');
+      const btnWeb = document.getElementById('btn-mode-webpage');
+      const containerFile = document.getElementById('container-file-upload');
+      const containerWeb = document.getElementById('container-webpage-url');
+
+      if (mode === 'file') {
+        btnFile.className = "flex-1 py-1.5 rounded-lg border border-purple-500 bg-purple-600/20 text-purple-400 text-xs font-semibold";
+        btnWeb.className = "flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold";
+        containerFile.classList.remove('hidden');
+        containerWeb.classList.add('hidden');
+      } else {
+        btnWeb.className = "flex-1 py-1.5 rounded-lg border border-purple-500 bg-purple-600/20 text-purple-400 text-xs font-semibold";
+        btnFile.className = "flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold";
+        containerWeb.classList.remove('hidden');
+        containerFile.classList.add('hidden');
+      }
+    }
+
+    function handleArtworkUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      selectedFileName = file.name;
+      selectedMimeType = file.type || "image/png";
+      document.getElementById('file-name-display').innerText = file.name;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const fullBase64 = e.target.result;
+        selectedArtworkBase64 = fullBase64.split(",")[1];
+        document.getElementById("artwork-preview-img").src = fullBase64;
+        document.getElementById("artwork-preview-container").classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function loadArtworkTable() {
+      const tbody = document.getElementById('table-artwork-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-purple-400 inline mr-2"></i> Memuat data artwork...</td></tr>`;
+      lucide.createIcons();
+
+      const { data: list, error } = await supabaseClient
+        .from('artwork_prescreenings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error || !list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat audit artwork. Klik "+ Periksa Artwork Baru".</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(item => `
+        <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+          <td class="px-4 py-3 font-semibold text-slate-100">${esc(item.title || item.product_name)}</td>
+          <td class="px-4 py-3 text-slate-400 font-mono">${esc(item.design_version || 'v1')}</td>
+          <td class="px-4 py-3 text-slate-300 font-medium">${esc(item.material_type || 'Kemasan')}</td>
+          <td class="px-4 py-3 text-slate-300">${esc(item.category || '-')}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 ${item.bpom_status === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded font-bold text-[10px]">
+              ${esc(item.bpom_status || 'Pending')}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 ${item.halal_status === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'} border rounded font-bold text-[10px]">
+              ${esc(item.halal_status || 'Pending')}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-center font-bold text-slate-200">${item.compliance_score || 0}/100</td>
+          <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${new Date(item.created_at).toLocaleDateString('id-ID')}</td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    async function analyzeArtwork() {
+      const title = document.getElementById('artwork-title-input').value.trim();
+      const designVersion = document.getElementById('artwork-version-input').value.trim();
+      const materialType = document.querySelector('input[name="material_type"]:checked').value;
+      const category = document.getElementById('artwork-category-select').value;
+      const webpageUrl = document.getElementById('artwork-webpage-input').value.trim();
+
+      if (!title) {
+        alert('Mohon isi Judul / Nama Produk terlebih dahulu!');
+        return;
+      }
+
+      if (artworkSourceMode === 'file' && !selectedArtworkBase64) {
+        alert('Mohon pilih file gambar (JPG/PNG) terlebih dahulu!');
+        return;
+      }
+
+      if (artworkSourceMode === 'webpage' && !webpageUrl) {
+        alert('Mohon masukkan URL Webpage terlebih dahulu!');
+        return;
+      }
+
+      const btn = document.getElementById("btn-analyze-artwork");
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa via Gemini...`;
+      lucide.createIcons();
+
+      try {
+        const payload = {
+          title,
+          designVersion,
+          materialType,
+          category,
+          imageBase64: artworkSourceMode === 'file' ? selectedArtworkBase64 : null,
+          mimeType: artworkSourceMode === 'file' ? selectedMimeType : null,
+          fileName: artworkSourceMode === 'file' ? selectedFileName : null,
+          webpageUrl: artworkSourceMode === 'webpage' ? webpageUrl : null
+        };
+
+        const { data, error } = await supabaseClient.functions.invoke("Scan-artwork", { body: payload });
+
+        if (error || (data && data.error)) {
+          alert("Gagal menganalisis compliance: " + (error?.message || data?.error));
+          btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
+          lucide.createIcons();
+          return;
+        }
+
+        logAuditAction(currentUserSession.username, 'PERIKSA_ARTWORK', 'artwork_prescreenings', data.saved_id);
+        closeArtworkModal();
+        alert('Pemeriksaan selesai! Data telah ditambahkan ke tabel riwayat audit.');
+        loadArtworkTable();
+
+      } catch (err) {
+        alert("Terjadi kesalahan sistem: " + err.message);
+      }
+
+      btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
+      lucide.createIcons();
     }
 
     // ==========================================
@@ -787,144 +905,6 @@
       }
 
       btn.innerHTML = `<i data-lucide="file-search" class="w-4 h-4"></i> Lihat Izin Yang Diperlukan`;
-      lucide.createIcons();
-    }
-
-    // ==========================================
-    // ARTWORK PRE-SCREENING FUNCTIONS
-    // ==========================================
-    function setArtworkSourceMode(mode) {
-      artworkSourceMode = mode;
-      const btnFile = document.getElementById('btn-mode-file');
-      const btnWeb = document.getElementById('btn-mode-webpage');
-      const containerFile = document.getElementById('container-file-upload');
-      const containerWeb = document.getElementById('container-webpage-url');
-
-      if (mode === 'file') {
-        btnFile.className = "flex-1 py-1.5 rounded-lg border border-blue-500 bg-blue-600/20 text-blue-400 text-xs font-semibold";
-        btnWeb.className = "flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold";
-        containerFile.classList.remove('hidden');
-        containerWeb.classList.add('hidden');
-      } else {
-        btnWeb.className = "flex-1 py-1.5 rounded-lg border border-blue-500 bg-blue-600/20 text-blue-400 text-xs font-semibold";
-        btnFile.className = "flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold";
-        containerWeb.classList.remove('hidden');
-        containerFile.classList.add('hidden');
-      }
-    }
-
-    function handleArtworkUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      selectedFileName = file.name;
-      selectedMimeType = file.type || "image/png";
-      document.getElementById('file-name-display').innerText = file.name;
-
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const fullBase64 = e.target.result;
-        selectedArtworkBase64 = fullBase64.split(",")[1];
-        document.getElementById("artwork-preview-img").src = fullBase64;
-        document.getElementById("artwork-preview-container").classList.remove("hidden");
-      };
-      reader.readAsDataURL(file);
-    }
-
-    async function analyzeArtwork() {
-      const title = document.getElementById('artwork-title-input').value.trim();
-      const designVersion = document.getElementById('artwork-version-input').value.trim();
-      const materialType = document.querySelector('input[name="material_type"]:checked').value;
-      const category = document.getElementById('artwork-category-select').value;
-      const webpageUrl = document.getElementById('artwork-webpage-input').value.trim();
-
-      if (!title) {
-        alert('Mohon isi Judul / Nama Produk terlebih dahulu!');
-        return;
-      }
-
-      if (artworkSourceMode === 'file' && !selectedArtworkBase64) {
-        alert('Mohon pilih file gambar (JPG/PNG) terlebih dahulu!');
-        return;
-      }
-
-      if (artworkSourceMode === 'webpage' && !webpageUrl) {
-        alert('Mohon masukkan URL Webpage terlebih dahulu!');
-        return;
-      }
-
-      const btn = document.getElementById("btn-analyze-artwork");
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa via Gemini 3.8...`;
-      lucide.createIcons();
-
-      try {
-        const payload = {
-          title,
-          designVersion,
-          materialType,
-          category,
-          imageBase64: artworkSourceMode === 'file' ? selectedArtworkBase64 : null,
-          mimeType: artworkSourceMode === 'file' ? selectedMimeType : null,
-          fileName: artworkSourceMode === 'file' ? selectedFileName : null,
-          webpageUrl: artworkSourceMode === 'webpage' ? webpageUrl : null
-        };
-
-        const { data, error } = await supabaseClient.functions.invoke("Scan-artwork", { body: payload });
-
-        if (error || (data && data.error)) {
-          alert("Gagal menganalisis compliance: " + (error?.message || data?.error));
-          btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
-          lucide.createIcons();
-          return;
-        }
-
-        const res = data.data;
-
-        document.getElementById("artwork-result-empty").classList.add("hidden");
-        document.getElementById("artwork-result-content").classList.remove("hidden");
-
-        document.getElementById("res-product-name").innerText = res.product_name || title;
-        document.getElementById("res-score-text").innerText = `${res.compliance_score}/100`;
-
-        const badge = document.getElementById("res-score-badge");
-        badge.innerText = `${res.compliance_score}%`;
-        if (res.compliance_score >= 80) {
-          badge.className = "w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
-        } else if (res.compliance_score >= 50) {
-          badge.className = "w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm bg-amber-500/10 text-amber-400 border border-amber-500/30";
-        } else {
-          badge.className = "w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm bg-rose-500/10 text-rose-400 border border-rose-500/30";
-        }
-
-        document.getElementById("res-bpom-status").innerHTML = res.nie_bpom_status === "Compliant" 
-          ? `<span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-bold">Compliant</span>`
-          : `<span class="px-2 py-0.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded font-bold">Non-Compliant</span>`;
-        document.getElementById("res-bpom-val").innerText = res.nie_bpom_value;
-
-        document.getElementById("res-halal-status").innerHTML = res.halal_status === "Compliant"
-          ? `<span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-bold">Compliant</span>`
-          : `<span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded font-bold">${res.halal_status}</span>`;
-        document.getElementById("res-halal-val").innerText = res.halal_cert_id;
-
-        document.getElementById("res-allergen-status").innerHTML = res.allergen_check ? "🟢 Sesuai" : "🔴 Tidak Ada/Belum Bold";
-        document.getElementById("res-ing-status").innerHTML = res.ing_table_check ? "🟢 Ada Tabel ING" : "🔴 Tidak Ada ING";
-        document.getElementById("res-netto-status").innerHTML = res.netto_check ? "🟢 Ada Netto" : "🔴 Netto Hilang";
-
-        const claimsList = document.getElementById("res-risky-claims");
-        if (res.risky_claims && res.risky_claims.length > 0) {
-          claimsList.innerHTML = res.risky_claims.map(c => `<li class="text-rose-300">${esc(c)}</li>`).join("");
-        } else {
-          claimsList.innerHTML = `<li class="text-slate-500">Tidak ada klaim berisiko terdeteksi.</li>`;
-        }
-
-        document.getElementById("res-recommendations").innerText = res.recommendations || "-";
-
-        logAuditAction(currentUserSession.username, 'PERIKSA_ARTWORK', 'artwork_prescreenings', data.saved_id);
-      } catch (err) {
-        alert("Terjadi kesalahan sistem: " + err.message);
-      }
-
-      btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
       lucide.createIcons();
     }
 
@@ -1227,6 +1207,7 @@
         document.getElementById('view-artwork-prescreening').classList.remove('hidden');
         document.getElementById('nav-artwork-prescreening').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-purple-400 text-sm font-medium transition";
         document.getElementById('page-title').innerText = "Artwork & Advertising Pre-Screening";
+        loadArtworkTable();
       } else if (tabName === 'npd-screener') {
         document.getElementById('view-npd-screener').classList.remove('hidden');
         document.getElementById('nav-npd-screener').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-emerald-400 text-sm font-medium transition";
