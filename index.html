@@ -91,6 +91,9 @@
           <button onclick="switchTab('npd-screener')" id="nav-npd-screener" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
             <i data-lucide="flask-conical" class="w-4 h-4"></i> NPD Permit Screener
           </button>
+          <button onclick="switchTab('tickets-module')" id="nav-tickets-module" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+            <i data-lucide="ticket" class="w-4 h-4"></i> Compliance Tickets
+          </button>
           <button onclick="switchTab('audit-trail')" id="nav-audit-trail" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
             <i data-lucide="history" class="w-4 h-4"></i> Audit Trail Log
           </button>
@@ -230,7 +233,7 @@
               <h2 class="text-lg font-bold text-white flex items-center gap-2">
                 <i data-lucide="flask-conical" class="w-5 h-5 text-emerald-400"></i> NPD Regulatory Feasibility Screener
               </h2>
-              <p class="text-xs text-slate-400 mt-1">Lakukan skrining singkat regulasi <span class="text-emerald-400 underline">jdih.pom.go.id</span> untuk menentukan kecocokan izin edar BPOM pada ide produk baru.</p>
+              <p class="text-xs text-slate-400 mt-1">Lakukan skrining awal regulasi BPOM. Jika produk <span class="text-emerald-400 font-bold">Lolos</span>, buat tiket untuk verifikasi mendalam tim Legal.</p>
             </div>
 
             <button onclick="openNpdModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
@@ -245,10 +248,10 @@
                   <tr>
                     <th class="px-4 py-3.5 font-bold min-w-[180px]">Ide Produk</th>
                     <th class="px-4 py-3.5 font-bold min-w-[140px]">Kategori</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[130px]">Izin Cocok</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[160px]">Status Review</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[120px]">Kecocokan BPOM</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[140px]">Kelayakan Regulasi</th>
                     <th class="px-4 py-3.5 font-bold min-w-[120px]">Tanggal</th>
-                    <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
+                    <th class="px-4 py-3.5 font-bold text-center min-w-[180px]">Aksi Integrasi</th>
                   </tr>
                 </thead>
                 <tbody id="table-npd-body" class="divide-y divide-slate-800/60">
@@ -257,6 +260,51 @@
                       <div class="flex flex-col items-center justify-center gap-2">
                         <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400"></i>
                         <span>Memuat daftar skrining produk...</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- COMPLIANCE TICKETS TAB -->
+        <section id="view-tickets-module" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <i data-lucide="ticket" class="w-5 h-5 text-amber-400"></i> Compliance & Legal Request Ticketing
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">Daftar tiket permintaan verifikasi legalitas produk NPD, review dokumen, dan perizinan BPOM.</p>
+            </div>
+
+            <button onclick="openCreateTicketModal()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-amber-600/20">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Buat Tiket Manual
+            </button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                  <tr>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">No. Tiket</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[200px]">Judul Permintaan</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[130px]">Kategori</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Prioritas</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Pengaju</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Status</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Tanggal</th>
+                    <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="table-tickets-body" class="divide-y divide-slate-800/60">
+                  <tr>
+                    <td colspan="8" class="px-4 py-10 text-center text-slate-500">
+                      <div class="flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-amber-400"></i>
+                        <span>Memuat data tiket compliance...</span>
                       </div>
                     </td>
                   </tr>
@@ -302,10 +350,132 @@
 
   </div>
 
-  <!-- MODAL POP-UP ARTWORK PRE-SCREENING -->
+  <!-- MODAL CREATE TICKET -->
+  <div id="ticket-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20">
+            <i data-lucide="ticket" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Buat Tiket Verification Legal</h3>
+            <p class="text-xs text-slate-400">Ajukan perizinan BPOM atau konsultasi legalitas produk.</p>
+          </div>
+        </div>
+        <button onclick="closeCreateTicketModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <input type="hidden" id="ticket-npd-id-hidden">
+        
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Judul Permintaan Tiket <span class="text-rose-400">*</span></label>
+          <input type="text" id="ticket-title-input" required placeholder="Contoh: Verifikasi Legalitas BPOM untuk Produk X"
+                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Kategori Tiket <span class="text-rose-400">*</span></label>
+            <select id="ticket-category-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 cursor-pointer">
+              <option value="Verifikasi NPD BPOM">Verifikasi NPD BPOM</option>
+              <option value="Review Kontrak Vendor">Review Kontrak Vendor</option>
+              <option value="Approval Artwork">Approval Artwork Kemasan</option>
+              <option value="Konsultasi Regulasi">Konsultasi Regulasi</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Prioritas <span class="text-rose-400">*</span></label>
+            <select id="ticket-priority-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 cursor-pointer">
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Deskripsi Permintaan <span class="text-rose-400">*</span></label>
+          <textarea id="ticket-description-input" rows="4" placeholder="Jelaskan kebutuhan verifikasi legalitas secara rinci..."
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500"></textarea>
+        </div>
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-end gap-3">
+        <button onclick="closeCreateTicketModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
+          Batal
+        </button>
+        <button id="btn-save-ticket" onclick="submitNewTicket()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+          <i data-lucide="send" class="w-4 h-4"></i> Kirim Tiket Permintaan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL & COMMENT TICKET -->
+  <div id="ticket-detail-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2.5">
+          <span id="detail-ticket-number" class="px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded font-mono font-bold text-xs">TKT-001</span>
+          <h3 id="detail-ticket-title" class="text-sm font-bold text-white truncate max-w-md">Judul Tiket</h3>
+        </div>
+        <button onclick="closeTicketDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <span id="detail-ticket-author" class="font-bold text-slate-200">Pengaju</span>
+            <span id="detail-ticket-status" class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[10px] font-bold">Open</span>
+          </div>
+          <p id="detail-ticket-description" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap"></p>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="message-square" class="w-4 h-4"></i> Diskusi & Catatan Legal
+          </h4>
+          <div id="comments-thread-container" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+            <p class="text-xs text-slate-500 text-center py-4">Memuat diskusi...</p>
+          </div>
+
+          <div class="flex gap-2 pt-2">
+            <input type="text" id="ticket-comment-input" placeholder="Tulis catatan/balasan..."
+                   class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+            <button onclick="postTicketComment()" class="bg-amber-600 hover:bg-amber-500 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i> Kirim
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-between items-center">
+        <div class="flex items-center gap-2 text-xs">
+          <span class="text-slate-400">Ubah Status:</span>
+          <select id="update-ticket-status-select" onchange="updateTicketStatusFromModal()" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-200 font-semibold text-xs">
+            <option value="Open">Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+        <button onclick="closeTicketDetailModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-1.5 rounded-lg text-xs font-semibold">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ARTWORK & MODAL NPD SCRIPT LENGKAP -->
   <div id="artwork-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
         <div class="flex items-center gap-2.5">
           <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20">
@@ -327,13 +497,11 @@
           <input type="text" id="artwork-title-input" required placeholder="Contoh: Susu Steril FitMax 250ml"
                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
         </div>
-
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Versi Desain</label>
           <input type="text" id="artwork-version-input" placeholder="Contoh: v1.2 / Final-Rev3"
                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
         </div>
-
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tipe Materi <span class="text-rose-400">*</span></label>
           <div class="grid grid-cols-2 gap-2">
@@ -351,7 +519,6 @@
             </label>
           </div>
         </div>
-
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Kategori Komoditi (JDIH BPOM) <span class="text-rose-400">*</span></label>
           <select id="artwork-category-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500 cursor-pointer">
@@ -373,7 +540,6 @@
               Webpage URL
             </button>
           </div>
-
           <div id="container-file-upload" class="space-y-2">
             <div onclick="document.getElementById('artwork-input').click()" 
                  class="border-2 border-dashed border-slate-700 hover:border-purple-500 rounded-xl p-4 text-center cursor-pointer transition bg-slate-950/50 flex flex-col items-center justify-center">
@@ -383,12 +549,10 @@
             </div>
             <p id="file-name-display" class="text-[10px] text-slate-500 truncate text-center"></p>
           </div>
-
           <div id="container-webpage-url" class="hidden space-y-2">
             <input type="url" id="artwork-webpage-input" placeholder="https://domain-produk.com/iklan"
                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
           </div>
-
           <div id="artwork-preview-container" class="hidden space-y-2">
             <img id="artwork-preview-img" class="w-full max-h-40 object-contain rounded-lg bg-slate-950 border border-slate-800" alt="Preview">
           </div>
@@ -409,7 +573,6 @@
   <!-- MODAL POP-UP NPD SCREENER -->
   <div id="npd-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
         <div class="flex items-center gap-2.5">
           <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
@@ -431,7 +594,6 @@
           <input type="text" id="npd-product-name" required placeholder="Contoh: Collagen Drink Stroberi 250ml"
                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
         </div>
-
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Kategori Komoditi (JDIH BPOM) <span class="text-rose-400">*</span></label>
           <select id="npd-category-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer">
@@ -442,7 +604,6 @@
             <option value="Kosmetik">Kosmetik</option>
           </select>
         </div>
-
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Klaim yang Direncanakan</label>
           <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
@@ -462,23 +623,13 @@
               <input type="checkbox" name="npd_claim" value="Alami / Organik" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
               <span>Alami / Organik</span>
             </label>
-            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
-              <input type="checkbox" name="npd_claim" value="Perbandingan Produk" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
-              <span>Perbandingan Produk</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
-              <input type="checkbox" name="npd_claim" value="Tidak Ada Klaim Khusus" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
-              <span class="text-slate-400">Tanpa Klaim Khusus</span>
-            </label>
           </div>
         </div>
-
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Bahan Utama (Key Ingredients)</label>
           <input type="text" id="npd-ingredients-input" placeholder="Contoh: Marine Collagen 5000mg, Stevia..."
                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
         </div>
-
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Skema Produksi <span class="text-rose-400">*</span></label>
           <select id="npd-scheme-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer">
@@ -487,7 +638,6 @@
             <option value="Impor dalam Bentuk Jadi">Impor dalam Bentuk Jadi</option>
           </select>
         </div>
-
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Negara Asal <span class="text-rose-400">*</span></label>
           <div class="flex gap-4 text-xs text-slate-300 mb-2">
@@ -501,28 +651,6 @@
           <input type="text" id="npd-foreign-country-input" placeholder="Sebutkan Nama Negara..."
                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 hidden">
         </div>
-
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Kanal Penjualan (Sales Channels)</label>
-          <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
-            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
-              <input type="checkbox" name="npd_channel" value="Toko Fisik / Ritel" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
-              <span>Toko Fisik / Ritel</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
-              <input type="checkbox" name="npd_channel" value="Marketplace / E-Commerce" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
-              <span>E-Commerce</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
-              <input type="checkbox" name="npd_channel" value="Website / Medsos" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
-              <span>Website / Medsos</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
-              <input type="checkbox" name="npd_channel" value="Ekspor / B2B" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
-              <span>Ekspor / B2B</span>
-            </label>
-          </div>
-        </div>
       </div>
 
       <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-end gap-3">
@@ -530,50 +658,7 @@
           Batal
         </button>
         <button id="btn-screen-npd" onclick="analyzeNpdPermit()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
-          <i data-lucide="file-search" class="w-4 h-4"></i> Lihat Izin Yang Diperlukan
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- FLOATING BAR FOR COMPARISON -->
-  <div id="compare-floating-bar" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur border border-blue-500/30 px-6 py-3 rounded-2xl shadow-2xl z-40 hidden flex items-center gap-4">
-    <div class="flex items-center gap-2">
-      <span class="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span>
-      <span id="compare-count" class="text-xs font-semibold text-slate-200">0 Vendor Dipilih</span>
-    </div>
-    <div class="h-4 w-px bg-slate-700"></div>
-    <button onclick="openCompareModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-lg shadow-blue-600/20">
-      <i data-lucide="columns-2" class="w-3.5 h-3.5"></i> Bandingkan Vendor
-    </button>
-    <button onclick="clearCompareSelection()" class="text-slate-400 hover:text-rose-400 p-1">
-      <i data-lucide="x-circle" class="w-4 h-4"></i>
-    </button>
-  </div>
-
-  <!-- MODAL COMPARE SIDE-BY-SIDE -->
-  <div id="compare-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-6xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
-        <div class="flex items-center gap-2.5">
-          <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/20">
-            <i data-lucide="columns-2" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-white">Komparasi Klausul Perjanjian Vendor</h3>
-            <p class="text-xs text-slate-400">Analisis perbandingan klausul hukum secara berdampingan.</p>
-          </div>
-        </div>
-        <button onclick="closeCompareModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="p-6 overflow-y-auto overflow-x-auto flex-1" id="compare-modal-content"></div>
-
-      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-end">
-        <button onclick="closeCompareModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
-          Tutup
+          <i data-lucide="file-search" class="w-4 h-4"></i> Jalankan Skrining BPOM
         </button>
       </div>
     </div>
@@ -586,14 +671,8 @@
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let currentUserSession = null;
-    let selectedContractIds = [];
-    let cachedContractsList = [];
-
-    // State Artwork
-    let artworkSourceMode = 'file';
-    let selectedArtworkBase64 = "";
-    let selectedMimeType = "image/png";
-    let selectedFileName = "";
+    let currentActiveTicketId = null;
+    let cachedNpdList = [];
 
     lucide.createIcons();
 
@@ -602,157 +681,18 @@
     }
 
     // ==========================================
-    // ARTWORK PRE-SCREENING MODAL & TABLE
+    // NPD SCREENER LOGIC (RE-SCREEN & TICKET)
     // ==========================================
-    function openArtworkModal() {
-      document.getElementById('artwork-modal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeArtworkModal() {
-      document.getElementById('artwork-modal').classList.add('hidden');
-    }
-
-    function setArtworkSourceMode(mode) {
-      artworkSourceMode = mode;
-      const btnFile = document.getElementById('btn-mode-file');
-      const btnWeb = document.getElementById('btn-mode-webpage');
-      const containerFile = document.getElementById('container-file-upload');
-      const containerWeb = document.getElementById('container-webpage-url');
-
-      if (mode === 'file') {
-        btnFile.className = "flex-1 py-1.5 rounded-lg border border-purple-500 bg-purple-600/20 text-purple-400 text-xs font-semibold";
-        btnWeb.className = "flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold";
-        containerFile.classList.remove('hidden');
-        containerWeb.classList.add('hidden');
+    function openNpdModal(existingItem = null) {
+      if (existingItem) {
+        document.getElementById('npd-product-name').value = existingItem.product_idea_name || '';
+        document.getElementById('npd-category-select').value = existingItem.category || 'Pangan Olahan';
+        document.getElementById('npd-ingredients-input').value = existingItem.main_ingredients || '';
+        document.getElementById('npd-scheme-select').value = existingItem.production_scheme || 'Pabrik Sendiri';
       } else {
-        btnWeb.className = "flex-1 py-1.5 rounded-lg border border-purple-500 bg-purple-600/20 text-purple-400 text-xs font-semibold";
-        btnFile.className = "flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold";
-        containerWeb.classList.remove('hidden');
-        containerFile.classList.add('hidden');
+        document.getElementById('npd-product-name').value = '';
+        document.getElementById('npd-ingredients-input').value = '';
       }
-    }
-
-    function handleArtworkUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      selectedFileName = file.name;
-      selectedMimeType = file.type || "image/png";
-      document.getElementById('file-name-display').innerText = file.name;
-
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const fullBase64 = e.target.result;
-        selectedArtworkBase64 = fullBase64.split(",")[1];
-        document.getElementById("artwork-preview-img").src = fullBase64;
-        document.getElementById("artwork-preview-container").classList.remove("hidden");
-      };
-      reader.readAsDataURL(file);
-    }
-
-    async function loadArtworkTable() {
-      const tbody = document.getElementById('table-artwork-body');
-      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-purple-400 inline mr-2"></i> Memuat data artwork...</td></tr>`;
-      lucide.createIcons();
-
-      const { data: list, error } = await supabaseClient
-        .from('artwork_prescreenings')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error || !list || list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat audit artwork. Klik "+ Periksa Artwork Baru".</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = list.map(item => `
-        <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
-          <td class="px-4 py-3 font-semibold text-slate-100">${esc(item.title || item.product_name)}</td>
-          <td class="px-4 py-3 text-slate-400 font-mono">${esc(item.design_version || 'v1')}</td>
-          <td class="px-4 py-3 text-slate-300 font-medium">${esc(item.material_type || 'Kemasan')}</td>
-          <td class="px-4 py-3 text-slate-300">${esc(item.category || '-')}</td>
-          <td class="px-4 py-3">
-            <span class="px-2 py-0.5 ${item.bpom_status === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded font-bold text-[10px]">
-              ${esc(item.bpom_status || 'Pending')}
-            </span>
-          </td>
-          <td class="px-4 py-3">
-            <span class="px-2 py-0.5 ${item.halal_status === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'} border rounded font-bold text-[10px]">
-              ${esc(item.halal_status || 'Pending')}
-            </span>
-          </td>
-          <td class="px-4 py-3 text-center font-bold text-slate-200">${item.compliance_score || 0}/100</td>
-          <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${new Date(item.created_at).toLocaleDateString('id-ID')}</td>
-        </tr>
-      `).join('');
-      lucide.createIcons();
-    }
-
-    async function analyzeArtwork() {
-      const title = document.getElementById('artwork-title-input').value.trim();
-      const designVersion = document.getElementById('artwork-version-input').value.trim();
-      const materialType = document.querySelector('input[name="material_type"]:checked').value;
-      const category = document.getElementById('artwork-category-select').value;
-      const webpageUrl = document.getElementById('artwork-webpage-input').value.trim();
-
-      if (!title) {
-        alert('Mohon isi Judul / Nama Produk terlebih dahulu!');
-        return;
-      }
-
-      if (artworkSourceMode === 'file' && !selectedArtworkBase64) {
-        alert('Mohon pilih file gambar (JPG/PNG) terlebih dahulu!');
-        return;
-      }
-
-      if (artworkSourceMode === 'webpage' && !webpageUrl) {
-        alert('Mohon masukkan URL Webpage terlebih dahulu!');
-        return;
-      }
-
-      const btn = document.getElementById("btn-analyze-artwork");
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa via Gemini...`;
-      lucide.createIcons();
-
-      try {
-        const payload = {
-          title,
-          designVersion,
-          materialType,
-          category,
-          imageBase64: artworkSourceMode === 'file' ? selectedArtworkBase64 : null,
-          mimeType: artworkSourceMode === 'file' ? selectedMimeType : null,
-          fileName: artworkSourceMode === 'file' ? selectedFileName : null,
-          webpageUrl: artworkSourceMode === 'webpage' ? webpageUrl : null
-        };
-
-        const { data, error } = await supabaseClient.functions.invoke("Scan-artwork", { body: payload });
-
-        if (error || (data && data.error)) {
-          alert("Gagal menganalisis compliance: " + (error?.message || data?.error));
-          btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
-          lucide.createIcons();
-          return;
-        }
-
-        logAuditAction(currentUserSession.username, 'PERIKSA_ARTWORK', 'artwork_prescreenings', data.saved_id);
-        closeArtworkModal();
-        alert('Pemeriksaan selesai! Data telah ditambahkan ke tabel riwayat audit.');
-        loadArtworkTable();
-
-      } catch (err) {
-        alert("Terjadi kesalahan sistem: " + err.message);
-      }
-
-      btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
-      lucide.createIcons();
-    }
-
-    // ==========================================
-    // NPD SCREENER & MODAL FUNCTIONS
-    // ==========================================
-    function openNpdModal() {
       document.getElementById('npd-modal').classList.remove('hidden');
       lucide.createIcons();
     }
@@ -788,8 +728,11 @@
         return;
       }
 
+      cachedNpdList = list;
+
       tbody.innerHTML = list.map(item => {
-        const isReviewed = item.review_status === 'Sudah Direview';
+        const score = item.feasibility_score || 0;
+        const isCompliant = score >= 70; // Skor >= 70 Dianggap Lolos BPOM
 
         return `
           <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
@@ -801,15 +744,21 @@
               </span>
             </td>
             <td class="px-4 py-3">
-              <span class="px-2.5 py-1 ${isReviewed ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'} border rounded-full text-[10px] font-bold">
-                ${esc(item.review_status || 'Menunggu Review Legal')}
+              <span class="px-2 py-0.5 ${isCompliant ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold">
+                ${isCompliant ? 'High Feasibility (Lolos BPOM)' : 'Risk / Barrier (Tidak Sesuai)'}
               </span>
             </td>
             <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${new Date(item.created_at).toLocaleDateString('id-ID')}</td>
             <td class="px-4 py-3 text-center">
-              <button onclick="toggleReviewStatus('${item.id}', '${item.review_status}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 text-[10px] font-semibold">
-                Ubah Status
-              </button>
+              ${isCompliant ? `
+                <button onclick="triggerTicketFromNpd('${item.id}')" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded font-bold text-[10px] shadow flex items-center gap-1 mx-auto">
+                  <i data-lucide="ticket" class="w-3 h-3"></i> Ajukan Tiket Legal
+                </button>
+              ` : `
+                <button onclick="rescreenNpdProduct('${item.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-rose-400 border border-rose-500/30 rounded font-bold text-[10px] flex items-center gap-1 mx-auto">
+                  <i data-lucide="refresh-cw" class="w-3 h-3"></i> Skrining Ulang
+                </button>
+              `}
             </td>
           </tr>
         `;
@@ -817,19 +766,30 @@
       lucide.createIcons();
     }
 
-    async function toggleReviewStatus(id, currentStatus) {
-      const nextStatus = currentStatus === 'Sudah Direview' ? 'Menunggu Review Legal' : 'Sudah Direview';
-      const { error } = await supabaseClient
-        .from('npd_permit_screenings')
-        .update({ review_status: nextStatus })
-        .eq('id', id);
-
-      if (error) {
-        alert('Gagal mengubah status review: ' + error.message);
-      } else {
-        logAuditAction(currentUserSession.username, 'UPDATE_NPD_STATUS', 'npd_permit_screenings', id);
-        loadNpdProductsTable();
+    function rescreenNpdProduct(npdId) {
+      const item = cachedNpdList.find(x => x.id === npdId);
+      if (item) {
+        openNpdModal(item);
       }
+    }
+
+    function triggerTicketFromNpd(npdId) {
+      const item = cachedNpdList.find(x => x.id === npdId);
+      if (!item) return;
+
+      document.getElementById('ticket-npd-id-hidden').value = item.id;
+      document.getElementById('ticket-title-input').value = `[Verifikasi Legal] - ${item.product_idea_name}`;
+      document.getElementById('ticket-category-select').value = 'Verifikasi NPD BPOM';
+      document.getElementById('ticket-priority-select').value = 'High';
+      document.getElementById('ticket-description-input').value = 
+        `Produk telah lolos skrining awal BPOM dengan kecocokan izin "${item.matched_permit_code}".\n` +
+        `Kategori: ${item.category}\n` +
+        `Bahan Utama: ${item.main_ingredients || '-'}\n` +
+        `Skema Produksi: ${item.production_scheme || '-'}\n\n` +
+        `Mohon tim Legal melakukan verifikasi dokumen dan legalitas izin edar lebih dalam.`;
+
+      document.getElementById('ticket-modal').classList.remove('hidden');
+      lucide.createIcons();
     }
 
     async function analyzeNpdPermit() {
@@ -850,9 +810,6 @@
       const foreignCountry = document.getElementById('npd-foreign-country-input').value.trim();
       const countryOrigin = isForeignRadio ? (foreignCountry || 'Luar Negeri') : 'Indonesia';
 
-      const channelBoxes = document.querySelectorAll('input[name="npd_channel"]:checked');
-      const salesChannels = Array.from(channelBoxes).map(cb => cb.value);
-
       const btn = document.getElementById('btn-screen-npd');
       btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menganalisis...`;
       lucide.createIcons();
@@ -865,7 +822,7 @@
           mainIngredients,
           productionScheme,
           countryOrigin,
-          salesChannels,
+          salesChannels: [],
           username: currentUserSession ? currentUserSession.username : 'guest'
         };
 
@@ -882,390 +839,252 @@
 
         if (!response.ok || result.error) {
           alert("Gagal melakukan skrining perizinan NPD: " + (result.error || "HTTP Error " + response.status));
-          btn.innerHTML = `<i data-lucide="file-search" class="w-4 h-4"></i> Lihat Izin Yang Diperlukan`;
+          btn.innerHTML = `<i data-lucide="file-search" class="w-4 h-4"></i> Jalankan Skrining BPOM`;
           lucide.createIcons();
           return;
         }
 
         logAuditAction(currentUserSession.username, 'NPD_PERMIT_SCREENING', 'npd_permit_screenings', result.saved_id);
         closeNpdModal();
-        alert('Skrining berhasil! Data produk telah ditambahkan ke tabel.');
+        alert('Skrining berhasil! Data kelayakan produk telah diperbarui.');
         loadNpdProductsTable();
 
       } catch (err) {
         alert("Terjadi kesalahan koneksi: " + err.message);
       }
 
-      btn.innerHTML = `<i data-lucide="file-search" class="w-4 h-4"></i> Lihat Izin Yang Diperlukan`;
+      btn.innerHTML = `<i data-lucide="file-search" class="w-4 h-4"></i> Jalankan Skrining BPOM`;
       lucide.createIcons();
     }
 
     // ==========================================
-    // VENDOR CONTRACT & UTILITY FUNCTIONS
+    // TICKETING SYSTEM FUNCTIONS
     // ==========================================
-    async function handleScanGoogleDriveEdge() {
-      const btnScan = document.getElementById('btn-scan-drive');
-      btnScan.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memindai Edge...`;
-      lucide.createIcons();
-
-      try {
-        let totalAdded = 0, totalFound = 0, remaining = 0, allErrors = [], failed = false;
-        const skip = [];
-
-        for (let i = 0; i < 40; i++) {
-          const { data, error } = await supabaseClient.functions.invoke('Scan-gdrive', { body: { skip } });
-
-          if (error) {
-            let detail = error.message;
-            try { const b = await error.context.json(); detail = b.error || b.message || JSON.stringify(b); } catch (e) {}
-            alert('Gagal mengeksekusi Edge Function:\n' + detail);
-            failed = true;
-            break;
-          }
-          if (data && data.error) {
-            alert('Error dari Edge Function:\n' + data.error);
-            failed = true;
-            break;
-          }
-
-          totalAdded += data.count || 0;
-          totalFound = data.total_found || 0;
-          remaining = data.remaining || 0;
-          if (data.errors && data.errors.length) allErrors = allErrors.concat(data.errors);
-          if (data.failed_ids && data.failed_ids.length) skip.push(...data.failed_ids);
-
-          btnScan.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memindai... (${totalAdded} selesai, sisa ${remaining})`;
-          lucide.createIcons();
-
-          if (!remaining) break;
-        }
-
-        if (!failed) {
-          logAuditAction(currentUserSession.username, 'SYNC_GOOGLE_DRIVE_EDGE', 'vendor_contracts', null);
-          let msg = `Pemindaian selesai.\n${totalAdded} dokumen diekstrak AI dari ${totalFound} berkas di folder.`;
-          if (remaining) msg += `\n${remaining} berkas belum diproses, tekan Scan lagi.`;
-          if (allErrors.length) msg += `\n\nGagal diproses:\n- ` + allErrors.join('\n- ');
-          alert(msg);
-          loadContracts();
-        }
-      } catch (err) {
-        alert('Terjadi kesalahan jaringan: ' + err.message);
-      }
-
-      btnScan.innerHTML = `<i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)`;
+    function openCreateTicketModal() {
+      document.getElementById('ticket-npd-id-hidden').value = '';
+      document.getElementById('ticket-title-input').value = '';
+      document.getElementById('ticket-description-input').value = '';
+      document.getElementById('ticket-modal').classList.remove('hidden');
       lucide.createIcons();
     }
 
-    async function loadContracts() {
-      const tbody = document.getElementById('table-contracts-body');
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="11" class="px-4 py-8 text-center text-slate-500">
-            <div class="flex flex-col items-center justify-center gap-2">
-              <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-blue-400"></i>
-              <span class="text-xs">Mengambil data dari Supabase...</span>
-            </div>
-          </td>
-        </tr>`;
+    function closeCreateTicketModal() {
+      document.getElementById('ticket-modal').classList.add('hidden');
+    }
+
+    async function loadTicketsTable() {
+      const tbody = document.getElementById('table-tickets-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-amber-400 inline mr-2"></i> Memuat data tiket...</td></tr>`;
       lucide.createIcons();
 
-      const { data: contracts, error } = await supabaseClient
-        .from('vendor_contracts')
+      const { data: tickets, error } = await supabaseClient
+        .from('tickets')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat data: ${error.message}</td></tr>`;
+      if (error || !tickets || tickets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada tiket compliance yang dibuat.</td></tr>`;
         return;
       }
 
-      if (!contracts || contracts.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="11" class="px-4 py-10 text-center text-slate-500">
-              <div class="flex flex-col items-center justify-center gap-2">
-                <i data-lucide="file-x" class="w-8 h-8 text-slate-600"></i>
-                <p class="text-xs">Belum ada data kontrak vendor.</p>
-                <p class="text-[11px] text-slate-600">Klik "Scan Google Drive (Edge)" untuk memindai berkas baru.</p>
-              </div>
-            </td>
-          </tr>`;
-        lucide.createIcons();
-        return;
-      }
-
-      cachedContractsList = contracts;
-
-      tbody.innerHTML = contracts.map(c => {
-        const isExpired = c.status !== 'Aktif';
-        const isChecked = selectedContractIds.includes(c.id) ? 'checked' : '';
-
-        return `
-        <tr class="hover:bg-slate-800/50 transition border-b border-slate-800/40 text-xs">
-          <td class="px-3.5 py-3 text-center">
-            <input type="checkbox" value="${c.id}" ${isChecked} onchange="toggleSelectContract('${c.id}')" class="contract-checkbox rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
-          </td>
-          <td class="px-4 py-3 font-semibold text-slate-100 whitespace-nowrap">
-            <div class="flex flex-col">
-              <span>${esc(c.vendor_name)}</span>
-              <span class="text-[10px] text-slate-500 font-mono">${esc(c.contract_number) || '-'}</span>
-            </div>
-          </td>
-          <td class="px-3.5 py-3 text-slate-200 font-medium whitespace-nowrap">
-            <span class="px-2 py-0.5 bg-purple-500/10 text-purple-300 border border-purple-500/20 rounded font-semibold text-[10px]">${esc(c.agreement_type) || '-'}</span>
-          </td>
-          <td class="px-3.5 py-3 text-slate-300 whitespace-nowrap">
-            <div class="flex flex-col text-[11px] font-mono">
-              <span class="text-slate-400">Mul: ${esc(c.effective_date) || '-'}</span>
-              <span class="${isExpired ? 'text-rose-400 font-bold' : 'text-emerald-400'}">Exp: ${esc(c.expiration_date) || '-'}</span>
-            </div>
-          </td>
-          <td class="px-3.5 py-3 whitespace-nowrap">
-            <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium text-[11px]">${esc(c.payment_terms) || '-'}</span>
-          </td>
-          <td class="px-3.5 py-3 text-slate-400 min-w-[180px] max-w-[220px]" title="${esc(c.late_penalty)}"><p class="line-clamp-2 leading-relaxed">${esc(c.late_penalty) || '-'}</p></td>
-          <td class="px-3.5 py-3 text-slate-400 min-w-[180px] max-w-[220px]" title="${esc(c.termination_clause)}"><p class="line-clamp-2 leading-relaxed">${esc(c.termination_clause) || '-'}</p></td>
-          <td class="px-3.5 py-3 text-slate-400 min-w-[160px] max-w-[200px]" title="${esc(c.confidentiality_clause)}"><p class="line-clamp-2 leading-relaxed">${esc(c.confidentiality_clause) || '-'}</p></td>
-          <td class="px-3.5 py-3 text-slate-300 whitespace-nowrap"><span class="text-[11px]">${esc(c.governing_law) || '-'}</span></td>
-          <td class="px-3.5 py-3 whitespace-nowrap">
-            <span class="px-2.5 py-1 ${c.status === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold inline-flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full ${c.status === 'Aktif' ? 'bg-emerald-400' : 'bg-rose-400'}"></span>
-              ${esc(c.status) || '-'}
+      tbody.innerHTML = tickets.map(t => `
+        <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+          <td class="px-4 py-3 font-mono font-bold text-amber-400">${esc(t.ticket_number)}</td>
+          <td class="px-4 py-3 font-semibold text-slate-100">${esc(t.title)}</td>
+          <td class="px-4 py-3 text-slate-300">${esc(t.category)}</td>
+          <td class="px-4 py-3 font-bold ${t.priority === 'Urgent' ? 'text-rose-400' : 'text-slate-300'}">${esc(t.priority)}</td>
+          <td class="px-4 py-3 text-slate-300">${esc(t.requested_by)}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-bold text-[10px]">
+              ${esc(t.status)}
             </span>
           </td>
-          <td class="px-4 py-3 text-center whitespace-nowrap sticky right-0 bg-slate-900/95 backdrop-blur shadow-l">
-            <a href="${esc(c.gdrive_web_link)}" target="_blank" class="p-1.5 bg-slate-800 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg transition inline-flex items-center gap-1" title="Buka Dokumen di Google Drive">
-              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-            </a>
+          <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${new Date(t.created_at).toLocaleDateString('id-ID')}</td>
+          <td class="px-4 py-3 text-center">
+            <button onclick="openTicketDetailModal('${t.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-semibold text-[10px]">
+              Buka Detail
+            </button>
           </td>
-        </tr>`;
-      }).join('');
-      lucide.createIcons();
-    }
-
-    function toggleSelectContract(id) {
-      if (selectedContractIds.includes(id)) {
-        selectedContractIds = selectedContractIds.filter(item => item !== id);
-      } else {
-        selectedContractIds.push(id);
-      }
-      updateCompareBar();
-    }
-
-    function toggleSelectAllContracts(masterCheckbox) {
-      const checkboxes = document.querySelectorAll('.contract-checkbox');
-      checkboxes.forEach(cb => {
-        cb.checked = masterCheckbox.checked;
-        if (masterCheckbox.checked) {
-          if (!selectedContractIds.includes(cb.value)) selectedContractIds.push(cb.value);
-        } else {
-          selectedContractIds = [];
-        }
-      });
-      updateCompareBar();
-    }
-
-    function clearCompareSelection() {
-      selectedContractIds = [];
-      document.querySelectorAll('.contract-checkbox').forEach(cb => cb.checked = false);
-      updateCompareBar();
-    }
-
-    function updateCompareBar() {
-      const bar = document.getElementById('compare-floating-bar');
-      const countSpan = document.getElementById('compare-count');
-      if (selectedContractIds.length > 0) {
-        countSpan.innerText = `${selectedContractIds.length} Vendor Dipilih`;
-        bar.classList.remove('hidden');
-      } else {
-        bar.classList.add('hidden');
-      }
-    }
-
-    function openCompareModal() {
-      if (selectedContractIds.length < 2) {
-        alert('Pilih minimal 2 vendor untuk dibandingkan!');
-        return;
-      }
-      const selectedData = cachedContractsList.filter(c => selectedContractIds.includes(c.id));
-      const container = document.getElementById('compare-modal-content');
-      const clauses = [
-        { label: "Nama Vendor", key: "vendor_name" },
-        { label: "Jenis Perjanjian", key: "agreement_type" },
-        { label: "Masa Berlaku", custom: c => `${c.effective_date || '-'} s/d ${c.expiration_date || '-'}` },
-        { label: "Payment Terms", key: "payment_terms", badge: "blue" },
-        { label: "Denda Keterlambatan", key: "late_penalty" },
-        { label: "Pemutusan Perjanjian", key: "termination_clause" },
-        { label: "Kerahasiaan (NDA)", key: "confidentiality_clause" },
-        { label: "Hukum yang Berlaku", key: "governing_law" },
-        { label: "Status Perjanjian", key: "status", badge: "status" }
-      ];
-
-      let tableHtml = `
-        <table class="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr class="border-b border-slate-800">
-              <th class="p-3 bg-slate-950 font-bold text-slate-400 uppercase w-48 sticky left-0 z-20">Klausul Perjanjian</th>
-              ${selectedData.map(v => `<th class="p-3 bg-slate-950 font-bold text-blue-400 min-w-[220px] text-sm border-l border-slate-800/80">${esc(v.vendor_name)}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-800/60">
-            ${clauses.map(clause => `
-              <tr class="hover:bg-slate-800/30">
-                <td class="p-3 font-semibold text-slate-300 bg-slate-900/90 sticky left-0 z-10 border-r border-slate-800">${clause.label}</td>${selectedData.map(v => {
-                  let val = clause.custom ? clause.custom(v) : esc(v[clause.key] || '-');
-                  if (clause.badge === "blue") val = `<span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium">${val}</span>`;
-                  else if (clause.badge === "status") val = `<span class="px-2 py-0.5 ${v.status === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded font-bold">${val}</span>`;
-                  return `<td class="p-3 text-slate-300 border-l border-slate-800/60 align-top leading-relaxed">${val}</td>`;
-                }).join('')}
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>`;
-      container.innerHTML = tableHtml;
-      document.getElementById('compare-modal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeCompareModal() {
-      document.getElementById('compare-modal').classList.add('hidden');
-    }
-
-    async function loadAuditLogs() {
-      const tbody = document.getElementById('table-audit-body');
-      tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil log...</td></tr>`;
-      lucide.createIcons();
-
-      const { data: logs, error } = await supabaseClient
-        .from('audit_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (error || !logs || logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">Belum ada riwayat aktivitas tercatat.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = logs.map(l => `
-        <tr class="hover:bg-slate-800/40 transition">
-          <td class="px-4 py-2.5 font-mono text-[11px] text-slate-400">${new Date(l.created_at).toLocaleString('id-ID')}</td>
-          <td class="px-4 py-2.5 font-semibold text-slate-200">${l.actor_username}</td>
-          <td class="px-4 py-2.5"><span class="px-2 py-0.5 bg-slate-800 text-blue-400 border border-slate-700 rounded text-[10px] font-bold">${l.action}</span></td>
-          <td class="px-4 py-2.5 text-slate-400">${l.entity_type}</td>
         </tr>
       `).join('');
       lucide.createIcons();
     }
 
-    async function logAuditAction(username, action, entityType, entityId) {
-      await supabaseClient.from('audit_logs').insert([{
-        actor_username: username,
-        action: action,
-        entity_type: entityType,
-        entity_id: entityId
+    async function submitNewTicket() {
+      const title = document.getElementById('ticket-title-input').value.trim();
+      const category = document.getElementById('ticket-category-select').value;
+      const priority = document.getElementById('ticket-priority-select').value;
+      const description = document.getElementById('ticket-description-input').value.trim();
+      const npdId = document.getElementById('ticket-npd-id-hidden').value || null;
+
+      if (!title || !description) {
+        alert('Mohon lengkapi Judul dan Deskripsi Permintaan!');
+        return;
+      }
+
+      const ticketNumber = 'TKT-' + Math.floor(100000 + Math.random() * 900000);
+
+      const { data, error } = await supabaseClient.from('tickets').insert([{
+        ticket_number: ticketNumber,
+        title: title,
+        category: category,
+        priority: priority,
+        description: description,
+        requested_by: currentUserSession ? currentUserSession.username : 'guest',
+        npd_product_id: npdId
+      }]).select();
+
+      if (error) {
+        alert('Gagal membuat tiket: ' + error.message);
+      } else {
+        logAuditAction(currentUserSession.username, 'CREATE_TICKET', 'tickets', data?.[0]?.id);
+        closeCreateTicketModal();
+        alert(`Tiket ${ticketNumber} berhasil dibuat dan dikirim ke tim Legal!`);
+        switchTab('tickets-module');
+      }
+    }
+
+    async function openTicketDetailModal(ticketId) {
+      currentActiveTicketId = ticketId;
+      const { data: ticket, error } = await supabaseClient.from('tickets').select('*').eq('id', ticketId).single();
+      if (error || !ticket) return;
+
+      document.getElementById('detail-ticket-number').innerText = ticket.ticket_number;
+      document.getElementById('detail-ticket-title').innerText = ticket.title;
+      document.getElementById('detail-ticket-author').innerText = `Pengaju: ${ticket.requested_by}`;
+      document.getElementById('detail-ticket-status').innerText = ticket.status;
+      document.getElementById('detail-ticket-description').innerText = ticket.description;
+      document.getElementById('update-ticket-status-select').value = ticket.status;
+
+      loadTicketComments(ticketId);
+      document.getElementById('ticket-detail-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeTicketDetailModal() {
+      document.getElementById('ticket-detail-modal').classList.add('hidden');
+    }
+
+    async function loadTicketComments(ticketId) {
+      const container = document.getElementById('comments-thread-container');
+      const { data: comments } = await supabaseClient.from('ticket_comments').select('*').eq('ticket_id', ticketId).order('created_at', { ascending: true });
+
+      if (!comments || comments.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada diskusi pada tiket ini.</p>`;
+        return;
+      }
+
+      container.innerHTML = comments.map(c => `
+        <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
+          <div class="flex justify-between items-center mb-1">
+            <span class="font-bold text-amber-400">${esc(c.sender_username)}</span>
+            <span class="text-[10px] text-slate-500">${new Date(c.created_at).toLocaleTimeString('id-ID')}</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">${esc(c.message)}</p>
+        </div>
+      `).join('');
+    }
+
+    async function postTicketComment() {
+      const input = document.getElementById('ticket-comment-input');
+      const msg = input.value.trim();
+      if (!msg || !currentActiveTicketId) return;
+
+      await supabaseClient.from('ticket_comments').insert([{
+        ticket_id: currentActiveTicketId,
+        sender_username: currentUserSession ? currentUserSession.username : 'system',
+        message: msg
       }]);
+
+      input.value = '';
+      loadTicketComments(currentActiveTicketId);
     }
 
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebar-overlay');
-      sidebar.classList.toggle('-translate-x-full');
-      overlay.classList.toggle('hidden');
+    async function updateTicketStatusFromModal() {
+      const status = document.getElementById('update-ticket-status-select').value;
+      if (!currentActiveTicketId) return;
+
+      await supabaseClient.from('tickets').update({ status: status }).eq('id', currentActiveTicketId);
+      logAuditAction(currentUserSession.username, 'UPDATE_TICKET_STATUS', 'tickets', currentActiveTicketId);
+      loadTicketsTable();
     }
 
+    // ==========================================
+    // SYSTEM NAVIGATION & AUTH
+    // ==========================================
     function switchTab(tabName) {
       document.getElementById('view-vendor-contracts').classList.add('hidden');
       document.getElementById('view-artwork-prescreening').classList.add('hidden');
       document.getElementById('view-npd-screener').classList.add('hidden');
+      document.getElementById('view-tickets-module').classList.add('hidden');
       document.getElementById('view-audit-trail').classList.add('hidden');
 
       document.getElementById('nav-vendor-contracts').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
       document.getElementById('nav-artwork-prescreening').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
       document.getElementById('nav-npd-screener').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+      document.getElementById('nav-tickets-module').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
       document.getElementById('nav-audit-trail').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
 
       if (tabName === 'vendor-contracts') {
         document.getElementById('view-vendor-contracts').classList.remove('hidden');
         document.getElementById('nav-vendor-contracts').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition";
         document.getElementById('page-title').innerText = "Vendor Agreement Matrix";
-        loadContracts();
       } else if (tabName === 'artwork-prescreening') {
         document.getElementById('view-artwork-prescreening').classList.remove('hidden');
         document.getElementById('nav-artwork-prescreening').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-purple-400 text-sm font-medium transition";
         document.getElementById('page-title').innerText = "Artwork & Advertising Pre-Screening";
-        loadArtworkTable();
       } else if (tabName === 'npd-screener') {
         document.getElementById('view-npd-screener').classList.remove('hidden');
         document.getElementById('nav-npd-screener').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-emerald-400 text-sm font-medium transition";
         document.getElementById('page-title').innerText = "NPD Regulatory Feasibility Screener";
         loadNpdProductsTable();
+      } else if (tabName === 'tickets-module') {
+        document.getElementById('view-tickets-module').classList.remove('hidden');
+        document.getElementById('nav-tickets-module').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-amber-400 text-sm font-medium transition";
+        document.getElementById('page-title').innerText = "Compliance Ticketing System";
+        loadTicketsTable();
       } else if (tabName === 'audit-trail') {
         document.getElementById('view-audit-trail').classList.remove('hidden');
         document.getElementById('nav-audit-trail').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-amber-400 text-sm font-medium transition";
         document.getElementById('page-title').innerText = "Audit Trail System";
-        loadAuditLogs();
       }
 
       if (window.innerWidth < 768) toggleSidebar();
       lucide.createIcons();
     }
 
-    function fillDemo(username, password) {
-      document.getElementById('username-input').value = username;
-      document.getElementById('password-input').value = password;
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.toggle('hidden');
+    }
+
+    function fillDemo(u, p) {
+      document.getElementById('username-input').value = u;
+      document.getElementById('password-input').value = p;
     }
 
     async function handlePureSupabaseLogin(e) {
       e.preventDefault();
       const usernameInput = document.getElementById('username-input').value.trim();
       const passwordInput = document.getElementById('password-input').value.trim();
-      const btnSubmit = document.getElementById('btn-submit');
 
-      btnSubmit.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa DB...`;
-      lucide.createIcons();
-
-      const { data: users, error } = await supabaseClient
-        .from('users')
-        .select('*')
-        .ilike('username', usernameInput)
-        .eq('password', passwordInput);
-
-      if (error) {
-        alert('Gagal Terhubung ke Supabase Database:\n' + error.message);
-        btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
-        lucide.createIcons();
-        return;
-      }
+      const { data: users } = await supabaseClient.from('users').select('*').ilike('username', usernameInput).eq('password', passwordInput);
 
       if (users && users.length > 0) {
         const user = users[0];
-        const sessionData = { 
-          username: user.username, 
-          role: user.role, 
-          avatar: user.username.substring(0, 2).toUpperCase() 
-        };
+        const sessionData = { username: user.username, role: user.role, avatar: user.username.substring(0, 2).toUpperCase() };
         localStorage.setItem('supabase_session', JSON.stringify(sessionData));
-        btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
-        lucide.createIcons();
         showApp(sessionData);
-        logAuditAction(user.username, 'LOGIN', 'users', user.id);
       } else {
-        alert('Username atau Password tidak terdaftar!');
-        btnSubmit.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB`;
-        lucide.createIcons();
+        alert('Username atau Password salah!');
       }
     }
 
     function handleLogout() {
-      if (currentUserSession) {
-        logAuditAction(currentUserSession.username, 'LOGOUT', 'users', null);
-      }
       localStorage.removeItem('supabase_session');
       currentUserSession = null;
       document.getElementById('login-view').classList.remove('hidden');
       document.getElementById('app-view').classList.add('hidden');
-      if (window.lucide) lucide.createIcons();
     }
 
     function showApp(session) {
@@ -1279,11 +1098,18 @@
       switchTab('vendor-contracts');
     }
 
+    async function logAuditAction(username, action, entityType, entityId) {
+      await supabaseClient.from('audit_logs').insert([{
+        actor_username: username,
+        action: action,
+        entity_type: entityType,
+        entity_id: entityId
+      }]);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const savedSession = localStorage.getItem('supabase_session');
-      if (savedSession) {
-        showApp(JSON.parse(savedSession));
-      }
+      if (savedSession) showApp(JSON.parse(savedSession));
     });
   </script>
 </body>
