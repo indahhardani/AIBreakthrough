@@ -819,13 +819,6 @@
       }).join('');
       lucide.createIcons();
     }
-
-    async function toggleReviewStatus(id, currentStatus) {
-      if (currentUserSession && currentUserSession.role.includes('AUDITOR')) {
-        alert('Akses Ditolak: Peran Auditor hanya memiliki akses Read-Only!');
-        return;
-      }
-
       const nextStatus = currentStatus === 'Sudah Direview' ? 'Menunggu Review Legal' : 'Sudah Direview';
       const { error } = await supabaseClient
         .from('npd_permit_screenings')
