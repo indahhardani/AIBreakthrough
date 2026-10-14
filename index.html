@@ -1369,6 +1369,7 @@
 
         closeNpdModal();
         loadNpdProductsTable();
+        const aiData = result.data || result;
         showNpdResultModal(payload, result.data || result, result.saved_id);
 
       } catch (err) {
