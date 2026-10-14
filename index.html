@@ -14,13 +14,6 @@
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #475569; }
-    
-    @media print {
-      body * { visibility: hidden; }
-      #artwork-printable-area, #artwork-printable-area * { visibility: visible; }
-      #artwork-printable-area { position: absolute; left: 0; top: 0; width: 100%; }
-      .no-print { display: none !important; }
-    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex">
@@ -195,7 +188,7 @@
               <h2 class="text-lg font-bold text-white flex items-center gap-2">
                 <i data-lucide="scan-line" class="w-5 h-5 text-purple-400"></i> Artwork & Advertising Pre-Screening
               </h2>
-              <p class="text-xs text-slate-400 mt-1">Verifikasi kepatuhan kemasan & materi periklanan sesuai regulasi <span class="text-purple-400 underline">jdih.pom.go.id</span> via Gemini 3.6 Flash.</p>
+              <p class="text-xs text-slate-400 mt-1">Verifikasi kepatuhan kemasan & materi periklanan sesuai regulasi <span class="text-purple-400 underline">jdih.pom.go.id</span> via Gemini 1.5 Flash.</p>
             </div>
 
             <button onclick="openArtworkModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-purple-600/20">
@@ -660,7 +653,7 @@
             <div class="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
               <i data-lucide="alert-octagon" class="w-4 h-4"></i> 🔴 High Risk (Risiko Tinggi Pelanggaran Hukum)
             </div>
-            <div id="res-section-high-risk" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-6">Tidak ditemukan poin risiko tinggi.</div>
+            <div id="res-section-high-risk" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-6">Tidak ditemukan indikasi risiko tinggi.</div>
           </div>
 
           <!-- 2. NEED ADJUSTMENT / REMOVAL -->
@@ -683,7 +676,7 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex flex-wrap justify-between items-center gap-2 no-print">
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex flex-wrap justify-between items-center gap-2">
         <button onclick="closeArtworkResultModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
           Tutup
         </button>
@@ -1014,6 +1007,7 @@
       lucide.createIcons();
     }
 
+    // PARSING TINGKAT LANJUT UNTUK SCORE & DETAIL REVIEW AI
     function showArtworkResultModal(payload, responseData) {
       currentArtworkAnalysisResult = { payload, responseData };
 
@@ -1034,9 +1028,10 @@
         imgElem.classList.add('hidden');
       }
 
-      const bpomStatus = responseData.bpom_status || 'Non-Compliant';
-      const halalStatus = responseData.halal_status || 'Pending';
-      const score = responseData.compliance_score || 0;
+      // Dynamic Property Mapping untuk Skor & Status BPOM/Halal
+      const bpomStatus = responseData.bpom_status || responseData.bpomStatus || responseData.bpom || 'Non-Compliant';
+      const halalStatus = responseData.halal_status || responseData.halalStatus || responseData.halal || 'Pending';
+      const score = responseData.compliance_score ?? responseData.complianceScore ?? responseData.score ?? 0;
 
       document.getElementById('res-artwork-score').innerText = `${score}/100`;
 
@@ -1052,15 +1047,19 @@
         halalStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
       }`;
 
-      // Mapping 3 Kategori Evaluasi AI
-      document.getElementById('res-section-high-risk').innerText = 
-        responseData.high_risk_items || responseData.high_risk || "Tidak ditemukan indikasi risiko tinggi.";
+      // Dynamic Property Mapping untuk Rincian Evaluasi (3 Seksi)
+      let highRisk = responseData.high_risk_items || responseData.high_risk || responseData.highRisk;
+      let needAdjustment = responseData.need_adjustment_items || responseData.need_adjustment || responseData.needAdjustment;
+      let compliant = responseData.compliant_items || responseData.compliant;
 
-      document.getElementById('res-section-need-adjustment').innerText = 
-        responseData.need_adjustment_items || responseData.need_adjustment || "Tidak ditemukan rekomendasi revisi/penghapusan.";
+      // Fallback jika Edge Function mengembalikan string tunggal (misal: analysis_details/summary)
+      if (!highRisk && !needAdjustment && (responseData.analysis_details || responseData.summary || responseData.details)) {
+        highRisk = responseData.analysis_details || responseData.summary || responseData.details;
+      }
 
-      document.getElementById('res-section-compliant').innerText = 
-        responseData.compliant_items || responseData.compliant || "Seluruh elemen umum telah sesuai.";
+      document.getElementById('res-section-high-risk').innerText = highRisk || "Tidak ditemukan indikasi risiko tinggi.";
+      document.getElementById('res-section-need-adjustment').innerText = needAdjustment || "Tidak ditemukan rekomendasi revisi/penghapusan.";
+      document.getElementById('res-section-compliant').innerText = compliant || "Seluruh elemen umum telah sesuai.";
 
       document.getElementById('artwork-result-modal').classList.remove('hidden');
       lucide.createIcons();
@@ -1077,21 +1076,68 @@
       document.getElementById('ticket-category-select').value = 'Approval Artwork';
       document.getElementById('ticket-priority-select').value = 'High';
       
+      const highRiskText = responseData.high_risk_items || responseData.high_risk || 'Tidak ada';
+      const needAdjText = responseData.need_adjustment_items || responseData.need_adjustment || 'Tidak ada';
+
       document.getElementById('ticket-description-input').value = 
         `Pemeriksaan AI awal menemukan potensi risiko compliance pada artwork:\n` +
         `Nama Produk: ${payload.title}\n` +
         `Versi/Materi: ${payload.designVersion} (${payload.materialType})\n` +
         `Kategori: ${payload.category}\n\n` +
-        `🔴 HIGH RISK TEMUAN AI:\n${responseData.high_risk_items || 'Tidak ada'}\n\n` +
-        `🟡 NEED ADJUSTMENT / REMOVAL:\n${responseData.need_adjustment_items || 'Tidak ada'}\n\n` +
+        `🔴 HIGH RISK TEMUAN AI:\n${highRiskText}\n\n` +
+        `🟡 NEED ADJUSTMENT / REMOVAL:\n${needAdjText}\n\n` +
         `Mohon Tim Legal melakukan peninjauan ulang & validasi kepatuhan resmi.`;
 
       document.getElementById('ticket-modal').classList.remove('hidden');
       lucide.createIcons();
     }
 
+    // CETAK DOKUMEN PDF BERSIH (TANPA BACKGROUND DARK WEB)
     function downloadArtworkReportPDF() {
-      window.print();
+      const printArea = document.getElementById('artwork-printable-area');
+      if (!printArea) {
+        window.print();
+        return;
+      }
+
+      const printWindow = window.open('', '_blank', 'width=850,height=1100');
+      
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Laporan Compliance Artwork - LegalOps</title>
+          <script src="https://cdn.tailwindcss.com"><\/script>
+          <style>
+            body { font-family: sans-serif; background-color: #ffffff !important; color: #0f172a !important; padding: 24px; }
+            .bg-slate-950, .bg-slate-900 { background-color: #f8fafc !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; }
+            .bg-rose-950\\/20 { background-color: #fff1f2 !important; border: 1px solid #fecdd3 !important; }
+            .bg-amber-950\\/20 { background-color: #fffbeb !important; border: 1px solid #fef3c7 !important; }
+            .bg-emerald-950\\/20 { background-color: #f0fdf4 !important; border: 1px solid #bbf7d0 !important; }
+            .text-slate-100, .text-slate-200, .text-slate-300 { color: #0f172a !important; }
+            .text-slate-400, .text-slate-500 { color: #475569 !important; }
+            .border-slate-800 { border-color: #cbd5e1 !important; }
+            .no-print { display: none !important; }
+            img { max-height: 220px !important; margin: 0 auto; }
+          </style>
+        </head>
+        <body onload="window.print(); setTimeout(() => window.close(), 500);">
+          <div style="margin-bottom: 20px; border-bottom: 2px solid #0f172a; padding-bottom: 12px; display: flex; justify-content: space-between; items-center: center;">
+            <div>
+              <h2 style="font-size: 20px; font-weight: bold; margin: 0;">LEGALOPS & COMPLIANCE INTELLIGENCE</h2>
+              <p style="font-size: 12px; color: #475569; margin: 4px 0 0 0;">Laporan Evaluasi Kepatuhan Artwork & Materi Iklan JDIH BPOM</p>
+            </div>
+            <div style="text-align: right; font-size: 11px; color: #64748b;">
+              Tanggal Audit: ${new Date().toLocaleDateString('id-ID')}
+            </div>
+          </div>
+          ${printArea.innerHTML}
+        </body>
+        </html>
+      `;
+
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
     }
 
     // ==========================================
