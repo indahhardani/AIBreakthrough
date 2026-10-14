@@ -233,7 +233,7 @@
               <h2 class="text-lg font-bold text-white flex items-center gap-2">
                 <i data-lucide="flask-conical" class="w-5 h-5 text-emerald-400"></i> NPD Regulatory Feasibility Screener
               </h2>
-              <p class="text-xs text-slate-400 mt-1">Lakukan skrining awal regulasi BPOM. Jika produk <span class="text-emerald-400 font-bold">Lolos</span>, buat tiket untuk verifikasi mendalam tim Legal.</p>
+              <p class="text-xs text-slate-400 mt-1">Lakukan skrining awal regulasi BPOM. Hasil analisis AI dapat dibuka kembali via <span class="text-emerald-400 font-bold">Buka Detail</span>.</p>
             </div>
 
             <button onclick="openNpdModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
@@ -246,12 +246,12 @@
               <table class="w-full text-left text-xs text-slate-300 border-collapse">
                 <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
                   <tr>
-                    <th class="px-4 py-3.5 font-bold min-w-[110px]">No. Tiket</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[200px]">Judul Permintaan</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">ID Skrining</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[200px]">Ide Produk</th>
                     <th class="px-4 py-3.5 font-bold min-w-[130px]">Kategori</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Prioritas</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[120px]">Kode Izin Utama</th>
                     <th class="px-4 py-3.5 font-bold min-w-[110px]">Pengaju</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Status</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Feasibility</th>
                     <th class="px-4 py-3.5 font-bold min-w-[110px]">Tanggal</th>
                     <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
                   </tr>
@@ -261,7 +261,7 @@
                     <td colspan="8" class="px-4 py-10 text-center text-slate-500">
                       <div class="flex flex-col items-center justify-center gap-2">
                         <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400"></i>
-                        <span>Memuat riwayat verifikasi NPD BPOM...</span>
+                        <span>Memuat riwayat skrining NPD BPOM...</span>
                       </div>
                     </td>
                   </tr>
@@ -1292,50 +1292,80 @@
       }
     }
 
+    // 1. Memuat tabel riwayat langsung dari database Supabase (`npd_permit_screenings`)
     async function loadNpdProductsTable() {
       const tbody = document.getElementById('table-npd-body');
-      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400 inline mr-2"></i> Memuat riwayat verifikasi NPD BPOM...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400 inline mr-2"></i> Memuat riwayat skrining NPD BPOM...</td></tr>`;
       lucide.createIcons();
 
       try {
-        const { data: tickets, error } = await supabaseClient
-          .from('tickets')
+        const { data: list, error } = await supabaseClient
+          .from('npd_permit_screenings')
           .select('*')
-          .or('category.ilike.%Verifikasi NPD BPOM%,title.ilike.%Verifikasi Legal NPD%')
           .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        if (!tickets || tickets.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat tiket Verifikasi NPD BPOM. Klik "+ Skrining Produk Baru".</td></tr>`;
+        if (!list || list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat skrining NPD BPOM. Klik "+ Skrining Produk Baru".</td></tr>`;
           return;
         }
 
-        tbody.innerHTML = tickets.map(t => `
-          <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
-            <td class="px-4 py-3 font-mono font-bold text-emerald-400">${esc(t.ticket_number || ('TKT-' + t.id))}</td>
-            <td class="px-4 py-3 font-semibold text-slate-100">${esc(t.title)}</td>
-            <td class="px-4 py-3 text-slate-300">${esc(t.category)}</td>
-            <td class="px-4 py-3 font-bold ${t.priority === 'Urgent' || t.priority === 'High' ? 'text-rose-400' : 'text-slate-300'}">${esc(t.priority || 'Medium')}</td>
-            <td class="px-4 py-3 text-slate-300">${esc(t.requested_by || 'system')}</td>
-            <td class="px-4 py-3">
-              <span class="px-2 py-0.5 ${t.status === 'Approved' || t.status === 'Resolved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'} border rounded font-bold text-[10px]">
-                ${esc(t.status || 'Open')}
-              </span>
-            </td>
-            <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${t.created_at ? new Date(t.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 text-center">
-              <button onclick="openTicketDetailModal('${t.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-semibold text-[10px]">
-                Buka Detail
-              </button>
-            </td>
-          </tr>
-        `).join('');
+        tbody.innerHTML = list.map(item => {
+          const jsonItem = JSON.stringify(item).replace(/'/g, "&apos;");
+          const score = item.feasibility_score || 0;
+          const isCompliant = score >= 70;
+
+          return `
+            <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+              <td class="px-4 py-3 font-mono font-bold text-emerald-400">NPD-${item.id}</td>
+              <td class="px-4 py-3 font-semibold text-slate-100">${esc(item.product_idea_name)}</td>
+              <td class="px-4 py-3 text-slate-300">${esc(item.category)}</td>
+              <td class="px-4 py-3 font-bold ${isCompliant ? 'text-emerald-400' : 'text-rose-400'}">
+                ${esc(item.matched_permit_code || 'BPOM RI')}
+              </td>
+              <td class="px-4 py-3 text-slate-300">${esc(item.created_by || 'system')}</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 ${isCompliant ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded font-bold text-[10px]">
+                  ${score}/100
+                </span>
+              </td>
+              <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</td>
+              <td class="px-4 py-3 text-center">
+                <button onclick='openStoredNpdResult(${jsonItem})' class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-semibold text-[10px]">
+                  Buka Detail
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
         lucide.createIcons();
 
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat tiket NPD: ${esc(err.message || err)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat skrining NPD: ${esc(err.message || err)}</td></tr>`;
       }
+    }
+
+    // 2. Fungsi untuk membaca objek JSON dari DB dan membukanya di modal popup
+    function openStoredNpdResult(item) {
+      const payload = {
+        productName: item.product_idea_name || 'Tanpa Judul',
+        category: item.category || 'Pangan Olahan',
+        productionScheme: item.production_scheme || 'Pabrik Sendiri'
+      };
+
+      let aiData = item.analysis_result || {};
+      if (typeof aiData === 'string') {
+        try { aiData = JSON.parse(aiData); } catch(_e) {}
+      }
+
+      aiData.primary_permit_code = item.matched_permit_code || aiData.primary_permit_code;
+      aiData.feasibility_score = item.feasibility_score ?? aiData.feasibility_score;
+      aiData.required_permits = aiData.required_permits || item.required_permits || [];
+      aiData.regulatory_warnings = aiData.regulatory_warnings || item.regulatory_warnings || [];
+      aiData.action_plan = aiData.action_plan || item.action_plan || '-';
+
+      showNpdResultModal(payload, aiData, item.id);
     }
 
     async function analyzeNpdPermit() {
