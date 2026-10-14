@@ -3,374 +3,1787 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Artwork Compliance Prescreening</title>
-  <!-- Tailwind CSS CDN -->
+  <title>Enterprise LegalOps & Compliance Intelligence</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase JS CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- html2pdf.js CDN untuk Cetak PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen p-6">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex">
 
-  <div class="max-w-6xl mx-auto space-y-8">
-    
-    <!-- HEADER -->
-    <header class="border-b border-gray-800 pb-4 flex justify-between items-center">
-      <div>
-        <h1 class="text-2xl font-bold text-white">Artwork Compliance Prescreening</h1>
-        <p class="text-sm text-gray-400">Pemeriksaan Otomatis Regulasi JDIH BPOM & Halal via AI</p>
+  <!-- 1. LOGIN CONTAINER -->
+  <div id="login-view" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-6">
+      <div class="text-center space-y-2">
+        <div class="inline-flex p-3 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/20 mb-1">
+          <i data-lucide="shield-check" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-2xl font-bold tracking-tight text-white">LegalOps Intelligence</h2>
+        <p class="text-xs text-slate-400">Masuk via Supabase Database (`public.users`)</p>
       </div>
-      <span class="bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs px-3 py-1 rounded-full font-mono">
-        System Active
-      </span>
-    </header>
 
-    <!-- FORM SCAN ARTWORK -->
-    <section class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
-      <h2 class="text-lg font-semibold text-white mb-4">Form Analisis Artwork Baru</h2>
-      <form id="scanForm" onsubmit="handleScanArtwork(event)" class="space-y-4">
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Judul Produk / Artwork *</label>
-            <input type="text" id="title" required placeholder="Contoh: Kripik Singkong Balado 100g"
-              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Versi Desain</label>
-            <input type="text" id="designVersion" placeholder="Contoh: v1.0 / Final Draft"
-              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Tipe Materi</label>
-            <select id="materialType" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
-              <option value="Kemasan Primer">Kemasan Primer</option>
-              <option value="Kemasan Sekunder">Kemasan Sekunder</option>
-              <option value="Brosur / Flyer">Brosur / Flyer</option>
-              <option value="Iklan Digital">Iklan Digital</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Kategori Produk</label>
-            <select id="category" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
-              <option value="Pangan Olahan">Pangan Olahan</option>
-              <option value="Kosmetik">Kosmetik</option>
-              <option value="Obat Tradisional">Obat Tradisional</option>
-              <option value="Suplemen Kesehatan">Suplemen Kesehatan</option>
-            </select>
-          </div>
-        </div>
-
+      <form id="form-login" onsubmit="handlePureSupabaseLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">Upload Gambar Artwork (Maks. 3.5 MB)</label>
-          <input type="file" id="imageFile" accept="image/*"
-            class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Username</label>
+          <input type="text" id="username-input" required placeholder="Masukkan username" 
+                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition">
         </div>
-
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">Link Landing Page Iklan (Opsional)</label>
-          <input type="url" id="webpageUrl" placeholder="https://contoh-produk.com/iklan"
-            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Password</label>
+          <input type="password" id="password-input" required placeholder="••••••••" 
+                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition">
         </div>
 
-        <button type="submit" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-200 flex items-center justify-center space-x-2">
-          <span>Jalankan Analisis AI</span>
+        <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB
         </button>
       </form>
-    </section>
 
-    <!-- TABEL RIWAYAT TIKET ARTWORK APPROVAL -->
-    <section class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg space-y-4">
-      <div class="flex justify-between items-center">
-        <div>
-          <h2 class="text-lg font-bold text-white">Riwayat Approval Artwork</h2>
-          <p class="text-xs text-gray-400">Data otomatis difilter dari tabel <code class="text-blue-400">tickets</code> kategori Artwork Approval</p>
+      <div class="border-t border-slate-800 pt-4 space-y-2">
+        <p class="text-xs text-slate-400 text-center font-medium">⚡ Auto-Fill Demo:</p>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="fillDemo('admin', 'admin123')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-lg text-xs text-amber-400 font-medium text-center flex items-center justify-center gap-1.5">
+            <i data-lucide="crown" class="w-3.5 h-3.5"></i> Admin
+          </button>
+          <button onclick="fillDemo('legal', 'legal123')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-lg text-xs text-blue-400 font-medium text-center flex items-center justify-center gap-1.5">
+            <i data-lucide="scale" class="w-3.5 h-3.5"></i> Legal
+          </button>
+          <button onclick="fillDemo('npd', 'npd123')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-lg text-xs text-emerald-400 font-medium text-center flex items-center justify-center gap-1.5">
+            <i data-lucide="flask-conical" class="w-3.5 h-3.5"></i> NPD
+          </button>
         </div>
-        <button onclick="loadArtworkTable()" class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1">
-          <span>↻ Refresh Data</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. MAIN APP DASHBOARD -->
+  <div id="app-view" class="hidden flex-1 flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
+    
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-4 flex-shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out">
+      <div class="space-y-6">
+        <div class="flex items-center justify-between px-2 py-2">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-600 rounded-lg text-white">
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+            <span class="font-bold text-base tracking-wide">LegalOps AI</span>
+          </div>
+          <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <nav class="space-y-1">
+          <button onclick="switchTab('vendor-contracts')" id="nav-vendor-contracts" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition">
+            <i data-lucide="file-text" class="w-4 h-4"></i> Vendor Contracts
+          </button>
+          <button onclick="switchTab('artwork-prescreening')" id="nav-artwork-prescreening" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+            <i data-lucide="scan-line" class="w-4 h-4"></i> Artwork Pre-Screening
+          </button>
+          <button onclick="switchTab('npd-screener')" id="nav-npd-screener" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+            <i data-lucide="flask-conical" class="w-4 h-4"></i> NPD Permit Screener
+          </button>
+          <button onclick="switchTab('tickets-module')" id="nav-tickets-module" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+            <i data-lucide="ticket" class="w-4 h-4"></i> Compliance Tickets
+          </button>
+          <button onclick="switchTab('audit-trail')" id="nav-audit-trail" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+            <i data-lucide="history" class="w-4 h-4"></i> Audit Trail Log
+          </button>
+        </nav>
+      </div>
+
+      <div class="border-t border-slate-800 pt-3 space-y-3 mt-auto">
+        <div class="flex items-center gap-3 px-1">
+          <div class="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 flex items-center justify-center font-bold text-xs" id="user-avatar">U</div>
+          <div class="overflow-hidden">
+            <p class="text-xs font-semibold text-slate-200 truncate" id="user-display">username</p>
+            <p class="text-[10px] uppercase font-bold text-blue-400 tracking-wider truncate" id="role-display">ROLE</p>
+          </div>
+        </div>
+
+        <button onclick="handleLogout()" class="w-full bg-slate-800 hover:bg-rose-900/30 hover:text-rose-400 text-slate-400 border border-slate-700 py-2 rounded-lg text-xs font-medium transition flex items-center justify-center gap-2">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Keluar
         </button>
       </div>
+    </aside>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-gray-700 bg-gray-900/50 text-gray-400 text-xs uppercase tracking-wider">
-              <th class="py-3 px-4">Kode Tiket</th>
-              <th class="py-3 px-4">Judul Artwork</th>
-              <th class="py-3 px-4">Kategori</th>
-              <th class="py-3 px-4">Status</th>
-              <th class="py-3 px-4">Prioritas</th>
-              <th class="py-3 px-4">Tanggal Buat</th>
-            </tr>
-          </thead>
-          <tbody id="artworkTableBody" class="divide-y divide-gray-700/60 text-sm">
-            <tr>
-              <td colspan="6" class="text-center py-6 text-gray-400">Memuat data riwayat...</td>
-            </tr>
-          </tbody>
-        </table>
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-950/80 z-30 hidden md:hidden"></div>
+
+    <main class="flex-1 flex flex-col bg-slate-950 overflow-y-auto w-full">
+      <header class="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur flex items-center justify-between px-4 md:px-6 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          <h1 class="text-sm md:text-base font-semibold text-slate-100 truncate" id="page-title">Vendor Agreement Matrix</h1>
+        </div>
+
+        <div class="text-[10px] md:text-xs text-slate-400 bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-800">
+          Akses: <span class="font-bold text-slate-200" id="access-badge">-</span>
+        </div>
+      </header>
+
+      <div class="p-4 md:p-6 space-y-6">
+        
+        <!-- VENDOR CONTRACTS TAB -->
+        <section id="view-vendor-contracts" class="space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-white">Vendor Contract Matrix</h2>
+              <p class="text-xs text-slate-400">Pindai folder Google Drive & kelola klausul perjanjian vendor secara otomatis via Supabase Edge Function.</p>
+            </div>
+
+            <button onclick="handleScanGoogleDriveEdge()" id="btn-scan-drive" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+              <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)
+            </button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto max-h-[70vh]">
+              <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                <thead class="bg-slate-950/90 backdrop-blur text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px] sticky top-0 z-10">
+                  <tr>
+                    <th class="px-3.5 py-3.5 text-center w-8">
+                      <input type="checkbox" onchange="toggleSelectAllContracts(this)" class="rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+                    </th>
+                    <th class="px-4 py-3.5 font-bold min-w-[180px]">Vendor</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[150px]">Jenis Perjanjian</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[170px]">Masa Berlaku</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[130px]">Payment Terms</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[180px]">Denda Keterlambatan</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[180px]">Pemutusan Perjanjian</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[160px]">Kerahasiaan</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[130px]">Hukum</th>
+                    <th class="px-3.5 py-3.5 font-bold min-w-[100px]">Status</th>
+                    <th class="px-4 py-3.5 font-bold text-center sticky right-0 bg-slate-950/90 min-w-[80px]">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="table-contracts-body" class="divide-y divide-slate-800/60">
+                  <tr>
+                    <td colspan="11" class="px-4 py-10 text-center text-slate-500">
+                      <div class="flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-blue-500"></i>
+                        <span>Memuat data dari Supabase...</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ARTWORK PRE-SCREENING TAB -->
+        <section id="view-artwork-prescreening" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <i data-lucide="scan-line" class="w-5 h-5 text-purple-400"></i> Artwork & Advertising Pre-Screening
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">Verifikasi kepatuhan kemasan & materi periklanan sesuai regulasi <span class="text-purple-400 underline">jdih.pom.go.id</span> via Gemini 1.5 Flash.</p>
+            </div>
+
+            <button onclick="openArtworkModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-purple-600/20">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Periksa Artwork Baru
+            </button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                  <tr>
+                    <th class="px-4 py-3.5 font-bold min-w-[180px]">Judul Produk / Desain</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Versi</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[120px]">Tipe Materi</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[140px]">Kategori JDIH</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">BPOM Status</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Halal Status</th>
+                    <th class="px-4 py-3.5 font-bold text-center min-w-[90px]">Score</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Tanggal</th>
+                  </tr>
+                </thead>
+                <tbody id="table-artwork-body" class="divide-y divide-slate-800/60">
+                  <tr>
+                    <td colspan="8" class="px-4 py-10 text-center text-slate-500">
+                      <div class="flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-purple-400"></i>
+                        <span>Memuat riwayat audit artwork...</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- NPD PERMIT SCREENER TAB -->
+        <section id="view-npd-screener" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <i data-lucide="flask-conical" class="w-5 h-5 text-emerald-400"></i> NPD Regulatory Feasibility Screener
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">Lakukan skrining awal regulasi BPOM. Jika produk <span class="text-emerald-400 font-bold">Lolos</span>, buat tiket untuk verifikasi mendalam tim Legal.</p>
+            </div>
+
+            <button onclick="openNpdModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Skrining Produk Baru
+            </button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                  <tr>
+                    <th class="px-4 py-3.5 font-bold min-w-[180px]">Ide Produk</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[140px]">Kategori</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[120px]">Kecocokan BPOM</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[140px]">Kelayakan Regulasi</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[120px]">Tanggal</th>
+                    <th class="px-4 py-3.5 font-bold text-center min-w-[180px]">Aksi Integrasi</th>
+                  </tr>
+                </thead>
+                <tbody id="table-npd-body" class="divide-y divide-slate-800/60">
+                  <tr>
+                    <td colspan="6" class="px-4 py-10 text-center text-slate-500">
+                      <div class="flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400"></i>
+                        <span>Memuat daftar skrining produk...</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- COMPLIANCE TICKETS TAB -->
+        <section id="view-tickets-module" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <i data-lucide="ticket" class="w-5 h-5 text-amber-400"></i> Compliance & Legal Request Ticketing
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">Daftar tiket permintaan verifikasi legalitas produk NPD, review dokumen, dan perizinan BPOM.</p>
+            </div>
+
+            <button onclick="openCreateTicketModal()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-amber-600/20">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Buat Tiket Manual
+            </button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                  <tr>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">No. Tiket</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[200px]">Judul Permintaan</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[130px]">Kategori</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Prioritas</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Pengaju</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Status</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Tanggal</th>
+                    <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="table-tickets-body" class="divide-y divide-slate-800/60">
+                  <tr>
+                    <td colspan="8" class="px-4 py-10 text-center text-slate-500">
+                      <div class="flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-amber-400"></i>
+                        <span>Memuat data tiket compliance...</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- AUDIT TRAIL LOG TAB -->
+        <section id="view-audit-trail" class="hidden space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <h2 class="text-lg font-bold text-white">Audit Trail Logs</h2>
+              <p class="text-xs text-slate-400">Catatan aktivitas perubahan data real-time.</p>
+            </div>
+            <button onclick="loadAuditLogs()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+            </button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                <tr>
+                  <th class="px-4 py-3">Waktu</th>
+                  <th class="px-4 py-3">Pengguna</th>
+                  <th class="px-4 py-3">Aksi</th>
+                  <th class="px-4 py-3">Entitas</th>
+                </tr>
+              </thead>
+              <tbody id="table-audit-body" class="divide-y divide-slate-800/60">
+                <tr>
+                  <td colspan="4" class="px-4 py-6 text-center text-slate-500">Memuat log aktivitas...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
       </div>
-    </section>
+    </main>
 
   </div>
 
-  <!-- POP-UP MODAL HASIL ANALISIS AI -->
-  <div id="resultModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-gray-800 border border-gray-700 rounded-xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-      
-      <!-- Modal Header -->
-      <div class="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-900">
-        <h3 class="text-lg font-bold text-white">Laporan Hasil Evaluasi AI</h3>
-        <button onclick="closeModal()" class="text-gray-400 hover:text-white text-xl font-bold px-2">&times;</button>
-      </div>
-
-      <!-- Modal Content Area (Area yang dicetak ke PDF) -->
-      <div id="pdfPrintArea" class="p-6 overflow-y-auto space-y-6 text-gray-200 bg-gray-800">
-        
-        <!-- Header Laporan Cetak -->
-        <div class="border-b border-gray-700 pb-4">
-          <h2 id="modalTitle" class="text-xl font-bold text-blue-400 mb-1">Judul Produk</h2>
-          <p id="modalMeta" class="text-xs text-gray-400">Versi: - | Tipe: - | Kategori: -</p>
-        </div>
-
-        <!-- Ringkasan Status & Skor -->
-        <div class="grid grid-cols-3 gap-4 text-center">
-          <div class="bg-gray-900 p-3 rounded-lg border border-gray-700">
-            <span class="block text-xs text-gray-400">Score Compliance</span>
-            <span id="modalScore" class="text-2xl font-bold text-blue-400">0%</span>
+  <!-- MODAL CREATE TICKET -->
+  <div id="ticket-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20">
+            <i data-lucide="ticket" class="w-5 h-5"></i>
           </div>
-          <div class="bg-gray-900 p-3 rounded-lg border border-gray-700">
-            <span class="block text-xs text-gray-400">Status BPOM</span>
-            <span id="modalBpom" class="text-sm font-semibold text-yellow-400">Pending</span>
-          </div>
-          <div class="bg-gray-900 p-3 rounded-lg border border-gray-700">
-            <span class="block text-xs text-gray-400">Status Halal</span>
-            <span id="modalHalal" class="text-sm font-semibold text-green-400">Pending</span>
+          <div>
+            <h3 class="text-base font-bold text-white">Buat Tiket Verification Legal</h3>
+            <p class="text-xs text-slate-400">Ajukan perizinan BPOM atau konsultasi legalitas produk.</p>
           </div>
         </div>
-
-        <!-- Detail Rincian AI (Tri-segmentasi) -->
-        <div class="space-y-4 text-sm">
-          <div class="bg-red-950/30 border border-red-800/50 p-4 rounded-lg">
-            <h4 class="font-bold text-red-400 mb-1 flex items-center">🔴 High Risk Items</h4>
-            <p id="modalHighRisk" class="text-gray-300 leading-relaxed whitespace-pre-line">-</p>
-          </div>
-
-          <div class="bg-yellow-950/30 border border-yellow-800/50 p-4 rounded-lg">
-            <h4 class="font-bold text-yellow-400 mb-1 flex items-center">🟡 Need Adjustment Items</h4>
-            <p id="modalAdjustment" class="text-gray-300 leading-relaxed whitespace-pre-line">-</p>
-          </div>
-
-          <div class="bg-green-950/30 border border-green-800/50 p-4 rounded-lg">
-            <h4 class="font-bold text-green-400 mb-1 flex items-center">🟢 Compliant Items</h4>
-            <p id="modalCompliant" class="text-gray-300 leading-relaxed whitespace-pre-line">-</p>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Modal Footer / Action Buttons -->
-      <div class="p-4 border-t border-gray-700 bg-gray-900 flex justify-between items-center">
-        <button onclick="downloadPDF()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2">
-          <span>📥 Download Laporan PDF</span>
+        <button onclick="closeCreateTicketModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
         </button>
-        <button onclick="closeModal()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <input type="hidden" id="ticket-npd-id-hidden">
+        
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Judul Permintaan Tiket <span class="text-rose-400">*</span></label>
+          <input type="text" id="ticket-title-input" required placeholder="Contoh: Verifikasi Legalitas BPOM untuk Produk X"
+                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Kategori Tiket <span class="text-rose-400">*</span></label>
+            <select id="ticket-category-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 cursor-pointer">
+              <option value="Verifikasi NPD BPOM">Verifikasi NPD BPOM</option>
+              <option value="Review Kontrak Vendor">Review Kontrak Vendor</option>
+              <option value="Approval Artwork">Approval Artwork Kemasan</option>
+              <option value="Konsultasi Regulasi">Konsultasi Regulasi</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Prioritas <span class="text-rose-400">*</span></label>
+            <select id="ticket-priority-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 cursor-pointer">
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Deskripsi Permintaan <span class="text-rose-400">*</span></label>
+          <textarea id="ticket-description-input" rows="5" placeholder="Jelaskan kebutuhan verifikasi legalitas secara rinci..."
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500"></textarea>
+        </div>
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-end gap-3">
+        <button onclick="closeCreateTicketModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
+          Batal
+        </button>
+        <button id="btn-save-ticket" onclick="submitNewTicket()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+          <i data-lucide="send" class="w-4 h-4"></i> Kirim Tiket Permintaan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL & COMMENT TICKET -->
+  <div id="ticket-detail-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2.5">
+          <span id="detail-ticket-number" class="px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded font-mono font-bold text-xs">TKT-001</span>
+          <h3 id="detail-ticket-title" class="text-sm font-bold text-white truncate max-w-md">Judul Tiket</h3>
+        </div>
+        <button onclick="closeTicketDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <span id="detail-ticket-author" class="font-bold text-slate-200">Pengaju</span>
+            <span id="detail-ticket-status" class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[10px] font-bold">Open</span>
+          </div>
+          <p id="detail-ticket-description" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap"></p>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="message-square" class="w-4 h-4"></i> Diskusi & Catatan Legal
+          </h4>
+          <div id="comments-thread-container" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+            <p class="text-xs text-slate-500 text-center py-4">Memuat diskusi...</p>
+          </div>
+
+          <div class="flex gap-2 pt-2">
+            <input type="text" id="ticket-comment-input" placeholder="Tulis catatan/balasan..."
+                   class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+            <button onclick="postTicketComment()" class="bg-amber-600 hover:bg-amber-500 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i> Kirim
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-between items-center">
+        <div class="flex items-center gap-2 text-xs">
+          <span class="text-slate-400">Ubah Status:</span>
+          <select id="update-ticket-status-select" onchange="updateTicketStatusFromModal()" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-200 font-semibold text-xs">
+            <option value="Open">Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+        <button onclick="closeTicketDetailModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-1.5 rounded-lg text-xs font-semibold">
           Tutup
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL POP-UP ARTWORK PRE-SCREENING -->
+  <div id="artwork-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20">
+            <i data-lucide="scan-line" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Audit Artwork & Advertising Compliance</h3>
+            <p class="text-xs text-slate-400">Masukkan metadata & unggah file desain untuk mulai pemeriksaan.</p>
+          </div>
+        </div>
+        <button onclick="closeArtworkModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Judul / Nama Produk <span class="text-rose-400">*</span></label>
+          <input type="text" id="artwork-title-input" required placeholder="Contoh: Susu Steril FitMax 250ml"
+                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Versi Desain</label>
+          <input type="text" id="artwork-version-input" placeholder="Contoh: v1.2 / Final-Rev3"
+                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tipe Materi <span class="text-rose-400">*</span></label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="material_type" value="Kemasan" checked class="peer hidden">
+              <div class="p-2 text-center rounded-lg border border-slate-800 bg-slate-950 peer-checked:border-purple-500 peer-checked:bg-purple-600/10 peer-checked:text-purple-400 text-xs font-medium">
+                Cek Kemasan
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="material_type" value="Materi Iklan" class="peer hidden">
+              <div class="p-2 text-center rounded-lg border border-slate-800 bg-slate-950 peer-checked:border-purple-500 peer-checked:bg-purple-600/10 peer-checked:text-purple-400 text-xs font-medium">
+                Materi Iklan
+              </div>
+            </label>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Kategori Komoditi (JDIH BPOM) <span class="text-rose-400">*</span></label>
+          <select id="artwork-category-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500 cursor-pointer">
+            <option value="Pangan Olahan">Pangan Olahan</option>
+            <option value="Suplemen Kesehatan">Suplemen Kesehatan</option>
+            <option value="Obat Bahan Alam">Obat Bahan Alam (Obat Tradisional/Herbal)</option>
+            <option value="Obat Kuasi">Obat Kuasi</option>
+            <option value="Kosmetik">Kosmetik</option>
+          </select>
+        </div>
+
+        <div class="space-y-2 pt-2">
+          <label class="block text-[11px] font-semibold text-slate-400">Pilihan Berkas / Webpage <span class="text-rose-400">*</span></label>
+          <div class="flex gap-2">
+            <button type="button" onclick="setArtworkSourceMode('file')" id="btn-mode-file" class="flex-1 py-1.5 rounded-lg border border-purple-500 bg-purple-600/20 text-purple-400 text-xs font-semibold">
+              File Gambar (JPG/PNG)
+            </button>
+            <button type="button" onclick="setArtworkSourceMode('webpage')" id="btn-mode-webpage" class="flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold">
+              Webpage URL
+            </button>
+          </div>
+          <div id="container-file-upload" class="space-y-2">
+            <div onclick="document.getElementById('artwork-input').click()" 
+                 class="border-2 border-dashed border-slate-700 hover:border-purple-500 rounded-xl p-4 text-center cursor-pointer transition bg-slate-950/50 flex flex-col items-center justify-center">
+              <input type="file" id="artwork-input" accept="image/png,image/jpeg,image/jpg" onchange="handleArtworkUpload(event)" class="hidden">
+              <i data-lucide="image" class="w-7 h-7 text-purple-400 mb-1"></i>
+              <p class="text-xs font-semibold text-slate-200">Choose File (JPG / PNG)</p>
+            </div>
+            <p id="file-name-display" class="text-[10px] text-slate-500 truncate text-center"></p>
+          </div>
+          <div id="container-webpage-url" class="hidden space-y-2">
+            <input type="url" id="artwork-webpage-input" placeholder="https://domain-produk.com/iklan"
+                   class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+          </div>
+          <div id="artwork-preview-container" class="hidden space-y-2">
+            <img id="artwork-preview-img" class="w-full max-h-40 object-contain rounded-lg bg-slate-950 border border-slate-800" alt="Preview">
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-end gap-3">
+        <button onclick="closeArtworkModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
+          Batal
+        </button>
+        <button id="btn-analyze-artwork" onclick="analyzeArtwork()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+          <i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL POP-UP DETAIL HASIL ANALISIS ARTWORK (DENGAN SEGMENTASI AI) -->
+  <div id="artwork-result-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-3xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20">
+            <i data-lucide="file-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Hasil Review AI - Artwork & Advertising</h3>
+            <p class="text-xs text-slate-400">Pemeriksaan Otomatis Regulasi JDIH BPOM</p>
+          </div>
+        </div>
+        <button onclick="closeArtworkResultModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Printable Area -->
+      <div id="artwork-printable-area" class="p-6 overflow-y-auto space-y-5 flex-1">
+        
+        <!-- Watermark Belum Validasi Legal -->
+        <div class="bg-amber-500/10 border border-amber-500/30 text-amber-400 p-2.5 rounded-xl text-center text-xs font-bold tracking-wide uppercase">
+          ⚠️ DRAFT - HASIL ANALISIS AI (BELUM DIVALIDASI LEGAL)
+        </div>
+
+        <!-- Meta Information -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <div>
+            <p class="text-[10px] text-slate-500 uppercase font-semibold">Judul Produk</p>
+            <p id="res-artwork-title" class="text-xs font-bold text-slate-200 mt-0.5">-</p>
+          </div>
+          <div>
+            <p class="text-[10px] text-slate-500 uppercase font-semibold">Versi & Tipe Materi</p>
+            <p id="res-artwork-meta" class="text-xs font-bold text-slate-200 mt-0.5">-</p>
+          </div>
+          <div>
+            <p class="text-[10px] text-slate-500 uppercase font-semibold">Kategori JDIH</p>
+            <p id="res-artwork-category" class="text-xs font-bold text-purple-400 mt-0.5">-</p>
+          </div>
+        </div>
+
+        <!-- Preview & Compliance Score -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center flex flex-col items-center justify-center min-h-[160px]">
+            <img id="res-artwork-img" class="max-h-44 object-contain rounded-lg hidden" alt="Artwork Preview">
+            <a id="res-artwork-url" href="#" target="_blank" class="text-xs text-purple-400 underline hidden flex items-center gap-1">
+              <i data-lucide="external-link" class="w-4 h-4"></i> Buka Link Webpage Iklan
+            </a>
+          </div>
+
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-semibold text-slate-400">Compliance Score</span>
+              <span id="res-artwork-score" class="text-xl font-extrabold text-slate-100">0/100</span>
+            </div>
+
+            <div class="space-y-2 border-t border-slate-800/80 pt-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400">Status BPOM:</span>
+                <span id="res-artwork-bpom" class="px-2 py-0.5 rounded text-[10px] font-bold border">-</span>
+              </div>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400">Status Halal:</span>
+                <span id="res-artwork-halal" class="px-2 py-0.5 rounded text-[10px] font-bold border">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRI-SEGMENTASI TEMUAN REGULASI AI -->
+        <div class="space-y-3 pt-2">
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="list-checks" class="w-4 h-4 text-purple-400"></i> Rincian Evaluasi Regulasi JDIH BPOM
+          </h4>
+
+          <!-- 1. HIGH RISK -->
+          <div class="bg-rose-950/20 border border-rose-800/40 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
+              <i data-lucide="alert-octagon" class="w-4 h-4"></i> 🔴 High Risk (Risiko Tinggi Pelanggaran Hukum)
+            </div>
+            <div id="res-section-high-risk" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-6">Tidak ditemukan indikasi risiko tinggi.</div>
+          </div>
+
+          <!-- 2. NEED ADJUSTMENT / REMOVAL -->
+          <div class="bg-amber-950/20 border border-amber-800/40 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i> 🟡 Need Adjustment / Removal (Perlu Revisi/Hapus)
+            </div>
+            <div id="res-section-need-adjustment" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-6">Tidak ada elemen yang perlu direvisi.</div>
+          </div>
+
+          <!-- 3. COMPLIANT -->
+          <div class="bg-emerald-950/20 border border-emerald-800/40 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i> 🟢 Compliant (Sesuai Aturan JDIH BPOM)
+            </div>
+            <div id="res-section-compliant" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-6">Seluruh komponen desain telah memenuhi syarat.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex flex-wrap justify-between items-center gap-2">
+        <button onclick="closeArtworkResultModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
+          Tutup
+        </button>
+
+        <div class="flex items-center gap-2">
+          <!-- Tombol Eskalasi Tiket Legal -->
+          <button id="btn-escalate-legal" onclick="triggerTicketFromArtworkResult()" class="bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow">
+            <i data-lucide="ticket" class="w-4 h-4"></i> Ajukan Tiket ke Legal
+          </button>
+          
+          <!-- Tombol Cetak PDF -->
+          <button onclick="downloadArtworkReportPDF()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-purple-600/20">
+            <i data-lucide="printer" class="w-4 h-4"></i> Cetak / Download PDF
+          </button>
+        </div>
       </div>
 
     </div>
   </div>
 
-  <!-- JAVASCRIPT LOGIC -->
+  <!-- MODAL POP-UP NPD SCREENER -->
+  <div id="npd-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
+            <i data-lucide="flask-conical" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Form Kuesioner Ide Produk Baru</h3>
+            <p class="text-xs text-slate-400">Isi data ide produk untuk mengetahui kebutuhan izin edar JDIH BPOM.</p>
+          </div>
+        </div>
+        <button onclick="closeNpdModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Nama / Ide Produk <span class="text-rose-400">*</span></label>
+          <input type="text" id="npd-product-name" required placeholder="Contoh: Collagen Drink Stroberi 250ml"
+                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Kategori Komoditi (JDIH BPOM) <span class="text-rose-400">*</span></label>
+          <select id="npd-category-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer">
+            <option value="Pangan Olahan">Pangan Olahan</option>
+            <option value="Suplemen Kesehatan">Suplemen Kesehatan</option>
+            <option value="Obat Bahan Alam">Obat Bahan Alam (Herbal/Jamu)</option>
+            <option value="Obat Kuasi">Obat Kuasi</option>
+            <option value="Kosmetik">Kosmetik</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Klaim yang Direncanakan</label>
+          <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
+            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
+              <input type="checkbox" name="npd_claim" value="Khasiat / Manfaat Kesehatan" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
+              <span>Khasiat / Kesehatan</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
+              <input type="checkbox" name="npd_claim" value="Kandungan Gizi / Nutrisi" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
+              <span>Kandungan Gizi</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
+              <input type="checkbox" name="npd_claim" value="Label Halal" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
+              <span>Label Halal</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
+              <input type="checkbox" name="npd_claim" value="Alami / Organik" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
+              <span>Alami / Organik</span>
+            </label>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Bahan Utama (Key Ingredients)</label>
+          <input type="text" id="npd-ingredients-input" placeholder="Contoh: Marine Collagen 5000mg, Stevia..."
+                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Skema Produksi <span class="text-rose-400">*</span></label>
+          <select id="npd-scheme-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer">
+            <option value="Pabrik Sendiri">Pabrik Sendiri</option>
+            <option value="Maklon (Contract Manufacturing)">Maklon (Contract Manufacturing)</option>
+            <option value="Impor dalam Bentuk Jadi">Impor dalam Bentuk Jadi</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Negara Asal <span class="text-rose-400">*</span></label>
+          <div class="flex gap-4 text-xs text-slate-300 mb-2">
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="npd_country_type" value="Indonesia" checked onchange="toggleCountryOriginInput(false)"> Indonesia
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="npd_country_type" value="Luar Negeri" onchange="toggleCountryOriginInput(true)"> Luar Negeri
+            </label>
+          </div>
+          <input type="text" id="npd-foreign-country-input" placeholder="Sebutkan Nama Negara..."
+                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 hidden">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Kanal Penjualan (Sales Channels)</label>
+          <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
+            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
+              <input type="checkbox" name="npd_channel" value="Toko Fisik / Ritel" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
+              <span>Toko Fisik / Ritel</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
+              <input type="checkbox" name="npd_channel" value="Marketplace / E-Commerce" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
+              <span>Marketplace / E-Commerce</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
+              <input type="checkbox" name="npd_channel" value="Website / Medsos" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
+              <span>Website Sendiri / Medsos</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 rounded-lg border border-slate-800">
+              <input type="checkbox" name="npd_channel" value="Ekspor / B2B / Distributor" class="rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-0">
+              <span>Ekspor / B2B / Distributor</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-end gap-3">
+        <button onclick="closeNpdModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
+          Batal
+        </button>
+        <button id="btn-screen-npd" onclick="analyzeNpdPermit()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+          <i data-lucide="file-search" class="w-4 h-4"></i> Jalankan Skrining BPOM
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT ENGINE -->
   <script>
-    // 1. Konfigurasi Supabase Client
-    const SUPABASE_URL = "https://<YOUR_SUPABASE_PROJECT_REF>.supabase.co"; // Ganti URL Supabase Anda
-    const SUPABASE_ANON_KEY = "<YOUR_SUPABASE_ANON_KEY>";               // Ganti Anon Key Supabase Anda
+    const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV'; 
+
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentUserSession = null;
+    let currentActiveTicketId = null;
+    let cachedNpdList = [];
+    let cachedContractsList = [];
 
-    // Endpoint Supabase Edge Function Scan-artwork
-    const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/Scan-artwork`;
+    // Artwork Variables
+    let artworkSourceMode = 'file';
+    let selectedArtworkBase64 = "";
+    let selectedMimeType = "image/png";
+    let selectedFileName = "";
+    let currentArtworkAnalysisResult = null;
 
-    // Variable global penyimpan data modal terkini
-    let currentAnalysisData = null;
+    lucide.createIcons();
 
-    // 2. Fungsi Memuat Tabel Tiket (Filter Khusus Kategori Artwork Approval)
-    async function loadArtworkTable() {
-      const tableBody = document.getElementById('artworkTableBody');
-      if (!tableBody) return;
+    function esc(v) {
+      return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
 
-      try {
-        const { data, error } = await supabaseClient
-          .from('tickets')
-          .select('*')
-          .eq('category', 'Artwork Approval')
-          .order('created_at', { ascending: false });
+    // ==========================================
+    // ARTWORK PRE-SCREENING & DETAIL RESULTS
+    // ==========================================
+    function openArtworkModal() {
+      document.getElementById('artwork-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
 
-        if (error) {
-          console.error("Gagal mengambil data tiket artwork:", error.message);
-          tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-400">Gagal memuat data: ${error.message}</td></tr>`;
-          return;
-        }
+    function closeArtworkModal() {
+      document.getElementById('artwork-modal').classList.add('hidden');
+    }
 
-        tableBody.innerHTML = '';
+    function closeArtworkResultModal() {
+      document.getElementById('artwork-result-modal').classList.add('hidden');
+    }
 
-        if (!data || data.length === 0) {
-          tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-400">Belum ada riwayat tiket Artwork Approval.</td></tr>';
-          return;
-        }
+    function setArtworkSourceMode(mode) {
+      artworkSourceMode = mode;
+      const btnFile = document.getElementById('btn-mode-file');
+      const btnWeb = document.getElementById('btn-mode-webpage');
+      const containerFile = document.getElementById('container-file-upload');
+      const containerWeb = document.getElementById('container-webpage-url');
 
-        data.forEach((ticket) => {
-          const row = document.createElement('tr');
-          row.className = "hover:bg-gray-700/50 transition";
-
-          // Badge Status
-          let statusBadge = "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30";
-          if (ticket.status === 'Approved' || ticket.status === 'Compliant') {
-            statusBadge = "bg-green-500/20 text-green-300 border border-green-500/30";
-          } else if (ticket.status === 'Rejected' || ticket.status === 'High Risk') {
-            statusBadge = "bg-red-500/20 text-red-300 border border-red-500/30";
-          }
-
-          // Format Tanggal
-          const createdDate = ticket.created_at 
-            ? new Date(ticket.created_at).toLocaleDateString('id-ID', {
-                day: '2-digit', month: 'short', year: 'numeric'
-              })
-            : '-';
-
-          row.innerHTML = `
-            <td class="py-3 px-4 font-mono text-blue-400">${ticket.ticket_code || ('TCK-' + ticket.id)}</td>
-            <td class="py-3 px-4 font-medium text-white">${ticket.title || 'Tanpa Judul'}</td>
-            <td class="py-3 px-4 text-gray-300">${ticket.category}</td>
-            <td class="py-3 px-4">
-              <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusBadge}">
-                ${ticket.status || 'Pending'}
-              </span>
-            </td>
-            <td class="py-3 px-4 text-gray-300">${ticket.priority || 'Medium'}</td>
-            <td class="py-3 px-4 text-gray-400">${createdDate}</td>
-          `;
-
-          tableBody.appendChild(row);
-        });
-      } catch (err) {
-        console.error("Error koneksi:", err);
-        tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-400">Terjadi kesalahan koneksi.</td></tr>';
+      if (mode === 'file') {
+        btnFile.className = "flex-1 py-1.5 rounded-lg border border-purple-500 bg-purple-600/20 text-purple-400 text-xs font-semibold";
+        btnWeb.className = "flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold";
+        containerFile.classList.remove('hidden');
+        containerWeb.classList.add('hidden');
+      } else {
+        btnWeb.className = "flex-1 py-1.5 rounded-lg border border-purple-500 bg-purple-600/20 text-purple-400 text-xs font-semibold";
+        btnFile.className = "flex-1 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold";
+        containerWeb.classList.remove('hidden');
+        containerFile.classList.add('hidden');
       }
     }
 
-    // 3. Fungsi Handle Form Submit & Panggil Edge Function
-    async function handleScanArtwork(event) {
-      event.preventDefault();
-      const btnSubmit = document.getElementById('btnSubmit');
-      btnSubmit.disabled = true;
-      btnSubmit.innerHTML = `<span>Proses Menganalisis AI...</span>`;
+   function handleArtworkUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  selectedFileName = file.name;
+  document.getElementById('file-name-display').innerText = file.name;
+
+  const img = new Image();
+  const url = URL.createObjectURL(file);
+  img.onload = function () {
+    const MAX = 1600;
+    const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    const fullBase64 = canvas.toDataURL('image/jpeg', 0.8);
+    selectedMimeType = 'image/jpeg';
+    selectedArtworkBase64 = fullBase64.split(',')[1];
+    document.getElementById('artwork-preview-img').src = fullBase64;
+    document.getElementById('artwork-preview-container').classList.remove('hidden');
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+}
+
+    async function loadArtworkTable() {
+      const tbody = document.getElementById('table-artwork-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-purple-400 inline mr-2"></i> Memuat data artwork...</td></tr>`;
+      lucide.createIcons();
 
       try {
-        const title = document.getElementById('title').value;
-        const designVersion = document.getElementById('designVersion').value;
-        const materialType = document.getElementById('materialType').value;
-        const category = document.getElementById('category').value;
-        const webpageUrl = document.getElementById('webpageUrl').value;
-        const fileInput = document.getElementById('imageFile');
+        const { data: list, error } = await supabaseClient
+          .from('artwork_prescreenings')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-        let imageBase64 = null;
-        let mimeType = null;
+        if (error) throw error;
 
-        if (fileInput.files && fileInput.files[0]) {
-          const file = fileInput.files[0];
-          mimeType = file.type;
-          imageBase64 = await convertFileToBase64(file);
+        if (!list || list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat audit artwork. Klik "+ Periksa Artwork Baru".</td></tr>`;
+          return;
         }
 
+        tbody.innerHTML = list.map(item => {
+          const bpomStatus = item.bpom_status || 'Pending';
+          const halalStatus = item.halal_status || 'Pending';
+          const score = item.compliance_score !== null && item.compliance_score !== undefined ? item.compliance_score : 0;
+          const materialType = item.material_type || 'Kemasan';
+          const title = item.title || item.product_name || 'Tanpa Judul';
+
+          const jsonItem = JSON.stringify(item).replace(/'/g, "&apos;");
+
+          return `
+            <tr onclick='openStoredArtworkResult(${jsonItem})' class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs cursor-pointer">
+              <td class="px-4 py-3 font-semibold text-slate-100">${esc(title)}</td>
+              <td class="px-4 py-3 text-slate-400 font-mono">${esc(item.design_version || 'v1')}</td>
+              <td class="px-4 py-3 text-slate-300 font-medium">${esc(materialType)}</td>
+              <td class="px-4 py-3 text-slate-300">${esc(item.category || '-')}</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 ${bpomStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded font-bold text-[10px]">
+                  ${esc(bpomStatus)}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 ${halalStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'} border rounded font-bold text-[10px]">
+                  ${esc(halalStatus)}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center font-bold text-slate-200">${score}/100</td>
+              <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</td>
+            </tr>
+          `;
+        }).join('');
+        lucide.createIcons();
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat artwork: ${esc(err.message || err)}</td></tr>`;
+      }
+    }
+
+    function openStoredArtworkResult(item) {
+      const payload = {
+        title: item.title || item.product_name || 'Tanpa Judul',
+        designVersion: item.design_version || 'v1.0',
+        materialType: item.material_type || 'Kemasan',
+        category: item.category || 'Pangan Olahan',
+        imageBase64: item.image_base64 || null,
+        webpageUrl: item.webpage_url || null,
+        mimeType: item.mime_type || 'image/png'
+      };
+
+      let responseData = {};
+      if (typeof item.analysis_result === 'object' && item.analysis_result !== null) {
+        responseData = item.analysis_result;
+      } else if (typeof item.analysis_result === 'string') {
+        try { responseData = JSON.parse(item.analysis_result); } catch(e) {}
+      }
+
+      responseData.compliance_score = item.compliance_score ?? responseData.compliance_score;
+      responseData.bpom_status = item.bpom_status ?? responseData.bpom_status;
+      responseData.halal_status = item.halal_status ?? responseData.halal_status;
+      responseData.high_risk_items = item.high_risk_items || responseData.high_risk_items || responseData.high_risk;
+      responseData.need_adjustment_items = item.need_adjustment_items || responseData.need_adjustment_items || responseData.need_adjustment;
+      responseData.compliant_items = item.compliant_items || responseData.compliant_items || responseData.compliant;
+      responseData.saved_id = item.id;
+
+      showArtworkResultModal(payload, responseData);
+    }
+
+    async function analyzeArtwork() {
+      const title = document.getElementById('artwork-title-input').value.trim();
+      const designVersion = document.getElementById('artwork-version-input').value.trim() || 'v1.0';
+      const materialType = document.querySelector('input[name="material_type"]:checked').value;
+      const category = document.getElementById('artwork-category-select').value;
+      const webpageUrl = document.getElementById('artwork-webpage-input').value.trim();
+
+      if (!title) {
+        alert('Mohon isi Judul / Nama Produk terlebih dahulu!');
+        return;
+      }
+
+      if (artworkSourceMode === 'file' && !selectedArtworkBase64) {
+        alert('Mohon pilih file gambar (JPG/PNG) terlebih dahulu!');
+        return;
+      }
+
+      if (artworkSourceMode === 'webpage' && !webpageUrl) {
+        alert('Mohon masukkan URL Webpage terlebih dahulu!');
+        return;
+      }
+
+      const btn = document.getElementById("btn-analyze-artwork");
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa via Gemini...`;
+      lucide.createIcons();
+
+      try {
         const payload = {
-          title, designVersion, materialType, category, imageBase64, mimeType, webpageUrl
+          title,
+          designVersion,
+          materialType,
+          category,
+          imageBase64: artworkSourceMode === 'file' ? selectedArtworkBase64 : null,
+          mimeType: artworkSourceMode === 'file' ? selectedMimeType : null,
+          fileName: artworkSourceMode === 'file' ? selectedFileName : null,
+          webpageUrl: artworkSourceMode === 'webpage' ? webpageUrl : null
         };
 
-        const response = await fetch(EDGE_FUNCTION_URL, {
-          method: 'POST',
+        const { data, error } = await supabaseClient.functions.invoke("Scan-artwork", { body: payload });
+
+        if (error || (data && data.error)) {
+  let detail = data?.error || error?.message;
+  try { detail = (await error.context.json()).error || detail; } catch (_) {}
+  alert("Gagal menganalisis compliance: " + detail);
+  btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
+  lucide.createIcons();
+  return;
+}
+
+        if (currentUserSession) {
+          logAuditAction(currentUserSession.username, 'PERIKSA_ARTWORK', 'artwork_prescreenings', data.saved_id);
+        }
+        
+        closeArtworkModal();
+        loadArtworkTable();
+        showArtworkResultModal(payload, data);
+
+      } catch (err) {
+        alert("Terjadi kesalahan sistem: " + err.message);
+      }
+
+      btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
+      lucide.createIcons();
+    }
+
+    function showArtworkResultModal(payload, responseData) {
+      currentArtworkAnalysisResult = { payload, responseData };
+
+      document.getElementById('res-artwork-title').innerText = payload.title || '-';
+      document.getElementById('res-artwork-meta').innerText = `${payload.designVersion} (${payload.materialType})`;
+      document.getElementById('res-artwork-category').innerText = payload.category || '-';
+
+      const imgElem = document.getElementById('res-artwork-img');
+      const urlElem = document.getElementById('res-artwork-url');
+
+      if (payload.imageBase64) {
+        imgElem.src = payload.imageBase64.startsWith('data:') ? payload.imageBase64 : `data:${payload.mimeType || 'image/png'};base64,${payload.imageBase64}`;
+        imgElem.classList.remove('hidden');
+        urlElem.classList.add('hidden');
+      } else if (payload.webpageUrl) {
+        urlElem.href = payload.webpageUrl;
+        urlElem.classList.remove('hidden');
+        imgElem.classList.add('hidden');
+      } else {
+        imgElem.classList.add('hidden');
+        urlElem.classList.add('hidden');
+      }
+
+      const bpomStatus = responseData.bpom_status || responseData.bpomStatus || 'Non-Compliant';
+      const halalStatus = responseData.halal_status || responseData.halalStatus || 'Pending';
+      const score = responseData.compliance_score ?? responseData.complianceScore ?? responseData.score ?? 0;
+
+      document.getElementById('res-artwork-score').innerText = `${score}/100`;
+
+      const bpomElem = document.getElementById('res-artwork-bpom');
+      bpomElem.innerText = bpomStatus;
+      bpomElem.className = `px-2 py-0.5 rounded text-[10px] font-bold border ${
+        bpomStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+      }`;
+
+      const halalElem = document.getElementById('res-artwork-halal');
+      halalElem.innerText = halalStatus;
+      halalElem.className = `px-2 py-0.5 rounded text-[10px] font-bold border ${
+        halalStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+      }`;
+
+      const highRiskText = responseData.high_risk_items || responseData.high_risk || responseData.highRisk;
+      const needAdjText = responseData.need_adjustment_items || responseData.need_adjustment || responseData.needAdjustment;
+      const compliantText = responseData.compliant_items || responseData.compliant;
+
+      document.getElementById('res-section-high-risk').innerText = highRiskText && highRiskText.trim() !== '' ? highRiskText : "Tidak ditemukan indikasi risiko tinggi.";
+      document.getElementById('res-section-need-adjustment').innerText = needAdjText && needAdjText.trim() !== '' ? needAdjText : "Tidak ditemukan rekomendasi revisi/penghapusan.";
+      document.getElementById('res-section-compliant').innerText = compliantText && compliantText.trim() !== '' ? compliantText : "Seluruh elemen umum telah sesuai.";
+
+      document.getElementById('artwork-result-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function triggerTicketFromArtworkResult() {
+      if (!currentArtworkAnalysisResult) return;
+      const { payload, responseData } = currentArtworkAnalysisResult;
+
+      closeArtworkResultModal();
+
+      document.getElementById('ticket-npd-id-hidden').value = responseData.saved_id || '';
+      document.getElementById('ticket-title-input').value = `[Review Legal Artwork] - ${payload.title} (${payload.designVersion})`;
+      document.getElementById('ticket-category-select').value = 'Approval Artwork';
+      document.getElementById('ticket-priority-select').value = 'High';
+      
+      const highRiskText = responseData.high_risk_items || responseData.high_risk || 'Tidak ada';
+      const needAdjText = responseData.need_adjustment_items || responseData.need_adjustment || 'Tidak ada';
+
+      document.getElementById('ticket-description-input').value = 
+        `Pemeriksaan AI awal menemukan potensi risiko compliance pada artwork:\n` +
+        `Nama Produk: ${payload.title}\n` +
+        `Versi/Materi: ${payload.designVersion} (${payload.materialType})\n` +
+        `Kategori: ${payload.category}\n\n` +
+        `🔴 HIGH RISK TEMUAN AI:\n${highRiskText}\n\n` +
+        `🟡 NEED ADJUSTMENT / REMOVAL:\n${needAdjText}\n\n` +
+        `Mohon Tim Legal melakukan peninjauan ulang & validasi kepatuhan resmi.`;
+
+      document.getElementById('ticket-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function downloadArtworkReportPDF() {
+      const printArea = document.getElementById('artwork-printable-area');
+      if (!printArea) {
+        window.print();
+        return;
+      }
+
+      const printWindow = window.open('', '_blank', 'width=850,height=1100');
+      
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Laporan Compliance Artwork - LegalOps</title>
+          <script src="https://cdn.tailwindcss.com"><\/script>
+          <style>
+            body { font-family: sans-serif; background-color: #ffffff !important; color: #0f172a !important; padding: 24px; }
+            .bg-slate-950, .bg-slate-900 { background-color: #f8fafc !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; }
+            .bg-rose-950\\/20 { background-color: #fff1f2 !important; border: 1px solid #fecdd3 !important; }
+            .bg-amber-950\\/20 { background-color: #fffbeb !important; border: 1px solid #fef3c7 !important; }
+            .bg-emerald-950\\/20 { background-color: #f0fdf4 !important; border: 1px solid #bbf7d0 !important; }
+            .text-slate-100, .text-slate-200, .text-slate-300 { color: #0f172a !important; }
+            .text-slate-400, .text-slate-500 { color: #475569 !important; }
+            .border-slate-800 { border-color: #cbd5e1 !important; }
+            .no-print { display: none !important; }
+            img { max-height: 220px !important; margin: 0 auto; }
+          </style>
+        </head>
+        <body onload="window.print(); setTimeout(() => window.close(), 500);">
+          <div style="margin-bottom: 20px; border-bottom: 2px solid #0f172a; padding-bottom: 12px; display: flex; justify-content: space-between; items-center: center;">
+            <div>
+              <h2 style="font-size: 20px; font-weight: bold; margin: 0;">LEGALOPS & COMPLIANCE INTELLIGENCE</h2>
+              <p style="font-size: 12px; color: #475569; margin: 4px 0 0 0;">Laporan Evaluasi Kepatuhan Artwork & Materi Iklan JDIH BPOM</p>
+            </div>
+            <div style="text-align: right; font-size: 11px; color: #64748b;">
+              Tanggal Audit: ${new Date().toLocaleDateString('id-ID')}
+            </div>
+          </div>
+          ${printArea.innerHTML}
+        </body>
+        </html>
+      `;
+
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+    }
+
+    // ==========================================
+    // VENDOR CONTRACTS LOAD
+    // ==========================================
+    async function handleScanGoogleDriveEdge() {
+      const btn = document.getElementById('btn-scan-drive');
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memindai Drive...`;
+      lucide.createIcons();
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/scan-gdrive`, {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            username: currentUserSession ? currentUserSession.username : 'guest'
+          })
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok || result.error) {
+          alert("Gagal memindai Google Drive: " + (result.error || "HTTP " + response.status));
+          return;
+        }
+
+        if (currentUserSession) {
+          logAuditAction(currentUserSession.username, 'SCAN_GDRIVE', 'vendor_contracts', null);
+        }
+        alert("Pemindaian selesai!");
+        loadContracts();
+      } catch (err) {
+        alert("Terjadi kesalahan koneksi: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        lucide.createIcons();
+      }
+    }
+
+    async function loadContracts() {
+      const tbody = document.getElementById('table-contracts-body');
+      tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-blue-400 inline mr-2"></i> Mengambil data dari Supabase...</td></tr>`;
+      lucide.createIcons();
+
+      try {
+        const { data: contracts, error } = await supabaseClient
+          .from('vendor_contracts')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!contracts || contracts.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-8 text-center text-slate-500">Belum ada data kontrak vendor.</td></tr>`;
+          return;
+        }
+
+        cachedContractsList = contracts;
+
+        tbody.innerHTML = contracts.map(c => {
+          const isExpired = c.status !== 'Aktif';
+
+          return `
+          <tr class="hover:bg-slate-800/50 transition border-b border-slate-800/40 text-xs">
+            <td class="px-3.5 py-3 text-center">
+              <input type="checkbox" value="${c.id}" class="contract-checkbox rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer">
+            </td>
+            <td class="px-4 py-3 font-semibold text-slate-100 whitespace-nowrap">
+              <div class="flex flex-col">
+                <span>${esc(c.vendor_name)}</span>
+                <span class="text-[10px] text-slate-500 font-mono">${esc(c.contract_number) || '-'}</span>
+              </div>
+            </td>
+            <td class="px-3.5 py-3 text-slate-200 font-medium whitespace-nowrap">
+              <span class="px-2 py-0.5 bg-purple-500/10 text-purple-300 border border-purple-500/20 rounded font-semibold text-[10px]">${esc(c.agreement_type) || '-'}</span>
+            </td>
+            <td class="px-3.5 py-3 text-slate-300 whitespace-nowrap">
+              <div class="flex flex-col text-[11px] font-mono">
+                <span class="text-slate-400">Mul: ${esc(c.effective_date) || '-'}</span>
+                <span class="${isExpired ? 'text-rose-400 font-bold' : 'text-emerald-400'}">Exp: ${esc(c.expiration_date) || '-'}</span>
+              </div>
+            </td>
+            <td class="px-3.5 py-3 whitespace-nowrap">
+              <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-medium text-[11px]">${esc(c.payment_terms) || '-'}</span>
+            </td>
+            <td class="px-3.5 py-3 text-slate-400 min-w-[180px] max-w-[220px]" title="${esc(c.late_penalty)}"><p class="line-clamp-2 leading-relaxed">${esc(c.late_penalty) || '-'}</p></td>
+            <td class="px-3.5 py-3 text-slate-400 min-w-[180px] max-w-[220px]" title="${esc(c.termination_clause)}"><p class="line-clamp-2 leading-relaxed">${esc(c.termination_clause) || '-'}</p></td>
+            <td class="px-3.5 py-3 text-slate-400 min-w-[160px] max-w-[200px]" title="${esc(c.confidentiality_clause)}"><p class="line-clamp-2 leading-relaxed">${esc(c.confidentiality_clause) || '-'}</p></td>
+            <td class="px-3.5 py-3 text-slate-300 whitespace-nowrap"><span class="text-[11px]">${esc(c.governing_law) || '-'}</span></td>
+            <td class="px-3.5 py-3 whitespace-nowrap">
+              <span class="px-2.5 py-1 ${c.status === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold inline-flex items-center gap-1">
+                ${esc(c.status) || '-'}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-center whitespace-nowrap sticky right-0 bg-slate-900/95 backdrop-blur shadow-l">
+              <a href="${esc(c.gdrive_web_link)}" target="_blank" class="p-1.5 bg-slate-800 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg transition inline-flex items-center gap-1" title="Buka Dokumen di Google Drive">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </a>
+            </td>
+          </tr>`;
+        }).join('');
+        lucide.createIcons();
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat vendor: ${esc(err.message || err)}</td></tr>`;
+      }
+    }
+
+    // ==========================================
+    // NPD SCREENER LOGIC
+    // ==========================================
+    function openNpdModal(existingItem = null) {
+      if (existingItem) {
+        document.getElementById('npd-product-name').value = existingItem.product_idea_name || '';
+        document.getElementById('npd-category-select').value = existingItem.category || 'Pangan Olahan';
+        document.getElementById('npd-ingredients-input').value = existingItem.main_ingredients || '';
+        document.getElementById('npd-scheme-select').value = existingItem.production_scheme || 'Pabrik Sendiri';
+      } else {
+        document.getElementById('npd-product-name').value = '';
+        document.getElementById('npd-ingredients-input').value = '';
+        document.getElementById('npd-category-select').value = 'Pangan Olahan';
+        document.getElementById('npd-scheme-select').value = 'Pabrik Sendiri';
+        document.getElementById('npd-foreign-country-input').value = '';
+        
+        const radioIndonesia = document.querySelector('input[name="npd_country_type"][value="Indonesia"]');
+        if (radioIndonesia) radioIndonesia.checked = true;
+        toggleCountryOriginInput(false);
+
+        document.querySelectorAll('input[name="npd_claim"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('input[name="npd_channel"]').forEach(cb => cb.checked = false);
+      }
+
+      document.getElementById('npd-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeNpdModal() {
+      document.getElementById('npd-modal').classList.add('hidden');
+    }
+
+    function toggleCountryOriginInput(isForeign) {
+      const input = document.getElementById('npd-foreign-country-input');
+      if (isForeign) {
+        input.classList.remove('hidden');
+        input.required = true;
+      } else {
+        input.classList.add('hidden');
+        input.required = false;
+        input.value = '';
+      }
+    }
+
+    async function loadNpdProductsTable() {
+      const tbody = document.getElementById('table-npd-body');
+      tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400 inline mr-2"></i> Memuat data NPD...</td></tr>`;
+      lucide.createIcons();
+
+      try {
+        const { data: list, error } = await supabaseClient
+          .from('npd_permit_screenings')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!list || list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Belum ada ide produk yang diskrining. Klik "+ Skrining Produk Baru".</td></tr>`;
+          return;
+        }
+
+        cachedNpdList = list;
+
+        tbody.innerHTML = list.map(item => {
+          const score = item.feasibility_score || 0;
+          const isCompliant = score >= 70;
+
+          return `
+            <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+              <td class="px-4 py-3 font-semibold text-slate-100">${esc(item.product_idea_name)}</td>
+              <td class="px-4 py-3 text-slate-300">${esc(item.category)}</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-mono font-bold text-[10px]">
+                  ${esc(item.matched_permit_code || 'BPOM RI')}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 ${isCompliant ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold">
+                  ${isCompliant ? 'High Feasibility (Lolos BPOM)' : 'Risk / Barrier (Tidak Sesuai)'}
+                </span>
+              </td>
+              <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</td>
+              <td class="px-4 py-3 text-center">
+                ${isCompliant ? `
+                  <button onclick="triggerTicketFromNpd('${item.id}')" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded font-bold text-[10px] shadow flex items-center gap-1 mx-auto">
+                    <i data-lucide="ticket" class="w-3 h-3"></i> Ajukan Tiket Legal
+                  </button>
+                ` : `
+                  <button onclick="rescreenNpdProduct('${item.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-rose-400 border border-rose-500/30 rounded font-bold text-[10px] flex items-center gap-1 mx-auto">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Skrining Ulang
+                  </button>
+                `}
+              </td>
+            </tr>
+          `;
+        }).join('');
+        lucide.createIcons();
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat NPD: ${esc(err.message || err)}</td></tr>`;
+      }
+    }
+
+    function rescreenNpdProduct(npdId) {
+      const item = cachedNpdList.find(x => x.id === npdId);
+      if (item) openNpdModal(item);
+    }
+
+    function triggerTicketFromNpd(npdId) {
+      const item = cachedNpdList.find(x => x.id === npdId);
+      if (!item) return;
+
+      document.getElementById('ticket-npd-id-hidden').value = item.id;
+      document.getElementById('ticket-title-input').value = `[Verifikasi Legal] - ${item.product_idea_name}`;
+      document.getElementById('ticket-category-select').value = 'Verifikasi NPD BPOM';
+      document.getElementById('ticket-priority-select').value = 'High';
+      document.getElementById('ticket-description-input').value = 
+        `Produk telah lolos skrining awal BPOM dengan kecocokan izin "${item.matched_permit_code}".\n` +
+        `Kategori: ${item.category}\n` +
+        `Bahan Utama: ${item.main_ingredients || '-'}\n` +
+        `Skema Produksi: ${item.production_scheme || '-'}\n\n` +
+        `Mohon tim Legal melakukan verifikasi dokumen dan legalitas izin edar lebih dalam.`;
+
+      document.getElementById('ticket-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    async function analyzeNpdPermit() {
+      const productName = document.getElementById('npd-product-name').value.trim();
+      const category = document.getElementById('npd-category-select').value;
+      const mainIngredients = document.getElementById('npd-ingredients-input').value.trim();
+      const productionScheme = document.getElementById('npd-scheme-select').value;
+
+      if (!productName) {
+        alert('Mohon isi Nama / Ide Produk terlebih dahulu!');
+        return;
+      }
+
+      const claimBoxes = document.querySelectorAll('input[name="npd_claim"]:checked');
+      const claims = Array.from(claimBoxes).map(cb => cb.value);
+
+      const isForeignRadio = document.querySelector('input[name="npd_country_type"]:checked').value === 'Luar Negeri';
+      const foreignCountry = document.getElementById('npd-foreign-country-input').value.trim();
+      const countryOrigin = isForeignRadio ? (foreignCountry || 'Luar Negeri') : 'Indonesia';
+
+      const channelBoxes = document.querySelectorAll('input[name="npd_channel"]:checked');
+      const salesChannels = Array.from(channelBoxes).map(cb => cb.value);
+
+      const btn = document.getElementById('btn-screen-npd');
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menganalisis...`;
+      lucide.createIcons();
+
+      try {
+        const payload = {
+          productName,
+          category,
+          claims,
+          mainIngredients,
+          productionScheme,
+          countryOrigin,
+          salesChannels,
+          username: currentUserSession ? currentUserSession.username : 'guest'
+        };
+
+        const response = await fetch("https://zsifocstbcbrxtexkuyi.supabase.co/functions/v1/scan-npd-permit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY
           },
           body: JSON.stringify(payload)
         });
 
         const result = await response.json();
 
-        if (!response.ok) {
-          throw new Error(result.error || "Gagal melakukan analisis artwork.");
+        if (!response.ok || result.error) {
+          alert("Gagal melakukan skrining perizinan NPD: " + (result.error || "HTTP Error " + response.status));
+          btn.innerHTML = `<i data-lucide="file-search" class="w-4 h-4"></i> Jalankan Skrining BPOM`;
+          lucide.createIcons();
+          return;
         }
 
-        // Tampilkan Hasil di Pop-Up Modal
-        currentAnalysisData = { ...payload, ...result };
-        showResultModal(currentAnalysisData);
-
-        // Refresh tabel riwayat tiket
-        loadArtworkTable();
+        logAuditAction(currentUserSession.username, 'NPD_PERMIT_SCREENING', 'npd_permit_screenings', result.saved_id);
+        closeNpdModal();
+        alert('Skrining berhasil! Data kelayakan produk telah diperbarui.');
+        loadNpdProductsTable();
 
       } catch (err) {
-        alert("Error: " + err.message);
-      } finally {
-        btnSubmit.disabled = false;
-        btnSubmit.innerHTML = `<span>Jalankan Analisis AI</span>`;
+        alert("Terjadi kesalahan koneksi: " + err.message);
+      }
+
+      btn.innerHTML = `<i data-lucide="file-search" class="w-4 h-4"></i> Jalankan Skrining BPOM`;
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // TICKETING SYSTEM FUNCTIONS
+    // ==========================================
+    function openCreateTicketModal() {
+      document.getElementById('ticket-npd-id-hidden').value = '';
+      document.getElementById('ticket-title-input').value = '';
+      document.getElementById('ticket-description-input').value = '';
+      document.getElementById('ticket-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCreateTicketModal() {
+      document.getElementById('ticket-modal').classList.add('hidden');
+    }
+
+    async function loadTicketsTable() {
+      const tbody = document.getElementById('table-tickets-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-amber-400 inline mr-2"></i> Memuat data tiket...</td></tr>`;
+      lucide.createIcons();
+
+      try {
+        const { data: tickets, error } = await supabaseClient
+          .from('tickets')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!tickets || tickets.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada tiket compliance yang dibuat.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = tickets.map(t => `
+          <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+            <td class="px-4 py-3 font-mono font-bold text-amber-400">${esc(t.ticket_number)}</td>
+            <td class="px-4 py-3 font-semibold text-slate-100">${esc(t.title)}</td>
+            <td class="px-4 py-3 text-slate-300">${esc(t.category)}</td>
+            <td class="px-4 py-3 font-bold ${t.priority === 'Urgent' ? 'text-rose-400' : 'text-slate-300'}">${esc(t.priority)}</td>
+            <td class="px-4 py-3 text-slate-300">${esc(t.requested_by)}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-bold text-[10px]">
+                ${esc(t.status)}
+              </span>
+            </td>
+            <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${t.created_at ? new Date(t.created_at).toLocaleDateString('id-ID') : '-'}</td>
+            <td class="px-4 py-3 text-center">
+              <button onclick="openTicketDetailModal('${t.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-semibold text-[10px]">
+                Buka Detail
+              </button>
+            </td>
+          </tr>
+        `).join('');
+        lucide.createIcons();
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat tiket: ${esc(err.message || err)}</td></tr>`;
       }
     }
 
-    // Convert File to Pure Base64 String
-    function convertFileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-          const base64Str = reader.result.split(',')[1];
-          resolve(base64Str);
-        };
-        reader.onerror = error => reject(error);
-      });
+    async function submitNewTicket() {
+      const title = document.getElementById('ticket-title-input').value.trim();
+      const category = document.getElementById('ticket-category-select').value;
+      const priority = document.getElementById('ticket-priority-select').value;
+      const description = document.getElementById('ticket-description-input').value.trim();
+      const npdId = document.getElementById('ticket-npd-id-hidden').value || null;
+
+      if (!title || !description) {
+        alert('Mohon lengkapi Judul dan Deskripsi Permintaan!');
+        return;
+      }
+
+      const ticketNumber = 'TKT-' + Math.floor(100000 + Math.random() * 900000);
+
+      const { data, error } = await supabaseClient.from('tickets').insert([{
+        ticket_number: ticketNumber,
+        title: title,
+        category: category,
+        priority: priority,
+        description: description,
+        requested_by: currentUserSession ? currentUserSession.username : 'guest',
+        npd_product_id: npdId
+      }]).select();
+
+      if (error) {
+        alert('Gagal membuat tiket: ' + error.message);
+      } else {
+        logAuditAction(currentUserSession.username, 'CREATE_TICKET', 'tickets', data?.[0]?.id);
+        closeCreateTicketModal();
+        alert(`Tiket ${ticketNumber} berhasil dibuat dan dikirim ke tim Legal!`);
+        switchTab('tickets-module');
+      }
     }
 
-    // 4. Fungsi Tampilkan Modal Hasil
-    function showResultModal(data) {
-      document.getElementById('modalTitle').innerText = data.title || 'Laporan Analysis';
-      document.getElementById('modalMeta').innerText = `Versi: ${data.designVersion || 'v1.0'} | Tipe: ${data.materialType || 'Kemasan'} | Kategori: ${data.category || 'Pangan'}`;
-      document.getElementById('modalScore').innerText = (data.compliance_score || 0) + '%';
-      document.getElementById('modalBpom').innerText = data.bpom_status || 'Pending';
-      document.getElementById('modalHalal').innerText = data.halal_status || 'Pending';
+    async function openTicketDetailModal(ticketId) {
+      currentActiveTicketId = ticketId;
+      const { data: ticket, error } = await supabaseClient.from('tickets').select('*').eq('id', ticketId).single();
+      if (error || !ticket) return;
 
-      document.getElementById('modalHighRisk').innerText = data.high_risk_items || 'Tidak ditemukan indikasi risiko tinggi.';
-      document.getElementById('modalAdjustment').innerText = data.need_adjustment_items || 'Tidak ada elemen yang perlu direvisi.';
-      document.getElementById('modalCompliant').innerText = data.compliant_items || '-';
+      document.getElementById('detail-ticket-number').innerText = ticket.ticket_number;
+      document.getElementById('detail-ticket-title').innerText = ticket.title;
+      document.getElementById('detail-ticket-author').innerText = `Pengaju: ${ticket.requested_by}`;
+      document.getElementById('detail-ticket-status').innerText = ticket.status;
+      document.getElementById('detail-ticket-description').innerText = ticket.description;
+      document.getElementById('update-ticket-status-select').value = ticket.status;
 
-      document.getElementById('resultModal').classList.remove('hidden');
+      loadTicketComments(ticketId);
+      document.getElementById('ticket-detail-modal').classList.remove('hidden');
+      lucide.createIcons();
     }
 
-    function closeModal() {
-      document.getElementById('resultModal').classList.add('hidden');
+    function closeTicketDetailModal() {
+      document.getElementById('ticket-detail-modal').classList.add('hidden');
     }
 
-    // 5. Fungsi Download Laporan PDF
-    function downloadPDF() {
-      const element = document.getElementById('pdfPrintArea');
-      const opt = {
-        margin:       0.5,
-        filename:     `Laporan_Compliance_${(document.getElementById('modalTitle').innerText).replace(/\s+/g, '_')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, backgroundColor: '#1f2937' },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(element).save();
+    async function loadTicketComments(ticketId) {
+      const container = document.getElementById('comments-thread-container');
+      const { data: comments } = await supabaseClient.from('ticket_comments').select('*').eq('ticket_id', ticketId).order('created_at', { ascending: true });
+
+      if (!comments || comments.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada diskusi pada tiket ini.</p>`;
+        return;
+      }
+
+      container.innerHTML = comments.map(c => `
+        <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
+          <div class="flex justify-between items-center mb-1">
+            <span class="font-bold text-amber-400">${esc(c.sender_username)}</span>
+            <span class="text-[10px] text-slate-500">${c.created_at ? new Date(c.created_at).toLocaleTimeString('id-ID') : '-'}</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">${esc(c.message)}</p>
+        </div>
+      `).join('');
     }
 
-    // Inisialisasi saat pertama kali buka halaman
+    async function postTicketComment() {
+      const input = document.getElementById('ticket-comment-input');
+      const msg = input.value.trim();
+      if (!msg || !currentActiveTicketId) return;
+
+      await supabaseClient.from('ticket_comments').insert([{
+        ticket_id: currentActiveTicketId,
+        sender_username: currentUserSession ? currentUserSession.username : 'system',
+        message: msg
+      }]);
+
+      input.value = '';
+      loadTicketComments(currentActiveTicketId);
+    }
+
+    async function updateTicketStatusFromModal() {
+      const status = document.getElementById('update-ticket-status-select').value;
+      if (!currentActiveTicketId) return;
+
+      await supabaseClient.from('tickets').update({ status: status }).eq('id', currentActiveTicketId);
+      logAuditAction(currentUserSession.username, 'UPDATE_TICKET_STATUS', 'tickets', currentActiveTicketId);
+      loadTicketsTable();
+    }
+
+    // ==========================================
+    // AUDIT TRAIL LOGS LOAD
+    // ==========================================
+    async function loadAuditLogs() {
+      const tbody = document.getElementById('table-audit-body');
+      tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-2"></i> Mengambil log...</td></tr>`;
+      lucide.createIcons();
+
+      try {
+        const { data: logs, error } = await supabaseClient
+          .from('audit_logs')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (error) throw error;
+
+        if (!logs || logs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">Belum ada riwayat aktivitas tercatat.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = logs.map(l => `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="px-4 py-2.5 font-mono text-[11px] text-slate-400">${l.created_at ? new Date(l.created_at).toLocaleString('id-ID') : '-'}</td>
+            <td class="px-4 py-2.5 font-semibold text-slate-200">${esc(l.actor_username)}</td>
+            <td class="px-4 py-2.5"><span class="px-2 py-0.5 bg-slate-800 text-blue-400 border border-slate-700 rounded text-[10px] font-bold">${esc(l.action)}</span></td>
+            <td class="px-4 py-2.5 text-slate-400">${esc(l.entity_type)}</td>
+          </tr>
+        `).join('');
+        lucide.createIcons();
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat log: ${esc(err.message || err)}</td></tr>`;
+      }
+    }
+
+    // ==========================================
+    // SYSTEM NAVIGATION & AUTH
+    // ==========================================
+    function switchTab(tabName) {
+      document.getElementById('view-vendor-contracts').classList.add('hidden');
+      document.getElementById('view-artwork-prescreening').classList.add('hidden');
+      document.getElementById('view-npd-screener').classList.add('hidden');
+      document.getElementById('view-tickets-module').classList.add('hidden');
+      document.getElementById('view-audit-trail').classList.add('hidden');
+
+      document.getElementById('nav-vendor-contracts').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+      document.getElementById('nav-artwork-prescreening').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+      document.getElementById('nav-npd-screener').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+      document.getElementById('nav-tickets-module').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+      document.getElementById('nav-audit-trail').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+
+      if (tabName === 'vendor-contracts') {
+        document.getElementById('view-vendor-contracts').classList.remove('hidden');
+        document.getElementById('nav-vendor-contracts').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition";
+        document.getElementById('page-title').innerText = "Vendor Agreement Matrix";
+        loadContracts();
+      } else if (tabName === 'artwork-prescreening') {
+        document.getElementById('view-artwork-prescreening').classList.remove('hidden');
+        document.getElementById('nav-artwork-prescreening').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-purple-400 text-sm font-medium transition";
+        document.getElementById('page-title').innerText = "Artwork & Advertising Pre-Screening";
+        loadArtworkTable();
+      } else if (tabName === 'npd-screener') {
+        document.getElementById('view-npd-screener').classList.remove('hidden');
+        document.getElementById('nav-npd-screener').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-emerald-400 text-sm font-medium transition";
+        document.getElementById('page-title').innerText = "NPD Regulatory Feasibility Screener";
+        loadNpdProductsTable();
+      } else if (tabName === 'tickets-module') {
+        document.getElementById('view-tickets-module').classList.remove('hidden');
+        document.getElementById('nav-tickets-module').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-amber-400 text-sm font-medium transition";
+        document.getElementById('page-title').innerText = "Compliance Ticketing System";
+        loadTicketsTable();
+      } else if (tabName === 'audit-trail') {
+        document.getElementById('view-audit-trail').classList.remove('hidden');
+        document.getElementById('nav-audit-trail').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-amber-400 text-sm font-medium transition";
+        document.getElementById('page-title').innerText = "Audit Trail System";
+        loadAuditLogs();
+      }
+
+      if (window.innerWidth < 768) toggleSidebar();
+      lucide.createIcons();
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.toggle('hidden');
+    }
+
+    function fillDemo(u, p) {
+      document.getElementById('username-input').value = u;
+      document.getElementById('password-input').value = p;
+    }
+
+    async function handlePureSupabaseLogin(e) {
+      e.preventDefault();
+      const usernameInput = document.getElementById('username-input').value.trim();
+      const passwordInput = document.getElementById('password-input').value.trim();
+
+      const { data: users } = await supabaseClient.from('users').select('*').ilike('username', usernameInput).eq('password', passwordInput);
+
+      if (users && users.length > 0) {
+        const user = users[0];
+        const sessionData = { username: user.username, role: user.role, avatar: user.username.substring(0, 2).toUpperCase() };
+        localStorage.setItem('supabase_session', JSON.stringify(sessionData));
+        showApp(sessionData);
+      } else {
+        alert('Username atau Password salah!');
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('supabase_session');
+      currentUserSession = null;
+      document.getElementById('login-view').classList.remove('hidden');
+      document.getElementById('app-view').classList.add('hidden');
+    }
+
+    function showApp(session) {
+      currentUserSession = session;
+      document.getElementById('login-view').classList.add('hidden');
+      document.getElementById('app-view').classList.remove('hidden');
+      document.getElementById('user-display').innerText = session.username;
+      document.getElementById('role-display').innerText = session.role;
+      document.getElementById('user-avatar').innerText = session.avatar;
+      document.getElementById('access-badge').innerText = session.role;
+      switchTab('vendor-contracts');
+    }
+
+    async function logAuditAction(username, action, entityType, entityId) {
+      await supabaseClient.from('audit_logs').insert([{
+        actor_username: username,
+        action: action,
+        entity_type: entityType,
+        entity_id: entityId
+      }]);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      loadArtworkTable();
+      const savedSession = localStorage.getItem('supabase_session');
+      if (savedSession) showApp(JSON.parse(savedSession));
     });
   </script>
 </body>
