@@ -14,6 +14,13 @@
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    
+    @media print {
+      body * { visibility: hidden; }
+      #artwork-printable-area, #artwork-printable-area * { visibility: visible; }
+      #artwork-printable-area { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex">
@@ -400,7 +407,7 @@
 
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Deskripsi Permintaan <span class="text-rose-400">*</span></label>
-          <textarea id="ticket-description-input" rows="4" placeholder="Jelaskan kebutuhan verifikasi legalitas secara rinci..."
+          <textarea id="ticket-description-input" rows="5" placeholder="Jelaskan kebutuhan verifikasi legalitas secara rinci..."
                     class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500"></textarea>
         </div>
       </div>
@@ -570,7 +577,134 @@
     </div>
   </div>
 
-  <!-- MODAL POP-UP NPD SCREENER (DILENGKAPI KANAL PENJUALAN) -->
+  <!-- MODAL POP-UP DETAIL HASIL ANALISIS ARTWORK (DENGAN SEGMENTASI AI) -->
+  <div id="artwork-result-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-3xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20">
+            <i data-lucide="file-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Hasil Review AI - Artwork & Advertising</h3>
+            <p class="text-xs text-slate-400">Pemeriksaan Otomatis Regulasi JDIH BPOM</p>
+          </div>
+        </div>
+        <button onclick="closeArtworkResultModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Printable Area -->
+      <div id="artwork-printable-area" class="p-6 overflow-y-auto space-y-5 flex-1">
+        
+        <!-- Watermark Belum Validasi Legal -->
+        <div class="bg-amber-500/10 border border-amber-500/30 text-amber-400 p-2.5 rounded-xl text-center text-xs font-bold tracking-wide uppercase">
+          ⚠️ DRAFT - HASIL ANALISIS AI (BELUM DIVALIDASI LEGAL)
+        </div>
+
+        <!-- Meta Information -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <div>
+            <p class="text-[10px] text-slate-500 uppercase font-semibold">Judul Produk</p>
+            <p id="res-artwork-title" class="text-xs font-bold text-slate-200 mt-0.5">-</p>
+          </div>
+          <div>
+            <p class="text-[10px] text-slate-500 uppercase font-semibold">Versi & Tipe Materi</p>
+            <p id="res-artwork-meta" class="text-xs font-bold text-slate-200 mt-0.5">-</p>
+          </div>
+          <div>
+            <p class="text-[10px] text-slate-500 uppercase font-semibold">Kategori JDIH</p>
+            <p id="res-artwork-category" class="text-xs font-bold text-purple-400 mt-0.5">-</p>
+          </div>
+        </div>
+
+        <!-- Preview & Compliance Score -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center flex flex-col items-center justify-center min-h-[160px]">
+            <img id="res-artwork-img" class="max-h-44 object-contain rounded-lg hidden" alt="Artwork Preview">
+            <a id="res-artwork-url" href="#" target="_blank" class="text-xs text-purple-400 underline hidden flex items-center gap-1">
+              <i data-lucide="external-link" class="w-4 h-4"></i> Buka Link Webpage Iklan
+            </a>
+          </div>
+
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-semibold text-slate-400">Compliance Score</span>
+              <span id="res-artwork-score" class="text-xl font-extrabold text-slate-100">0/100</span>
+            </div>
+
+            <div class="space-y-2 border-t border-slate-800/80 pt-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400">Status BPOM:</span>
+                <span id="res-artwork-bpom" class="px-2 py-0.5 rounded text-[10px] font-bold border">-</span>
+              </div>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400">Status Halal:</span>
+                <span id="res-artwork-halal" class="px-2 py-0.5 rounded text-[10px] font-bold border">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRI-SEGMENTASI TEMUAN REGULASI AI -->
+        <div class="space-y-3 pt-2">
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="list-checks" class="w-4 h-4 text-purple-400"></i> Rincian Evaluasi Regulasi JDIH BPOM
+          </h4>
+
+          <!-- 1. HIGH RISK -->
+          <div class="bg-rose-950/20 border border-rose-800/40 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
+              <i data-lucide="alert-octagon" class="w-4 h-4"></i> 🔴 High Risk (Risiko Tinggi Pelanggaran Hukum)
+            </div>
+            <div id="res-section-high-risk" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-6">Tidak ditemukan poin risiko tinggi.</div>
+          </div>
+
+          <!-- 2. NEED ADJUSTMENT / REMOVAL -->
+          <div class="bg-amber-950/20 border border-amber-800/40 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i> 🟡 Need Adjustment / Removal (Perlu Revisi/Hapus)
+            </div>
+            <div id="res-section-need-adjustment" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-6">Tidak ada elemen yang perlu direvisi.</div>
+          </div>
+
+          <!-- 3. COMPLIANT -->
+          <div class="bg-emerald-950/20 border border-emerald-800/40 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i> 🟢 Compliant (Sesuai Aturan JDIH BPOM)
+            </div>
+            <div id="res-section-compliant" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-6">Seluruh komponen desain telah memenuhi syarat.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex flex-wrap justify-between items-center gap-2 no-print">
+        <button onclick="closeArtworkResultModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
+          Tutup
+        </button>
+
+        <div class="flex items-center gap-2">
+          <!-- Tombol Eskalasi Tiket Legal -->
+          <button id="btn-escalate-legal" onclick="triggerTicketFromArtworkResult()" class="bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow">
+            <i data-lucide="ticket" class="w-4 h-4"></i> Ajukan Tiket ke Legal
+          </button>
+          
+          <!-- Tombol Cetak PDF -->
+          <button onclick="downloadArtworkReportPDF()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-purple-600/20">
+            <i data-lucide="printer" class="w-4 h-4"></i> Cetak / Download PDF
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL POP-UP NPD SCREENER -->
   <div id="npd-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
@@ -652,7 +786,6 @@
                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 hidden">
         </div>
 
-        <!-- FITUR CEKLIS KANAL PENJUALAN -->
         <div>
           <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Kanal Penjualan (Sales Channels)</label>
           <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
@@ -703,6 +836,7 @@
     let selectedArtworkBase64 = "";
     let selectedMimeType = "image/png";
     let selectedFileName = "";
+    let currentArtworkAnalysisResult = null;
 
     lucide.createIcons();
 
@@ -711,7 +845,7 @@
     }
 
     // ==========================================
-    // ARTWORK PRE-SCREENING (SAFE LOAD FIX)
+    // ARTWORK PRE-SCREENING & DETAIL RESULTS
     // ==========================================
     function openArtworkModal() {
       document.getElementById('artwork-modal').classList.remove('hidden');
@@ -720,6 +854,10 @@
 
     function closeArtworkModal() {
       document.getElementById('artwork-modal').classList.add('hidden');
+    }
+
+    function closeArtworkResultModal() {
+      document.getElementById('artwork-result-modal').classList.add('hidden');
     }
 
     function setArtworkSourceMode(mode) {
@@ -815,7 +953,7 @@
 
     async function analyzeArtwork() {
       const title = document.getElementById('artwork-title-input').value.trim();
-      const designVersion = document.getElementById('artwork-version-input').value.trim();
+      const designVersion = document.getElementById('artwork-version-input').value.trim() || 'v1.0';
       const materialType = document.querySelector('input[name="material_type"]:checked').value;
       const category = document.getElementById('artwork-category-select').value;
       const webpageUrl = document.getElementById('artwork-webpage-input').value.trim();
@@ -860,10 +998,13 @@
           return;
         }
 
-        logAuditAction(currentUserSession.username, 'PERIKSA_ARTWORK', 'artwork_prescreenings', data.saved_id);
+        if (currentUserSession) {
+          logAuditAction(currentUserSession.username, 'PERIKSA_ARTWORK', 'artwork_prescreenings', data.saved_id);
+        }
+        
         closeArtworkModal();
-        alert('Pemeriksaan selesai! Data telah ditambahkan ke tabel riwayat audit.');
         loadArtworkTable();
+        showArtworkResultModal(payload, data);
 
       } catch (err) {
         alert("Terjadi kesalahan sistem: " + err.message);
@@ -871,6 +1012,86 @@
 
       btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
       lucide.createIcons();
+    }
+
+    function showArtworkResultModal(payload, responseData) {
+      currentArtworkAnalysisResult = { payload, responseData };
+
+      document.getElementById('res-artwork-title').innerText = payload.title;
+      document.getElementById('res-artwork-meta').innerText = `${payload.designVersion} (${payload.materialType})`;
+      document.getElementById('res-artwork-category').innerText = payload.category;
+
+      const imgElem = document.getElementById('res-artwork-img');
+      const urlElem = document.getElementById('res-artwork-url');
+
+      if (payload.imageBase64) {
+        imgElem.src = `data:${payload.mimeType};base64,${payload.imageBase64}`;
+        imgElem.classList.remove('hidden');
+        urlElem.classList.add('hidden');
+      } else if (payload.webpageUrl) {
+        urlElem.href = payload.webpageUrl;
+        urlElem.classList.remove('hidden');
+        imgElem.classList.add('hidden');
+      }
+
+      const bpomStatus = responseData.bpom_status || 'Non-Compliant';
+      const halalStatus = responseData.halal_status || 'Pending';
+      const score = responseData.compliance_score || 0;
+
+      document.getElementById('res-artwork-score').innerText = `${score}/100`;
+
+      const bpomElem = document.getElementById('res-artwork-bpom');
+      bpomElem.innerText = bpomStatus;
+      bpomElem.className = `px-2 py-0.5 rounded text-[10px] font-bold border ${
+        bpomStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+      }`;
+
+      const halalElem = document.getElementById('res-artwork-halal');
+      halalElem.innerText = halalStatus;
+      halalElem.className = `px-2 py-0.5 rounded text-[10px] font-bold border ${
+        halalStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+      }`;
+
+      // Mapping 3 Kategori Evaluasi AI
+      document.getElementById('res-section-high-risk').innerText = 
+        responseData.high_risk_items || responseData.high_risk || "Tidak ditemukan indikasi risiko tinggi.";
+
+      document.getElementById('res-section-need-adjustment').innerText = 
+        responseData.need_adjustment_items || responseData.need_adjustment || "Tidak ditemukan rekomendasi revisi/penghapusan.";
+
+      document.getElementById('res-section-compliant').innerText = 
+        responseData.compliant_items || responseData.compliant || "Seluruh elemen umum telah sesuai.";
+
+      document.getElementById('artwork-result-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function triggerTicketFromArtworkResult() {
+      if (!currentArtworkAnalysisResult) return;
+      const { payload, responseData } = currentArtworkAnalysisResult;
+
+      closeArtworkResultModal();
+
+      document.getElementById('ticket-npd-id-hidden').value = responseData.saved_id || '';
+      document.getElementById('ticket-title-input').value = `[Review Legal Artwork] - ${payload.title} (${payload.designVersion})`;
+      document.getElementById('ticket-category-select').value = 'Approval Artwork';
+      document.getElementById('ticket-priority-select').value = 'High';
+      
+      document.getElementById('ticket-description-input').value = 
+        `Pemeriksaan AI awal menemukan potensi risiko compliance pada artwork:\n` +
+        `Nama Produk: ${payload.title}\n` +
+        `Versi/Materi: ${payload.designVersion} (${payload.materialType})\n` +
+        `Kategori: ${payload.category}\n\n` +
+        `🔴 HIGH RISK TEMUAN AI:\n${responseData.high_risk_items || 'Tidak ada'}\n\n` +
+        `🟡 NEED ADJUSTMENT / REMOVAL:\n${responseData.need_adjustment_items || 'Tidak ada'}\n\n` +
+        `Mohon Tim Legal melakukan peninjauan ulang & validasi kepatuhan resmi.`;
+
+      document.getElementById('ticket-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function downloadArtworkReportPDF() {
+      window.print();
     }
 
     // ==========================================
@@ -987,7 +1208,7 @@
     }
 
     // ==========================================
-    // NPD SCREENER LOGIC (RE-SCREEN & TICKET)
+    // NPD SCREENER LOGIC
     // ==========================================
     function openNpdModal(existingItem = null) {
       if (existingItem) {
@@ -1121,7 +1342,6 @@
       const foreignCountry = document.getElementById('npd-foreign-country-input').value.trim();
       const countryOrigin = isForeignRadio ? (foreignCountry || 'Luar Negeri') : 'Indonesia';
 
-      // Pembacaan Data Ceklis Kanal Penjualan
       const channelBoxes = document.querySelectorAll('input[name="npd_channel"]:checked');
       const salesChannels = Array.from(channelBoxes).map(cb => cb.value);
 
