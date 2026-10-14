@@ -181,7 +181,7 @@
           </div>
         </section>
 
-        <!-- ARTWORK PRE-SCREENING TAB -->
+        <!-- ARTWORK PRE-SCREENING TAB (TAMPILAN TABEL DISESUAIKAN PERSIS COMPLIANCE TICKETS) -->
         <section id="view-artwork-prescreening" class="hidden space-y-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
             <div>
@@ -201,14 +201,14 @@
               <table class="w-full text-left text-xs text-slate-300 border-collapse">
                 <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
                   <tr>
-                    <th class="px-4 py-3.5 font-bold min-w-[180px]">Judul Produk / Desain</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Versi</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[120px]">Tipe Materi</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[140px]">Kategori JDIH</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[110px]">BPOM Status</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Halal Status</th>
-                    <th class="px-4 py-3.5 font-bold text-center min-w-[90px]">Score</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">No. Tiket</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[200px]">Judul Permintaan</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[130px]">Kategori</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Prioritas</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Pengaju</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Status</th>
                     <th class="px-4 py-3.5 font-bold min-w-[110px]">Tanggal</th>
+                    <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody id="table-artwork-body" class="divide-y divide-slate-800/60">
@@ -216,7 +216,7 @@
                     <td colspan="8" class="px-4 py-10 text-center text-slate-500">
                       <div class="flex flex-col items-center justify-center gap-2">
                         <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-purple-400"></i>
-                        <span>Memuat riwayat audit artwork...</span>
+                        <span>Memuat riwayat artwork approval...</span>
                       </div>
                     </td>
                   </tr>
@@ -873,84 +873,76 @@
       }
     }
 
-   function handleArtworkUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+    function handleArtworkUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
 
-  selectedFileName = file.name;
-  document.getElementById('file-name-display').innerText = file.name;
+      selectedFileName = file.name;
+      document.getElementById('file-name-display').innerText = file.name;
 
-  const img = new Image();
-  const url = URL.createObjectURL(file);
-  img.onload = function () {
-    const MAX = 1600;
-    const scale = Math.min(1, MAX / Math.max(img.width, img.height));
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.round(img.width * scale);
-    canvas.height = Math.round(img.height * scale);
-    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-    const fullBase64 = canvas.toDataURL('image/jpeg', 0.8);
-    selectedMimeType = 'image/jpeg';
-    selectedArtworkBase64 = fullBase64.split(',')[1];
-    document.getElementById('artwork-preview-img').src = fullBase64;
-    document.getElementById('artwork-preview-container').classList.remove('hidden');
-    URL.revokeObjectURL(url);
-  };
-  img.src = url;
-}
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = function () {
+        const MAX = 1600;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const fullBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        selectedMimeType = 'image/jpeg';
+        selectedArtworkBase64 = fullBase64.split(',')[1];
+        document.getElementById('artwork-preview-img').src = fullBase64;
+        document.getElementById('artwork-preview-container').classList.remove('hidden');
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    }
 
+    // FUNGSI INI DIUBAH AGAR MEMBACA TICKETS DENGAN FILTER CATEGORY 'Approval Artwork' (SAMA SEPERTI TICKETS MODULE)
     async function loadArtworkTable() {
       const tbody = document.getElementById('table-artwork-body');
-      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-purple-400 inline mr-2"></i> Memuat data artwork...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-purple-400 inline mr-2"></i> Memuat riwayat artwork approval...</td></tr>`;
       lucide.createIcons();
 
       try {
-        const { data: list, error } = await supabaseClient
-          .from('artwork_prescreenings')
+        const { data: tickets, error } = await supabaseClient
+          .from('tickets')
           .select('*')
+          .or('category.ilike.%Artwork%,category.ilike.%Approval%') // Memfilter khusus kategori Artwork / Approval
           .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        if (!list || list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat audit artwork. Klik "+ Periksa Artwork Baru".</td></tr>`;
+        if (!tickets || tickets.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat tiket Approval Artwork. Klik "+ Periksa Artwork Baru".</td></tr>`;
           return;
         }
 
-        tbody.innerHTML = list.map(item => {
-          const bpomStatus = item.bpom_status || 'Pending';
-          const halalStatus = item.halal_status || 'Pending';
-          const score = item.compliance_score !== null && item.compliance_score !== undefined ? item.compliance_score : 0;
-          const materialType = item.material_type || 'Kemasan';
-          const title = item.title || item.product_name || 'Tanpa Judul';
-
-          const jsonItem = JSON.stringify(item).replace(/'/g, "&apos;");
-
-          return `
-            <tr onclick='openStoredArtworkResult(${jsonItem})' class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs cursor-pointer">
-              <td class="px-4 py-3 font-semibold text-slate-100">${esc(title)}</td>
-              <td class="px-4 py-3 text-slate-400 font-mono">${esc(item.design_version || 'v1')}</td>
-              <td class="px-4 py-3 text-slate-300 font-medium">${esc(materialType)}</td>
-              <td class="px-4 py-3 text-slate-300">${esc(item.category || '-')}</td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-0.5 ${bpomStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded font-bold text-[10px]">
-                  ${esc(bpomStatus)}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-0.5 ${halalStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'} border rounded font-bold text-[10px]">
-                  ${esc(halalStatus)}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-center font-bold text-slate-200">${score}/100</td>
-              <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            </tr>
-          `;
-        }).join('');
+        tbody.innerHTML = tickets.map(t => `
+          <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+            <td class="px-4 py-3 font-mono font-bold text-purple-400">${esc(t.ticket_number || ('TKT-' + t.id))}</td>
+            <td class="px-4 py-3 font-semibold text-slate-100">${esc(t.title)}</td>
+            <td class="px-4 py-3 text-slate-300">${esc(t.category)}</td>
+            <td class="px-4 py-3 font-bold ${t.priority === 'Urgent' || t.priority === 'High' ? 'text-rose-400' : 'text-slate-300'}">${esc(t.priority || 'Medium')}</td>
+            <td class="px-4 py-3 text-slate-300">${esc(t.requested_by || 'system')}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 ${t.status === 'Approved' || t.status === 'Resolved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'} border rounded font-bold text-[10px]">
+                ${esc(t.status || 'Open')}
+              </span>
+            </td>
+            <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${t.created_at ? new Date(t.created_at).toLocaleDateString('id-ID') : '-'}</td>
+            <td class="px-4 py-3 text-center">
+              <button onclick="openTicketDetailModal('${t.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-semibold text-[10px]">
+                Buka Detail
+              </button>
+            </td>
+          </tr>
+        `).join('');
         lucide.createIcons();
 
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat artwork: ${esc(err.message || err)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat tiket artwork: ${esc(err.message || err)}</td></tr>`;
       }
     }
 
@@ -1024,13 +1016,13 @@
         const { data, error } = await supabaseClient.functions.invoke("Scan-artwork", { body: payload });
 
         if (error || (data && data.error)) {
-  let detail = data?.error || error?.message;
-  try { detail = (await error.context.json()).error || detail; } catch (_) {}
-  alert("Gagal menganalisis compliance: " + detail);
-  btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
-  lucide.createIcons();
-  return;
-}
+          let detail = data?.error || error?.message;
+          try { detail = (await error.context.json()).error || detail; } catch (_) {}
+          alert("Gagal menganalisis compliance: " + detail);
+          btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
+          lucide.createIcons();
+          return;
+        }
 
         if (currentUserSession) {
           logAuditAction(currentUserSession.username, 'PERIKSA_ARTWORK', 'artwork_prescreenings', data.saved_id);
