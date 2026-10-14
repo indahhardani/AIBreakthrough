@@ -181,7 +181,7 @@
           </div>
         </section>
 
-        <!-- ARTWORK PRE-SCREENING TAB (TAMPILAN TABEL DISESUAIKAN PERSIS COMPLIANCE TICKETS) -->
+        <!-- ARTWORK PRE-SCREENING TAB -->
         <section id="view-artwork-prescreening" class="hidden space-y-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
             <div>
@@ -570,11 +570,10 @@
     </div>
   </div>
 
-  <!-- MODAL POP-UP DETAIL HASIL ANALISIS ARTWORK (DENGAN SEGMENTASI AI) -->
+  <!-- MODAL POP-UP DETAIL HASIL ANALISIS ARTWORK -->
   <div id="artwork-result-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-3xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       
-      <!-- Modal Header -->
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
         <div class="flex items-center gap-2.5">
           <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20">
@@ -590,15 +589,11 @@
         </button>
       </div>
 
-      <!-- Printable Area -->
       <div id="artwork-printable-area" class="p-6 overflow-y-auto space-y-5 flex-1">
-        
-        <!-- Watermark Belum Validasi Legal -->
         <div class="bg-amber-500/10 border border-amber-500/30 text-amber-400 p-2.5 rounded-xl text-center text-xs font-bold tracking-wide uppercase">
           ⚠️ DRAFT - HASIL ANALISIS AI (BELUM DIVALIDASI LEGAL)
         </div>
 
-        <!-- Meta Information -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
           <div>
             <p class="text-[10px] text-slate-500 uppercase font-semibold">Judul Produk</p>
@@ -614,7 +609,6 @@
           </div>
         </div>
 
-        <!-- Preview & Compliance Score -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
           <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center flex flex-col items-center justify-center min-h-[160px]">
             <img id="res-artwork-img" class="max-h-44 object-contain rounded-lg hidden" alt="Artwork Preview">
@@ -642,13 +636,11 @@
           </div>
         </div>
 
-        <!-- TRI-SEGMENTASI TEMUAN REGULASI AI -->
         <div class="space-y-3 pt-2">
           <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
             <i data-lucide="list-checks" class="w-4 h-4 text-purple-400"></i> Rincian Evaluasi Regulasi JDIH BPOM
           </h4>
 
-          <!-- 1. HIGH RISK -->
           <div class="bg-rose-950/20 border border-rose-800/40 rounded-xl p-4 space-y-2">
             <div class="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
               <i data-lucide="alert-octagon" class="w-4 h-4"></i> 🔴 High Risk (Risiko Tinggi Pelanggaran Hukum)
@@ -656,7 +648,6 @@
             <div id="res-section-high-risk" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-6">Tidak ditemukan indikasi risiko tinggi.</div>
           </div>
 
-          <!-- 2. NEED ADJUSTMENT / REMOVAL -->
           <div class="bg-amber-950/20 border border-amber-800/40 rounded-xl p-4 space-y-2">
             <div class="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
               <i data-lucide="alert-triangle" class="w-4 h-4"></i> 🟡 Need Adjustment / Removal (Perlu Revisi/Hapus)
@@ -664,7 +655,6 @@
             <div id="res-section-need-adjustment" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-6">Tidak ada elemen yang perlu direvisi.</div>
           </div>
 
-          <!-- 3. COMPLIANT -->
           <div class="bg-emerald-950/20 border border-emerald-800/40 rounded-xl p-4 space-y-2">
             <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
               <i data-lucide="check-circle-2" class="w-4 h-4"></i> 🟢 Compliant (Sesuai Aturan JDIH BPOM)
@@ -675,19 +665,16 @@
 
       </div>
 
-      <!-- Modal Footer -->
       <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex flex-wrap justify-between items-center gap-2">
         <button onclick="closeArtworkResultModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
           Tutup
         </button>
 
         <div class="flex items-center gap-2">
-          <!-- Tombol Eskalasi Tiket Legal -->
           <button id="btn-escalate-legal" onclick="triggerTicketFromArtworkResult()" class="bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow">
             <i data-lucide="ticket" class="w-4 h-4"></i> Ajukan Tiket ke Legal
           </button>
           
-          <!-- Tombol Cetak PDF -->
           <button onclick="downloadArtworkReportPDF()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-purple-600/20">
             <i data-lucide="printer" class="w-4 h-4"></i> Cetak / Download PDF
           </button>
@@ -813,6 +800,121 @@
     </div>
   </div>
 
+  <!-- MODAL POP-UP DETAIL HASIL ANALISIS NPD SCREENER -->
+  <div id="npd-result-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-3xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
+            <i data-lucide="file-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Hasil Skrining Kelayakan NPD BPOM</h3>
+            <p class="text-xs text-slate-400">Analisis Otomatis Regulasi JDIH BPOM & Halal BPJPH</p>
+          </div>
+        </div>
+        <button onclick="closeNpdResultModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Printable Area -->
+      <div id="npd-printable-area" class="p-6 overflow-y-auto space-y-5 flex-1 bg-slate-900">
+        
+        <!-- Watermark Belum Validasi Legal -->
+        <div class="bg-amber-500/10 border border-amber-500/30 text-amber-400 p-2.5 rounded-xl text-center text-xs font-bold tracking-wide uppercase">
+          ⚠️ DRAFT - HASIL ANALISIS AI (BELUM DIVALIDASI LEGAL)
+        </div>
+
+        <!-- Ringkasan Produk & Skor -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <div>
+            <p class="text-[10px] text-slate-500 uppercase font-semibold">Nama / Ide Produk</p>
+            <p id="res-npd-title" class="text-xs font-bold text-slate-200 mt-0.5">-</p>
+          </div>
+          <div>
+            <p class="text-[10px] text-slate-500 uppercase font-semibold">Kategori & Skema</p>
+            <p id="res-npd-meta" class="text-xs font-bold text-slate-200 mt-0.5">-</p>
+          </div>
+          <div>
+            <p class="text-[10px] text-slate-500 uppercase font-semibold">Estimasi Waktu</p>
+            <p id="res-npd-timeline" class="text-xs font-bold text-blue-400 mt-0.5">-</p>
+          </div>
+          <div>
+            <p class="text-[10px] text-slate-500 uppercase font-semibold">Skor Feasibility</p>
+            <p id="res-npd-score" class="text-base font-extrabold text-emerald-400 mt-0.5">0/100</p>
+          </div>
+        </div>
+
+        <!-- Kode Izin Edar Utama BPOM -->
+        <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
+          <div>
+            <p class="text-[10px] text-slate-500 uppercase font-semibold">1. Kode Izin Edar Utama (Primary Permit Code)</p>
+            <p id="res-npd-primary-code" class="text-sm font-bold text-purple-400 mt-0.5">-</p>
+          </div>
+          <span id="res-npd-status-badge" class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-bold text-xs">
+            High Feasibility
+          </span>
+        </div>
+
+        <!-- Required Permits Table -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+          <p class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="list-checks" class="w-4 h-4 text-emerald-400"></i> 2. List Izin / Permit Wajib Tim NPD
+          </p>
+          <div id="res-npd-permits-list" class="space-y-2 pt-1">
+            <!-- Render via JS -->
+          </div>
+        </div>
+
+        <!-- Regulatory Warnings & Red Flags -->
+        <div class="bg-rose-950/20 border border-rose-800/40 rounded-xl p-4 space-y-2">
+          <div class="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
+            <i data-lucide="alert-octagon" class="w-4 h-4"></i> 🔴 Regulatory Warnings & Red Flags
+          </div>
+          <div id="res-npd-warnings" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-2">-</div>
+        </div>
+
+        <!-- Checklist Dokumen Awal & Action Plan -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
+              <i data-lucide="file-text" class="w-4 h-4"></i> Checklist Dokumen Awal
+            </div>
+            <div id="res-npd-documents" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-2">-</div>
+          </div>
+
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2 text-blue-400 font-bold text-xs uppercase tracking-wider">
+              <i data-lucide="compass" class="w-4 h-4"></i> Rekomendasi Action Plan
+            </div>
+            <div id="res-npd-action-plan" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap pl-2">-</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex flex-wrap justify-between items-center gap-2">
+        <button onclick="closeNpdResultModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">
+          Tutup
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button id="btn-npd-escalate-legal" onclick="triggerTicketFromNpdResult()" class="bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow">
+            <i data-lucide="ticket" class="w-4 h-4"></i> Masukkan Tiket ke Legal
+          </button>
+          
+          <button onclick="downloadNpdReportPDF()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+            <i data-lucide="printer" class="w-4 h-4"></i> Cetak / Download PDF
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- SCRIPT ENGINE -->
   <script>
     const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
@@ -824,12 +926,13 @@
     let cachedNpdList = [];
     let cachedContractsList = [];
 
-    // Artwork Variables
+    // Artwork & NPD Global Variables
     let artworkSourceMode = 'file';
     let selectedArtworkBase64 = "";
     let selectedMimeType = "image/png";
     let selectedFileName = "";
     let currentArtworkAnalysisResult = null;
+    let currentNpdAnalysisResult = null;
 
     lucide.createIcons();
 
@@ -899,7 +1002,6 @@
       img.src = url;
     }
 
-    // FUNGSI INI DIUBAH AGAR MEMBACA TICKETS DENGAN FILTER CATEGORY 'Approval Artwork' (SAMA SEPERTI TICKETS MODULE)
     async function loadArtworkTable() {
       const tbody = document.getElementById('table-artwork-body');
       tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-purple-400 inline mr-2"></i> Memuat riwayat artwork approval...</td></tr>`;
@@ -909,7 +1011,7 @@
         const { data: tickets, error } = await supabaseClient
           .from('tickets')
           .select('*')
-          .or('category.ilike.%Artwork%,category.ilike.%Approval%') // Memfilter khusus kategori Artwork / Approval
+          .or('category.ilike.%Artwork%,category.ilike.%Approval%')
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -946,35 +1048,6 @@
       }
     }
 
-    function openStoredArtworkResult(item) {
-      const payload = {
-        title: item.title || item.product_name || 'Tanpa Judul',
-        designVersion: item.design_version || 'v1.0',
-        materialType: item.material_type || 'Kemasan',
-        category: item.category || 'Pangan Olahan',
-        imageBase64: item.image_base64 || null,
-        webpageUrl: item.webpage_url || null,
-        mimeType: item.mime_type || 'image/png'
-      };
-
-      let responseData = {};
-      if (typeof item.analysis_result === 'object' && item.analysis_result !== null) {
-        responseData = item.analysis_result;
-      } else if (typeof item.analysis_result === 'string') {
-        try { responseData = JSON.parse(item.analysis_result); } catch(e) {}
-      }
-
-      responseData.compliance_score = item.compliance_score ?? responseData.compliance_score;
-      responseData.bpom_status = item.bpom_status ?? responseData.bpom_status;
-      responseData.halal_status = item.halal_status ?? responseData.halal_status;
-      responseData.high_risk_items = item.high_risk_items || responseData.high_risk_items || responseData.high_risk;
-      responseData.need_adjustment_items = item.need_adjustment_items || responseData.need_adjustment_items || responseData.need_adjustment;
-      responseData.compliant_items = item.compliant_items || responseData.compliant_items || responseData.compliant;
-      responseData.saved_id = item.id;
-
-      showArtworkResultModal(payload, responseData);
-    }
-
     async function analyzeArtwork() {
       const title = document.getElementById('artwork-title-input').value.trim();
       const designVersion = document.getElementById('artwork-version-input').value.trim() || 'v1.0';
@@ -992,24 +1065,15 @@
         return;
       }
 
-      if (artworkSourceMode === 'webpage' && !webpageUrl) {
-        alert('Mohon masukkan URL Webpage terlebih dahulu!');
-        return;
-      }
-
       const btn = document.getElementById("btn-analyze-artwork");
       btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memeriksa via Gemini...`;
       lucide.createIcons();
 
       try {
         const payload = {
-          title,
-          designVersion,
-          materialType,
-          category,
+          title, designVersion, materialType, category,
           imageBase64: artworkSourceMode === 'file' ? selectedArtworkBase64 : null,
           mimeType: artworkSourceMode === 'file' ? selectedMimeType : null,
-          fileName: artworkSourceMode === 'file' ? selectedFileName : null,
           webpageUrl: artworkSourceMode === 'webpage' ? webpageUrl : null
         };
 
@@ -1017,7 +1081,6 @@
 
         if (error || (data && data.error)) {
           let detail = data?.error || error?.message;
-          try { detail = (await error.context.json()).error || detail; } catch (_) {}
           alert("Gagal menganalisis compliance: " + detail);
           btn.innerHTML = `<i data-lucide="scan-eye" class="w-4 h-4"></i> PERIKSA COMPLIANCE`;
           lucide.createIcons();
@@ -1065,7 +1128,7 @@
 
       const bpomStatus = responseData.bpom_status || responseData.bpomStatus || 'Non-Compliant';
       const halalStatus = responseData.halal_status || responseData.halalStatus || 'Pending';
-      const score = responseData.compliance_score ?? responseData.complianceScore ?? responseData.score ?? 0;
+      const score = responseData.compliance_score ?? responseData.complianceScore ?? 0;
 
       document.getElementById('res-artwork-score').innerText = `${score}/100`;
 
@@ -1081,13 +1144,9 @@
         halalStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
       }`;
 
-      const highRiskText = responseData.high_risk_items || responseData.high_risk || responseData.highRisk;
-      const needAdjText = responseData.need_adjustment_items || responseData.need_adjustment || responseData.needAdjustment;
-      const compliantText = responseData.compliant_items || responseData.compliant;
-
-      document.getElementById('res-section-high-risk').innerText = highRiskText && highRiskText.trim() !== '' ? highRiskText : "Tidak ditemukan indikasi risiko tinggi.";
-      document.getElementById('res-section-need-adjustment').innerText = needAdjText && needAdjText.trim() !== '' ? needAdjText : "Tidak ditemukan rekomendasi revisi/penghapusan.";
-      document.getElementById('res-section-compliant').innerText = compliantText && compliantText.trim() !== '' ? compliantText : "Seluruh elemen umum telah sesuai.";
+      document.getElementById('res-section-high-risk').innerText = responseData.high_risk_items || "Tidak ditemukan indikasi risiko tinggi.";
+      document.getElementById('res-section-need-adjustment').innerText = responseData.need_adjustment_items || "Tidak ditemukan rekomendasi revisi/penghapusan.";
+      document.getElementById('res-section-compliant').innerText = responseData.compliant_items || "Seluruh elemen umum telah sesuai.";
 
       document.getElementById('artwork-result-modal').classList.remove('hidden');
       lucide.createIcons();
@@ -1103,17 +1162,14 @@
       document.getElementById('ticket-title-input').value = `[Review Legal Artwork] - ${payload.title} (${payload.designVersion})`;
       document.getElementById('ticket-category-select').value = 'Approval Artwork';
       document.getElementById('ticket-priority-select').value = 'High';
-      
-      const highRiskText = responseData.high_risk_items || responseData.high_risk || 'Tidak ada';
-      const needAdjText = responseData.need_adjustment_items || responseData.need_adjustment || 'Tidak ada';
 
       document.getElementById('ticket-description-input').value = 
         `Pemeriksaan AI awal menemukan potensi risiko compliance pada artwork:\n` +
         `Nama Produk: ${payload.title}\n` +
         `Versi/Materi: ${payload.designVersion} (${payload.materialType})\n` +
         `Kategori: ${payload.category}\n\n` +
-        `🔴 HIGH RISK TEMUAN AI:\n${highRiskText}\n\n` +
-        `🟡 NEED ADJUSTMENT / REMOVAL:\n${needAdjText}\n\n` +
+        `🔴 HIGH RISK TEMUAN AI:\n${responseData.high_risk_items || 'Tidak ada'}\n\n` +
+        `🟡 NEED ADJUSTMENT / REMOVAL:\n${responseData.need_adjustment_items || 'Tidak ada'}\n\n` +
         `Mohon Tim Legal melakukan peninjauan ulang & validasi kepatuhan resmi.`;
 
       document.getElementById('ticket-modal').classList.remove('hidden');
@@ -1122,47 +1178,348 @@
 
     function downloadArtworkReportPDF() {
       const printArea = document.getElementById('artwork-printable-area');
-      if (!printArea) {
-        window.print();
-        return;
-      }
+      if (!printArea) { window.print(); return; }
 
       const printWindow = window.open('', '_blank', 'width=850,height=1100');
-      
       const htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
           <title>Laporan Compliance Artwork - LegalOps</title>
           <script src="https://cdn.tailwindcss.com"><\/script>
-          <style>
-            body { font-family: sans-serif; background-color: #ffffff !important; color: #0f172a !important; padding: 24px; }
-            .bg-slate-950, .bg-slate-900 { background-color: #f8fafc !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; }
-            .bg-rose-950\\/20 { background-color: #fff1f2 !important; border: 1px solid #fecdd3 !important; }
-            .bg-amber-950\\/20 { background-color: #fffbeb !important; border: 1px solid #fef3c7 !important; }
-            .bg-emerald-950\\/20 { background-color: #f0fdf4 !important; border: 1px solid #bbf7d0 !important; }
-            .text-slate-100, .text-slate-200, .text-slate-300 { color: #0f172a !important; }
-            .text-slate-400, .text-slate-500 { color: #475569 !important; }
-            .border-slate-800 { border-color: #cbd5e1 !important; }
-            .no-print { display: none !important; }
-            img { max-height: 220px !important; margin: 0 auto; }
-          </style>
         </head>
-        <body onload="window.print(); setTimeout(() => window.close(), 500);">
-          <div style="margin-bottom: 20px; border-bottom: 2px solid #0f172a; padding-bottom: 12px; display: flex; justify-content: space-between; items-center: center;">
+        <body onload="window.print(); setTimeout(() => window.close(), 500);" class="p-6 bg-white text-slate-900">
+          <div class="border-b-2 border-slate-900 pb-3 mb-4 flex justify-between items-center">
             <div>
-              <h2 style="font-size: 20px; font-weight: bold; margin: 0;">LEGALOPS & COMPLIANCE INTELLIGENCE</h2>
-              <p style="font-size: 12px; color: #475569; margin: 4px 0 0 0;">Laporan Evaluasi Kepatuhan Artwork & Materi Iklan JDIH BPOM</p>
+              <h2 class="text-xl font-bold">LEGALOPS & COMPLIANCE INTELLIGENCE</h2>
+              <p class="text-xs text-slate-600">Laporan Evaluasi Kepatuhan Artwork JDIH BPOM</p>
             </div>
-            <div style="text-align: right; font-size: 11px; color: #64748b;">
-              Tanggal Audit: ${new Date().toLocaleDateString('id-ID')}
-            </div>
+            <div class="text-right text-xs text-slate-500">Tanggal: ${new Date().toLocaleDateString('id-ID')}</div>
           </div>
           ${printArea.innerHTML}
         </body>
         </html>
       `;
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+    }
 
+    // ==========================================
+    // NPD SCREENER LOGIC & RESULT MODAL
+    // ==========================================
+    function openNpdModal(existingItem = null) {
+      if (existingItem) {
+        document.getElementById('npd-product-name').value = existingItem.product_idea_name || '';
+        document.getElementById('npd-category-select').value = existingItem.category || 'Pangan Olahan';
+        document.getElementById('npd-ingredients-input').value = existingItem.main_ingredients || '';
+        document.getElementById('npd-scheme-select').value = existingItem.production_scheme || 'Pabrik Sendiri';
+      } else {
+        document.getElementById('npd-product-name').value = '';
+        document.getElementById('npd-ingredients-input').value = '';
+        document.getElementById('npd-category-select').value = 'Pangan Olahan';
+        document.getElementById('npd-scheme-select').value = 'Pabrik Sendiri';
+        document.getElementById('npd-foreign-country-input').value = '';
+        
+        const radioIndonesia = document.querySelector('input[name="npd_country_type"][value="Indonesia"]');
+        if (radioIndonesia) radioIndonesia.checked = true;
+        toggleCountryOriginInput(false);
+
+        document.querySelectorAll('input[name="npd_claim"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('input[name="npd_channel"]').forEach(cb => cb.checked = false);
+      }
+
+      document.getElementById('npd-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeNpdModal() {
+      document.getElementById('npd-modal').classList.add('hidden');
+    }
+
+    function closeNpdResultModal() {
+      document.getElementById('npd-result-modal').classList.add('hidden');
+    }
+
+    function toggleCountryOriginInput(isForeign) {
+      const input = document.getElementById('npd-foreign-country-input');
+      if (isForeign) {
+        input.classList.remove('hidden');
+        input.required = true;
+      } else {
+        input.classList.add('hidden');
+        input.required = false;
+        input.value = '';
+      }
+    }
+
+    async function loadNpdProductsTable() {
+      const tbody = document.getElementById('table-npd-body');
+      tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400 inline mr-2"></i> Memuat data NPD...</td></tr>`;
+      lucide.createIcons();
+
+      try {
+        const { data: list, error } = await supabaseClient
+          .from('npd_permit_screenings')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!list || list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Belum ada ide produk yang diskrining. Klik "+ Skrining Produk Baru".</td></tr>`;
+          return;
+        }
+
+        cachedNpdList = list;
+
+        tbody.innerHTML = list.map(item => {
+          const score = item.feasibility_score || 0;
+          const isCompliant = score >= 70;
+          const jsonItem = JSON.stringify(item).replace(/'/g, "&apos;");
+
+          return `
+            <tr onclick='openStoredNpdResult(${jsonItem})' class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs cursor-pointer">
+              <td class="px-4 py-3 font-semibold text-slate-100">${esc(item.product_idea_name)}</td>
+              <td class="px-4 py-3 text-slate-300">${esc(item.category)}</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded font-mono font-bold text-[10px]">
+                  ${esc(item.matched_permit_code || 'BPOM RI')}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 ${isCompliant ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold">
+                  ${isCompliant ? 'High Feasibility' : 'Risk / Barrier'}
+                </span>
+              </td>
+              <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</td>
+              <td class="px-4 py-3 text-center" onclick="event.stopPropagation()">
+                <button onclick="triggerTicketFromNpdList('${item.id}')" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded font-bold text-[10px] shadow flex items-center gap-1 mx-auto">
+                  <i data-lucide="ticket" class="w-3 h-3"></i> Ajukan Tiket Legal
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        lucide.createIcons();
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat NPD: ${esc(err.message || err)}</td></tr>`;
+      }
+    }
+
+    async function analyzeNpdPermit() {
+      const productName = document.getElementById('npd-product-name').value.trim();
+      const category = document.getElementById('npd-category-select').value;
+      const mainIngredients = document.getElementById('npd-ingredients-input').value.trim();
+      const productionScheme = document.getElementById('npd-scheme-select').value;
+
+      if (!productName) {
+        alert('Mohon isi Nama / Ide Produk terlebih dahulu!');
+        return;
+      }
+
+      const claimBoxes = document.querySelectorAll('input[name="npd_claim"]:checked');
+      const claims = Array.from(claimBoxes).map(cb => cb.value);
+
+      const isForeignRadio = document.querySelector('input[name="npd_country_type"]:checked').value === 'Luar Negeri';
+      const foreignCountry = document.getElementById('npd-foreign-country-input').value.trim();
+      const countryOrigin = isForeignRadio ? (foreignCountry || 'Luar Negeri') : 'Indonesia';
+
+      const channelBoxes = document.querySelectorAll('input[name="npd_channel"]:checked');
+      const salesChannels = Array.from(channelBoxes).map(cb => cb.value);
+
+      const btn = document.getElementById('btn-screen-npd');
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menganalisis...`;
+      lucide.createIcons();
+
+      try {
+        const payload = {
+          productName,
+          category,
+          claims,
+          mainIngredients,
+          productionScheme,
+          countryOrigin,
+          salesChannels,
+          username: currentUserSession ? currentUserSession.username : 'guest'
+        };
+
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/scan-npd-permit`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || result.error) {
+          alert("Gagal melakukan skrining perizinan NPD: " + (result.error || "HTTP Error " + response.status));
+          btn.innerHTML = `<i data-lucide="file-search" class="w-4 h-4"></i> Jalankan Skrining BPOM`;
+          lucide.createIcons();
+          return;
+        }
+
+        if (currentUserSession) {
+          logAuditAction(currentUserSession.username, 'NPD_PERMIT_SCREENING', 'npd_permit_screenings', result.saved_id);
+        }
+
+        closeNpdModal();
+        loadNpdProductsTable();
+        showNpdResultModal(payload, result.data || result, result.saved_id);
+
+      } catch (err) {
+        alert("Terjadi kesalahan koneksi: " + err.message);
+      }
+
+      btn.innerHTML = `<i data-lucide="file-search" class="w-4 h-4"></i> Jalankan Skrining BPOM`;
+      lucide.createIcons();
+    }
+
+    function showNpdResultModal(payload, aiData, savedId = null) {
+      currentNpdAnalysisResult = { payload, aiData, savedId };
+
+      document.getElementById('res-npd-title').innerText = payload.productName || '-';
+      document.getElementById('res-npd-meta').innerText = `${payload.category} (${payload.productionScheme})`;
+      document.getElementById('res-npd-timeline').innerText = aiData.estimated_timeline || '2 - 3 Bulan';
+      document.getElementById('res-npd-score').innerText = `${aiData.feasibility_score || 0}/100`;
+
+      document.getElementById('res-npd-primary-code').innerText = aiData.primary_permit_code || 'BPOM RI';
+      document.getElementById('res-npd-status-badge').innerText = aiData.feasibility_status || 'High Feasibility';
+
+      // Render Required Permits
+      const permitsContainer = document.getElementById('res-npd-permits-list');
+      permitsContainer.innerHTML = '';
+      if (Array.isArray(aiData.required_permits) && aiData.required_permits.length > 0) {
+        aiData.required_permits.forEach(p => {
+          const div = document.createElement('div');
+          div.className = "bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-xs space-y-1";
+          div.innerHTML = `
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-emerald-400">${esc(p.permit_name)} (${esc(p.code)})</span>
+              <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-400">${esc(p.authority)}</span>
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">${esc(p.description)}</p>
+          `;
+          permitsContainer.appendChild(div);
+        });
+      } else {
+        permitsContainer.innerHTML = `<p class="text-xs text-slate-400">Tidak ada rincian perizinan khusus.</p>`;
+      }
+
+      // Warnings
+      const warningsElem = document.getElementById('res-npd-warnings');
+      if (Array.isArray(aiData.regulatory_warnings) && aiData.regulatory_warnings.length > 0) {
+        warningsElem.innerText = aiData.regulatory_warnings.map(w => '• ' + w).join('\n');
+      } else {
+        warningsElem.innerText = 'Tidak ditemukan indikasi risiko atau Red Flag.';
+      }
+
+      // Initial Documents
+      const docsElem = document.getElementById('res-npd-documents');
+      if (Array.isArray(aiData.initial_documents) && aiData.initial_documents.length > 0) {
+        docsElem.innerText = aiData.initial_documents.map(d => '✓ ' + d).join('\n');
+      } else {
+        docsElem.innerText = 'Persiapkan dokumen standar perusahaan & spesifikasi bahan.';
+      }
+
+      // Action Plan
+      document.getElementById('res-npd-action-plan').innerText = aiData.action_plan || '-';
+
+      document.getElementById('npd-result-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function openStoredNpdResult(item) {
+      const payload = {
+        productName: item.product_idea_name || 'Tanpa Judul',
+        category: item.category || 'Pangan Olahan',
+        productionScheme: item.production_scheme || 'Pabrik Sendiri'
+      };
+
+      let aiData = item.analysis_result || {};
+      if (typeof aiData === 'string') {
+        try { aiData = JSON.parse(aiData); } catch(_e) {}
+      }
+
+      aiData.primary_permit_code = item.matched_permit_code || aiData.primary_permit_code;
+      aiData.feasibility_score = item.feasibility_score ?? aiData.feasibility_score;
+
+      showNpdResultModal(payload, aiData, item.id);
+    }
+
+    function triggerTicketFromNpdResult() {
+      if (!currentNpdAnalysisResult) return;
+      const { payload, aiData, savedId } = currentNpdAnalysisResult;
+
+      closeNpdResultModal();
+
+      document.getElementById('ticket-npd-id-hidden').value = savedId || '';
+      document.getElementById('ticket-title-input').value = `[Verifikasi Legal NPD] - ${payload.productName}`;
+      document.getElementById('ticket-category-select').value = 'Verifikasi NPD BPOM';
+      document.getElementById('ticket-priority-select').value = 'High';
+
+      const permitsText = Array.isArray(aiData.required_permits) 
+        ? aiData.required_permits.map(p => `- ${p.permit_name} (${p.code})`).join('\n')
+        : '-';
+
+      document.getElementById('ticket-description-input').value = 
+        `Hasil Skrining AI NPD BPOM (${aiData.primary_permit_code || 'BPOM RI'}):\n` +
+        `Nama Produk: ${payload.productName}\n` +
+        `Kategori: ${payload.category}\n` +
+        `Estimasi Waktu: ${aiData.estimated_timeline || '-'}\n\n` +
+        `📋 PERMIT / IZIN WAJIB:\n${permitsText}\n\n` +
+        `Mohon Tim Legal melakukan peninjauan ulang & validasi kepatuhan resmi.`;
+
+      document.getElementById('ticket-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function triggerTicketFromNpdList(npdId) {
+      const item = cachedNpdList.find(x => x.id === npdId);
+      if (!item) return;
+
+      let aiData = item.analysis_result || {};
+      if (typeof aiData === 'string') {
+        try { aiData = JSON.parse(aiData); } catch(_e) {}
+      }
+
+      currentNpdAnalysisResult = {
+        payload: { productName: item.product_idea_name, category: item.category, productionScheme: item.production_scheme },
+        aiData: aiData,
+        savedId: item.id
+      };
+
+      triggerTicketFromNpdResult();
+    }
+
+    function downloadNpdReportPDF() {
+      const printArea = document.getElementById('npd-printable-area');
+      if (!printArea) { window.print(); return; }
+
+      const printWindow = window.open('', '_blank', 'width=850,height=1100');
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Laporan Skrining NPD BPOM - LegalOps</title>
+          <script src="https://cdn.tailwindcss.com"><\/script>
+        </head>
+        <body onload="window.print(); setTimeout(() => window.close(), 500);" class="p-6 bg-white text-slate-900">
+          <div class="border-b-2 border-slate-900 pb-3 mb-4 flex justify-between items-center">
+            <div>
+              <h2 class="text-xl font-bold">LEGALOPS & COMPLIANCE INTELLIGENCE</h2>
+              <p class="text-xs text-slate-600">Laporan Kelayakan Perizinan Produk NPD JDIH BPOM</p>
+            </div>
+            <div class="text-right text-xs text-slate-500">Tanggal: ${new Date().toLocaleDateString('id-ID')}</div>
+          </div>
+          ${printArea.innerHTML}
+        </body>
+        </html>
+      `;
       printWindow.document.write(htmlContent);
       printWindow.document.close();
     }
@@ -1278,203 +1635,6 @@
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat vendor: ${esc(err.message || err)}</td></tr>`;
       }
-    }
-
-    // ==========================================
-    // NPD SCREENER LOGIC
-    // ==========================================
-    function openNpdModal(existingItem = null) {
-      if (existingItem) {
-        document.getElementById('npd-product-name').value = existingItem.product_idea_name || '';
-        document.getElementById('npd-category-select').value = existingItem.category || 'Pangan Olahan';
-        document.getElementById('npd-ingredients-input').value = existingItem.main_ingredients || '';
-        document.getElementById('npd-scheme-select').value = existingItem.production_scheme || 'Pabrik Sendiri';
-      } else {
-        document.getElementById('npd-product-name').value = '';
-        document.getElementById('npd-ingredients-input').value = '';
-        document.getElementById('npd-category-select').value = 'Pangan Olahan';
-        document.getElementById('npd-scheme-select').value = 'Pabrik Sendiri';
-        document.getElementById('npd-foreign-country-input').value = '';
-        
-        const radioIndonesia = document.querySelector('input[name="npd_country_type"][value="Indonesia"]');
-        if (radioIndonesia) radioIndonesia.checked = true;
-        toggleCountryOriginInput(false);
-
-        document.querySelectorAll('input[name="npd_claim"]').forEach(cb => cb.checked = false);
-        document.querySelectorAll('input[name="npd_channel"]').forEach(cb => cb.checked = false);
-      }
-
-      document.getElementById('npd-modal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeNpdModal() {
-      document.getElementById('npd-modal').classList.add('hidden');
-    }
-
-    function toggleCountryOriginInput(isForeign) {
-      const input = document.getElementById('npd-foreign-country-input');
-      if (isForeign) {
-        input.classList.remove('hidden');
-        input.required = true;
-      } else {
-        input.classList.add('hidden');
-        input.required = false;
-        input.value = '';
-      }
-    }
-
-    async function loadNpdProductsTable() {
-      const tbody = document.getElementById('table-npd-body');
-      tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400 inline mr-2"></i> Memuat data NPD...</td></tr>`;
-      lucide.createIcons();
-
-      try {
-        const { data: list, error } = await supabaseClient
-          .from('npd_permit_screenings')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        if (!list || list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Belum ada ide produk yang diskrining. Klik "+ Skrining Produk Baru".</td></tr>`;
-          return;
-        }
-
-        cachedNpdList = list;
-
-        tbody.innerHTML = list.map(item => {
-          const score = item.feasibility_score || 0;
-          const isCompliant = score >= 70;
-
-          return `
-            <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
-              <td class="px-4 py-3 font-semibold text-slate-100">${esc(item.product_idea_name)}</td>
-              <td class="px-4 py-3 text-slate-300">${esc(item.category)}</td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-mono font-bold text-[10px]">
-                  ${esc(item.matched_permit_code || 'BPOM RI')}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-0.5 ${isCompliant ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold">
-                  ${isCompliant ? 'High Feasibility (Lolos BPOM)' : 'Risk / Barrier (Tidak Sesuai)'}
-                </span>
-              </td>
-              <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</td>
-              <td class="px-4 py-3 text-center">
-                ${isCompliant ? `
-                  <button onclick="triggerTicketFromNpd('${item.id}')" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded font-bold text-[10px] shadow flex items-center gap-1 mx-auto">
-                    <i data-lucide="ticket" class="w-3 h-3"></i> Ajukan Tiket Legal
-                  </button>
-                ` : `
-                  <button onclick="rescreenNpdProduct('${item.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-rose-400 border border-rose-500/30 rounded font-bold text-[10px] flex items-center gap-1 mx-auto">
-                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Skrining Ulang
-                  </button>
-                `}
-              </td>
-            </tr>
-          `;
-        }).join('');
-        lucide.createIcons();
-
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat NPD: ${esc(err.message || err)}</td></tr>`;
-      }
-    }
-
-    function rescreenNpdProduct(npdId) {
-      const item = cachedNpdList.find(x => x.id === npdId);
-      if (item) openNpdModal(item);
-    }
-
-    function triggerTicketFromNpd(npdId) {
-      const item = cachedNpdList.find(x => x.id === npdId);
-      if (!item) return;
-
-      document.getElementById('ticket-npd-id-hidden').value = item.id;
-      document.getElementById('ticket-title-input').value = `[Verifikasi Legal] - ${item.product_idea_name}`;
-      document.getElementById('ticket-category-select').value = 'Verifikasi NPD BPOM';
-      document.getElementById('ticket-priority-select').value = 'High';
-      document.getElementById('ticket-description-input').value = 
-        `Produk telah lolos skrining awal BPOM dengan kecocokan izin "${item.matched_permit_code}".\n` +
-        `Kategori: ${item.category}\n` +
-        `Bahan Utama: ${item.main_ingredients || '-'}\n` +
-        `Skema Produksi: ${item.production_scheme || '-'}\n\n` +
-        `Mohon tim Legal melakukan verifikasi dokumen dan legalitas izin edar lebih dalam.`;
-
-      document.getElementById('ticket-modal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    async function analyzeNpdPermit() {
-      const productName = document.getElementById('npd-product-name').value.trim();
-      const category = document.getElementById('npd-category-select').value;
-      const mainIngredients = document.getElementById('npd-ingredients-input').value.trim();
-      const productionScheme = document.getElementById('npd-scheme-select').value;
-
-      if (!productName) {
-        alert('Mohon isi Nama / Ide Produk terlebih dahulu!');
-        return;
-      }
-
-      const claimBoxes = document.querySelectorAll('input[name="npd_claim"]:checked');
-      const claims = Array.from(claimBoxes).map(cb => cb.value);
-
-      const isForeignRadio = document.querySelector('input[name="npd_country_type"]:checked').value === 'Luar Negeri';
-      const foreignCountry = document.getElementById('npd-foreign-country-input').value.trim();
-      const countryOrigin = isForeignRadio ? (foreignCountry || 'Luar Negeri') : 'Indonesia';
-
-      const channelBoxes = document.querySelectorAll('input[name="npd_channel"]:checked');
-      const salesChannels = Array.from(channelBoxes).map(cb => cb.value);
-
-      const btn = document.getElementById('btn-screen-npd');
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menganalisis...`;
-      lucide.createIcons();
-
-      try {
-        const payload = {
-          productName,
-          category,
-          claims,
-          mainIngredients,
-          productionScheme,
-          countryOrigin,
-          salesChannels,
-          username: currentUserSession ? currentUserSession.username : 'guest'
-        };
-
-        const response = await fetch("https://zsifocstbcbrxtexkuyi.supabase.co/functions/v1/scan-npd-permit", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_ANON_KEY
-            "Authorization": 'Bearer ${SUPABSE_ANON_KEY}'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-
-        if (!response.ok || result.error) {
-          alert("Gagal melakukan skrining perizinan NPD: " + (result.error || "HTTP Error " + response.status));
-          btn.innerHTML = `<i data-lucide="file-search" class="w-4 h-4"></i> Jalankan Skrining BPOM`;
-          lucide.createIcons();
-          return;
-        }
-
-        logAuditAction(currentUserSession.username, 'NPD_PERMIT_SCREENING', 'npd_permit_screenings', result.saved_id);
-        closeNpdModal();
-        alert('Skrining berhasil! Data kelayakan produk telah diperbarui.');
-        loadNpdProductsTable();
-
-      } catch (err) {
-        alert("Terjadi kesalahan koneksi: " + err.message);
-      }
-
-      btn.innerHTML = `<i data-lucide="file-search" class="w-4 h-4"></i> Jalankan Skrining BPOM`;
-      lucide.createIcons();
     }
 
     // ==========================================
@@ -1756,6 +1916,7 @@
 
     function showApp(session) {
       currentUserSession = session;
+      document.getElementById('login-view').classList.hidden = true;
       document.getElementById('login-view').classList.add('hidden');
       document.getElementById('app-view').classList.remove('hidden');
       document.getElementById('user-display').innerText = session.username;
