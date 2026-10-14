@@ -916,8 +916,10 @@
           const materialType = item.material_type || 'Kemasan';
           const title = item.title || item.product_name || 'Tanpa Judul';
 
+          const jsonItem = JSON.stringify(item).replace(/'/g, "&apos;");
+
           return `
-            <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+            <tr onclick='openStoredArtworkResult(${jsonItem})' class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs cursor-pointer">
               <td class="px-4 py-3 font-semibold text-slate-100">${esc(title)}</td>
               <td class="px-4 py-3 text-slate-400 font-mono">${esc(item.design_version || 'v1')}</td>
               <td class="px-4 py-3 text-slate-300 font-medium">${esc(materialType)}</td>
@@ -942,6 +944,35 @@
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat artwork: ${esc(err.message || err)}</td></tr>`;
       }
+    }
+
+    function openStoredArtworkResult(item) {
+      const payload = {
+        title: item.title || item.product_name || 'Tanpa Judul',
+        designVersion: item.design_version || 'v1.0',
+        materialType: item.material_type || 'Kemasan',
+        category: item.category || 'Pangan Olahan',
+        imageBase64: item.image_base64 || null,
+        webpageUrl: item.webpage_url || null,
+        mimeType: item.mime_type || 'image/png'
+      };
+
+      let responseData = {};
+      if (typeof item.analysis_result === 'object' && item.analysis_result !== null) {
+        responseData = item.analysis_result;
+      } else if (typeof item.analysis_result === 'string') {
+        try { responseData = JSON.parse(item.analysis_result); } catch(e) {}
+      }
+
+      responseData.compliance_score = item.compliance_score ?? responseData.compliance_score;
+      responseData.bpom_status = item.bpom_status ?? responseData.bpom_status;
+      responseData.halal_status = item.halal_status ?? responseData.halal_status;
+      responseData.high_risk_items = item.high_risk_items || responseData.high_risk_items || responseData.high_risk;
+      responseData.need_adjustment_items = item.need_adjustment_items || responseData.need_adjustment_items || responseData.need_adjustment;
+      responseData.compliant_items = item.compliant_items || responseData.compliant_items || responseData.compliant;
+      responseData.saved_id = item.id;
+
+      showArtworkResultModal(payload, responseData);
     }
 
     async function analyzeArtwork() {
@@ -1007,30 +1038,31 @@
       lucide.createIcons();
     }
 
-    // PARSING TINGKAT LANJUT UNTUK SCORE & DETAIL REVIEW AI
     function showArtworkResultModal(payload, responseData) {
       currentArtworkAnalysisResult = { payload, responseData };
 
-      document.getElementById('res-artwork-title').innerText = payload.title;
+      document.getElementById('res-artwork-title').innerText = payload.title || '-';
       document.getElementById('res-artwork-meta').innerText = `${payload.designVersion} (${payload.materialType})`;
-      document.getElementById('res-artwork-category').innerText = payload.category;
+      document.getElementById('res-artwork-category').innerText = payload.category || '-';
 
       const imgElem = document.getElementById('res-artwork-img');
       const urlElem = document.getElementById('res-artwork-url');
 
       if (payload.imageBase64) {
-        imgElem.src = `data:${payload.mimeType};base64,${payload.imageBase64}`;
+        imgElem.src = payload.imageBase64.startsWith('data:') ? payload.imageBase64 : `data:${payload.mimeType || 'image/png'};base64,${payload.imageBase64}`;
         imgElem.classList.remove('hidden');
         urlElem.classList.add('hidden');
       } else if (payload.webpageUrl) {
         urlElem.href = payload.webpageUrl;
         urlElem.classList.remove('hidden');
         imgElem.classList.add('hidden');
+      } else {
+        imgElem.classList.add('hidden');
+        urlElem.classList.add('hidden');
       }
 
-      // Dynamic Property Mapping untuk Skor & Status BPOM/Halal
-      const bpomStatus = responseData.bpom_status || responseData.bpomStatus || responseData.bpom || 'Non-Compliant';
-      const halalStatus = responseData.halal_status || responseData.halalStatus || responseData.halal || 'Pending';
+      const bpomStatus = responseData.bpom_status || responseData.bpomStatus || 'Non-Compliant';
+      const halalStatus = responseData.halal_status || responseData.halalStatus || 'Pending';
       const score = responseData.compliance_score ?? responseData.complianceScore ?? responseData.score ?? 0;
 
       document.getElementById('res-artwork-score').innerText = `${score}/100`;
@@ -1047,19 +1079,13 @@
         halalStatus === 'Compliant' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
       }`;
 
-      // Dynamic Property Mapping untuk Rincian Evaluasi (3 Seksi)
-      let highRisk = responseData.high_risk_items || responseData.high_risk || responseData.highRisk;
-      let needAdjustment = responseData.need_adjustment_items || responseData.need_adjustment || responseData.needAdjustment;
-      let compliant = responseData.compliant_items || responseData.compliant;
+      const highRiskText = responseData.high_risk_items || responseData.high_risk || responseData.highRisk;
+      const needAdjText = responseData.need_adjustment_items || responseData.need_adjustment || responseData.needAdjustment;
+      const compliantText = responseData.compliant_items || responseData.compliant;
 
-      // Fallback jika Edge Function mengembalikan string tunggal (misal: analysis_details/summary)
-      if (!highRisk && !needAdjustment && (responseData.analysis_details || responseData.summary || responseData.details)) {
-        highRisk = responseData.analysis_details || responseData.summary || responseData.details;
-      }
-
-      document.getElementById('res-section-high-risk').innerText = highRisk || "Tidak ditemukan indikasi risiko tinggi.";
-      document.getElementById('res-section-need-adjustment').innerText = needAdjustment || "Tidak ditemukan rekomendasi revisi/penghapusan.";
-      document.getElementById('res-section-compliant').innerText = compliant || "Seluruh elemen umum telah sesuai.";
+      document.getElementById('res-section-high-risk').innerText = highRiskText && highRiskText.trim() !== '' ? highRiskText : "Tidak ditemukan indikasi risiko tinggi.";
+      document.getElementById('res-section-need-adjustment').innerText = needAdjText && needAdjText.trim() !== '' ? needAdjText : "Tidak ditemukan rekomendasi revisi/penghapusan.";
+      document.getElementById('res-section-compliant').innerText = compliantText && compliantText.trim() !== '' ? compliantText : "Seluruh elemen umum telah sesuai.";
 
       document.getElementById('artwork-result-modal').classList.remove('hidden');
       lucide.createIcons();
@@ -1092,7 +1118,6 @@
       lucide.createIcons();
     }
 
-    // CETAK DOKUMEN PDF BERSIH (TANPA BACKGROUND DARK WEB)
     function downloadArtworkReportPDF() {
       const printArea = document.getElementById('artwork-printable-area');
       if (!printArea) {
@@ -1257,36 +1282,29 @@
     // NPD SCREENER LOGIC
     // ==========================================
     function openNpdModal(existingItem = null) {
-  if (existingItem) {
-    // 1. Jika mode edit / rescreen
-    document.getElementById('npd-product-name').value = existingItem.product_idea_name || '';
-    document.getElementById('npd-category-select').value = existingItem.category || 'Pangan Olahan';
-    document.getElementById('npd-ingredients-input').value = existingItem.main_ingredients || '';
-    document.getElementById('npd-scheme-select').value = existingItem.production_scheme || 'Pabrik Sendiri';
-  } else {
-    // 2. Jika mode PRODUK BARU -> Reset seluruh bidang form secara bersih
-    document.getElementById('npd-product-name').value = '';
-    document.getElementById('npd-ingredients-input').value = '';
-    document.getElementById('npd-category-select').value = 'Pangan Olahan';
-    document.getElementById('npd-scheme-select').value = 'Pabrik Sendiri';
-    document.getElementById('npd-foreign-country-input').value = '';
-    
-    // Reset radio button Negara Asal ke Indonesia
-    const radioIndonesia = document.querySelector('input[name="npd_country_type"][value="Indonesia"]');
-    if (radioIndonesia) radioIndonesia.checked = true;
-    toggleCountryOriginInput(false);
+      if (existingItem) {
+        document.getElementById('npd-product-name').value = existingItem.product_idea_name || '';
+        document.getElementById('npd-category-select').value = existingItem.category || 'Pangan Olahan';
+        document.getElementById('npd-ingredients-input').value = existingItem.main_ingredients || '';
+        document.getElementById('npd-scheme-select').value = existingItem.production_scheme || 'Pabrik Sendiri';
+      } else {
+        document.getElementById('npd-product-name').value = '';
+        document.getElementById('npd-ingredients-input').value = '';
+        document.getElementById('npd-category-select').value = 'Pangan Olahan';
+        document.getElementById('npd-scheme-select').value = 'Pabrik Sendiri';
+        document.getElementById('npd-foreign-country-input').value = '';
+        
+        const radioIndonesia = document.querySelector('input[name="npd_country_type"][value="Indonesia"]');
+        if (radioIndonesia) radioIndonesia.checked = true;
+        toggleCountryOriginInput(false);
 
-    // Uncheck semua checkbox klaim
-    document.querySelectorAll('input[name="npd_claim"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('input[name="npd_claim"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('input[name="npd_channel"]').forEach(cb => cb.checked = false);
+      }
 
-    // Uncheck semua checkbox kanal penjualan
-    document.querySelectorAll('input[name="npd_channel"]').forEach(cb => cb.checked = false);
-  }
-
-  document.getElementById('npd-modal').classList.remove('hidden');
-  lucide.createIcons();
-}
-
+      document.getElementById('npd-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
 
     function closeNpdModal() {
       document.getElementById('npd-modal').classList.add('hidden');
