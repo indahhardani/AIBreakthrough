@@ -246,20 +246,22 @@
               <table class="w-full text-left text-xs text-slate-300 border-collapse">
                 <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
                   <tr>
-                    <th class="px-4 py-3.5 font-bold min-w-[180px]">Ide Produk</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[140px]">Kategori</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[120px]">Kecocokan BPOM</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[140px]">Kelayakan Regulasi</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[120px]">Tanggal</th>
-                    <th class="px-4 py-3.5 font-bold text-center min-w-[180px]">Aksi Integrasi</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">No. Tiket</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[200px]">Judul Permintaan</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[130px]">Kategori</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Prioritas</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Pengaju</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Status</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Tanggal</th>
+                    <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody id="table-npd-body" class="divide-y divide-slate-800/60">
                   <tr>
-                    <td colspan="6" class="px-4 py-10 text-center text-slate-500">
+                    <td colspan="8" class="px-4 py-10 text-center text-slate-500">
                       <div class="flex flex-col items-center justify-center gap-2">
                         <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400"></i>
-                        <span>Memuat daftar skrining produk...</span>
+                        <span>Memuat riwayat verifikasi NPD BPOM...</span>
                       </div>
                     </td>
                   </tr>
@@ -923,7 +925,6 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let currentUserSession = null;
     let currentActiveTicketId = null;
-    let cachedNpdList = [];
     let cachedContractsList = [];
 
     // Artwork & NPD Global Variables
@@ -1187,14 +1188,60 @@
         <head>
           <title>Laporan Compliance Artwork - LegalOps</title>
           <script src="https://cdn.tailwindcss.com"><\/script>
+          <style>
+            @media print {
+              body, html {
+                background-color: #ffffff !important;
+                color: #0f172a !important;
+              }
+              * {
+                background-color: transparent !important;
+                color: #0f172a !important;
+                border-color: #cbd5e1 !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+              }
+              .bg-slate-950, .bg-slate-900, .bg-slate-900\\/50 {
+                background-color: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+              }
+              .bg-purple-950\\/20, .bg-purple-500\\/10 {
+                background-color: #faf5ff !important;
+                border: 1px solid #e9d5ff !important;
+              }
+              .bg-emerald-950\\/20, .bg-emerald-500\\/10 {
+                background-color: #f0fdf4 !important;
+                border: 1px solid #bbf7d0 !important;
+              }
+              .bg-rose-950\\/20, .bg-rose-500\\/10 {
+                background-color: #fff1f2 !important;
+                border: 1px solid #fecdd3 !important;
+              }
+              .bg-amber-950\\/20, .bg-amber-500\\/10 {
+                background-color: #fffbeb !important;
+                border: 1px solid #fef3c7 !important;
+              }
+              .text-white, .text-slate-100, .text-slate-200, .text-slate-300 {
+                color: #0f172a !important;
+              }
+              .text-slate-400, .text-slate-500 {
+                color: #475569 !important;
+              }
+              .text-purple-400 {
+                color: #7e22ce !important;
+              }
+            }
+          </style>
         </head>
-        <body onload="window.print(); setTimeout(() => window.close(), 500);" class="p-6 bg-white text-slate-900">
-          <div class="border-b-2 border-slate-900 pb-3 mb-4 flex justify-between items-center">
+        <body class="p-6 bg-white text-slate-900" onload="window.print(); setTimeout(() => window.close(), 500);">
+          <div style="margin-bottom: 20px; border-bottom: 2px solid #0f172a; padding-bottom: 12px; display: flex; justify-content: space-between;">
             <div>
-              <h2 class="text-xl font-bold">LEGALOPS & COMPLIANCE INTELLIGENCE</h2>
-              <p class="text-xs text-slate-600">Laporan Evaluasi Kepatuhan Artwork JDIH BPOM</p>
+              <h2 style="font-size: 18px; font-weight: bold; margin: 0; color: #0f172a;">LEGALOPS & COMPLIANCE INTELLIGENCE</h2>
+              <p style="font-size: 11px; color: #475569; margin: 4px 0 0 0;">Laporan Evaluasi Kepatuhan Artwork & Advertising JDIH BPOM</p>
             </div>
-            <div class="text-right text-xs text-slate-500">Tanggal: ${new Date().toLocaleDateString('id-ID')}</div>
+            <div style="text-align: right; font-size: 11px; color: #64748b;">
+              Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}
+            </div>
           </div>
           ${printArea.innerHTML}
         </body>
@@ -1207,26 +1254,19 @@
     // ==========================================
     // NPD SCREENER LOGIC & RESULT MODAL
     // ==========================================
-    function openNpdModal(existingItem = null) {
-      if (existingItem) {
-        document.getElementById('npd-product-name').value = existingItem.product_idea_name || '';
-        document.getElementById('npd-category-select').value = existingItem.category || 'Pangan Olahan';
-        document.getElementById('npd-ingredients-input').value = existingItem.main_ingredients || '';
-        document.getElementById('npd-scheme-select').value = existingItem.production_scheme || 'Pabrik Sendiri';
-      } else {
-        document.getElementById('npd-product-name').value = '';
-        document.getElementById('npd-ingredients-input').value = '';
-        document.getElementById('npd-category-select').value = 'Pangan Olahan';
-        document.getElementById('npd-scheme-select').value = 'Pabrik Sendiri';
-        document.getElementById('npd-foreign-country-input').value = '';
-        
-        const radioIndonesia = document.querySelector('input[name="npd_country_type"][value="Indonesia"]');
-        if (radioIndonesia) radioIndonesia.checked = true;
-        toggleCountryOriginInput(false);
+    function openNpdModal() {
+      document.getElementById('npd-product-name').value = '';
+      document.getElementById('npd-ingredients-input').value = '';
+      document.getElementById('npd-category-select').value = 'Pangan Olahan';
+      document.getElementById('npd-scheme-select').value = 'Pabrik Sendiri';
+      document.getElementById('npd-foreign-country-input').value = '';
+      
+      const radioIndonesia = document.querySelector('input[name="npd_country_type"][value="Indonesia"]');
+      if (radioIndonesia) radioIndonesia.checked = true;
+      toggleCountryOriginInput(false);
 
-        document.querySelectorAll('input[name="npd_claim"]').forEach(cb => cb.checked = false);
-        document.querySelectorAll('input[name="npd_channel"]').forEach(cb => cb.checked = false);
-      }
+      document.querySelectorAll('input[name="npd_claim"]').forEach(cb => cb.checked = false);
+      document.querySelectorAll('input[name="npd_channel"]').forEach(cb => cb.checked = false);
 
       document.getElementById('npd-modal').classList.remove('hidden');
       lucide.createIcons();
@@ -1254,56 +1294,47 @@
 
     async function loadNpdProductsTable() {
       const tbody = document.getElementById('table-npd-body');
-      tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400 inline mr-2"></i> Memuat data NPD...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-emerald-400 inline mr-2"></i> Memuat riwayat verifikasi NPD BPOM...</td></tr>`;
       lucide.createIcons();
 
       try {
-        const { data: list, error } = await supabaseClient
-          .from('npd_permit_screenings')
+        const { data: tickets, error } = await supabaseClient
+          .from('tickets')
           .select('*')
+          .or('category.ilike.%Verifikasi NPD BPOM%,title.ilike.%Verifikasi Legal NPD%')
           .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        if (!list || list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Belum ada ide produk yang diskrining. Klik "+ Skrining Produk Baru".</td></tr>`;
+        if (!tickets || tickets.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat tiket Verifikasi NPD BPOM. Klik "+ Skrining Produk Baru".</td></tr>`;
           return;
         }
 
-        cachedNpdList = list;
-
-        tbody.innerHTML = list.map(item => {
-          const score = item.feasibility_score || 0;
-          const isCompliant = score >= 70;
-          const jsonItem = JSON.stringify(item).replace(/'/g, "&apos;");
-
-          return `
-            <tr onclick='openStoredNpdResult(${jsonItem})' class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs cursor-pointer">
-              <td class="px-4 py-3 font-semibold text-slate-100">${esc(item.product_idea_name)}</td>
-              <td class="px-4 py-3 text-slate-300">${esc(item.category)}</td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-0.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded font-mono font-bold text-[10px]">
-                  ${esc(item.matched_permit_code || 'BPOM RI')}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-0.5 ${isCompliant ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold">
-                  ${isCompliant ? 'High Feasibility' : 'Risk / Barrier'}
-                </span>
-              </td>
-              <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</td>
-              <td class="px-4 py-3 text-center" onclick="event.stopPropagation()">
-                <button onclick="triggerTicketFromNpdList('${item.id}')" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded font-bold text-[10px] shadow flex items-center gap-1 mx-auto">
-                  <i data-lucide="ticket" class="w-3 h-3"></i> Ajukan Tiket Legal
-                </button>
-              </td>
-            </tr>
-          `;
-        }).join('');
+        tbody.innerHTML = tickets.map(t => `
+          <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+            <td class="px-4 py-3 font-mono font-bold text-emerald-400">${esc(t.ticket_number || ('TKT-' + t.id))}</td>
+            <td class="px-4 py-3 font-semibold text-slate-100">${esc(t.title)}</td>
+            <td class="px-4 py-3 text-slate-300">${esc(t.category)}</td>
+            <td class="px-4 py-3 font-bold ${t.priority === 'Urgent' || t.priority === 'High' ? 'text-rose-400' : 'text-slate-300'}">${esc(t.priority || 'Medium')}</td>
+            <td class="px-4 py-3 text-slate-300">${esc(t.requested_by || 'system')}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 ${t.status === 'Approved' || t.status === 'Resolved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'} border rounded font-bold text-[10px]">
+                ${esc(t.status || 'Open')}
+              </span>
+            </td>
+            <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${t.created_at ? new Date(t.created_at).toLocaleDateString('id-ID') : '-'}</td>
+            <td class="px-4 py-3 text-center">
+              <button onclick="openTicketDetailModal('${t.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-semibold text-[10px]">
+                Buka Detail
+              </button>
+            </td>
+          </tr>
+        `).join('');
         lucide.createIcons();
 
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat NPD: ${esc(err.message || err)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400 font-medium">Gagal memuat tiket NPD: ${esc(err.message || err)}</td></tr>`;
       }
     }
 
@@ -1334,13 +1365,7 @@
 
       try {
         const payload = {
-          productName,
-          category,
-          claims,
-          mainIngredients,
-          productionScheme,
-          countryOrigin,
-          salesChannels,
+          productName, category, claims, mainIngredients, productionScheme, countryOrigin, salesChannels,
           username: currentUserSession ? currentUserSession.username : 'guest'
         };
 
@@ -1369,8 +1394,9 @@
 
         closeNpdModal();
         loadNpdProductsTable();
+
         const aiData = result.data || result;
-        showNpdResultModal(payload, result.data || result, result.saved_id);
+        showNpdResultModal(payload, aiData, result.saved_id);
 
       } catch (err) {
         alert("Terjadi kesalahan koneksi: " + err.message);
@@ -1391,7 +1417,6 @@
       document.getElementById('res-npd-primary-code').innerText = aiData.primary_permit_code || 'BPOM RI';
       document.getElementById('res-npd-status-badge').innerText = aiData.feasibility_status || 'High Feasibility';
 
-      // Render Required Permits
       const permitsContainer = document.getElementById('res-npd-permits-list');
       permitsContainer.innerHTML = '';
       if (Array.isArray(aiData.required_permits) && aiData.required_permits.length > 0) {
@@ -1411,7 +1436,6 @@
         permitsContainer.innerHTML = `<p class="text-xs text-slate-400">Tidak ada rincian perizinan khusus.</p>`;
       }
 
-      // Warnings
       const warningsElem = document.getElementById('res-npd-warnings');
       if (Array.isArray(aiData.regulatory_warnings) && aiData.regulatory_warnings.length > 0) {
         warningsElem.innerText = aiData.regulatory_warnings.map(w => '• ' + w).join('\n');
@@ -1419,7 +1443,6 @@
         warningsElem.innerText = 'Tidak ditemukan indikasi risiko atau Red Flag.';
       }
 
-      // Initial Documents
       const docsElem = document.getElementById('res-npd-documents');
       if (Array.isArray(aiData.initial_documents) && aiData.initial_documents.length > 0) {
         docsElem.innerText = aiData.initial_documents.map(d => '✓ ' + d).join('\n');
@@ -1427,29 +1450,10 @@
         docsElem.innerText = 'Persiapkan dokumen standar perusahaan & spesifikasi bahan.';
       }
 
-      // Action Plan
       document.getElementById('res-npd-action-plan').innerText = aiData.action_plan || '-';
 
       document.getElementById('npd-result-modal').classList.remove('hidden');
       lucide.createIcons();
-    }
-
-    function openStoredNpdResult(item) {
-      const payload = {
-        productName: item.product_idea_name || 'Tanpa Judul',
-        category: item.category || 'Pangan Olahan',
-        productionScheme: item.production_scheme || 'Pabrik Sendiri'
-      };
-
-      let aiData = item.analysis_result || {};
-      if (typeof aiData === 'string') {
-        try { aiData = JSON.parse(aiData); } catch(_e) {}
-      }
-
-      aiData.primary_permit_code = item.matched_permit_code || aiData.primary_permit_code;
-      aiData.feasibility_score = item.feasibility_score ?? aiData.feasibility_score;
-
-      showNpdResultModal(payload, aiData, item.id);
     }
 
     function triggerTicketFromNpdResult() {
@@ -1479,24 +1483,6 @@
       lucide.createIcons();
     }
 
-    function triggerTicketFromNpdList(npdId) {
-      const item = cachedNpdList.find(x => x.id === npdId);
-      if (!item) return;
-
-      let aiData = item.analysis_result || {};
-      if (typeof aiData === 'string') {
-        try { aiData = JSON.parse(aiData); } catch(_e) {}
-      }
-
-      currentNpdAnalysisResult = {
-        payload: { productName: item.product_idea_name, category: item.category, productionScheme: item.production_scheme },
-        aiData: aiData,
-        savedId: item.id
-      };
-
-      triggerTicketFromNpdResult();
-    }
-
     function downloadNpdReportPDF() {
       const printArea = document.getElementById('npd-printable-area');
       if (!printArea) { window.print(); return; }
@@ -1508,14 +1494,53 @@
         <head>
           <title>Laporan Skrining NPD BPOM - LegalOps</title>
           <script src="https://cdn.tailwindcss.com"><\/script>
+          <style>
+            @media print {
+              body, html {
+                background-color: #ffffff !important;
+                color: #0f172a !important;
+              }
+              * {
+                background-color: transparent !important;
+                color: #0f172a !important;
+                border-color: #cbd5e1 !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+              }
+              .bg-slate-950, .bg-slate-900, .bg-slate-900\\/50 {
+                background-color: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+              }
+              .bg-emerald-950\\/20, .bg-emerald-500\\/10 {
+                background-color: #f0fdf4 !important;
+                border: 1px solid #bbf7d0 !important;
+              }
+              .bg-rose-950\\/20, .bg-rose-500\\/10 {
+                background-color: #fff1f2 !important;
+                border: 1px solid #fecdd3 !important;
+              }
+              .bg-amber-500\\/10 {
+                background-color: #fffbeb !important;
+                border: 1px solid #fef3c7 !important;
+              }
+              .text-white, .text-slate-100, .text-slate-200, .text-slate-300 {
+                color: #0f172a !important;
+              }
+              .text-slate-400, .text-slate-500 {
+                color: #475569 !important;
+              }
+            }
+          </style>
         </head>
-        <body onload="window.print(); setTimeout(() => window.close(), 500);" class="p-6 bg-white text-slate-900">
-          <div class="border-b-2 border-slate-900 pb-3 mb-4 flex justify-between items-center">
+        <body class="p-6 bg-white text-slate-900" onload="window.print(); setTimeout(() => window.close(), 500);">
+          <div style="margin-bottom: 20px; border-bottom: 2px solid #0f172a; padding-bottom: 12px; display: flex; justify-content: space-between;">
             <div>
-              <h2 class="text-xl font-bold">LEGALOPS & COMPLIANCE INTELLIGENCE</h2>
-              <p class="text-xs text-slate-600">Laporan Kelayakan Perizinan Produk NPD JDIH BPOM</p>
+              <h2 style="font-size: 18px; font-weight: bold; margin: 0; color: #0f172a;">LEGALOPS & COMPLIANCE INTELLIGENCE</h2>
+              <p style="font-size: 11px; color: #475569; margin: 4px 0 0 0;">Laporan Kelayakan Perizinan Produk NPD JDIH BPOM</p>
             </div>
-            <div class="text-right text-xs text-slate-500">Tanggal: ${new Date().toLocaleDateString('id-ID')}</div>
+            <div style="text-align: right; font-size: 11px; color: #64748b;">
+              Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}
+            </div>
           </div>
           ${printArea.innerHTML}
         </body>
