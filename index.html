@@ -1257,18 +1257,36 @@
     // NPD SCREENER LOGIC
     // ==========================================
     function openNpdModal(existingItem = null) {
-      if (existingItem) {
-        document.getElementById('npd-product-name').value = existingItem.product_idea_name || '';
-        document.getElementById('npd-category-select').value = existingItem.category || 'Pangan Olahan';
-        document.getElementById('npd-ingredients-input').value = existingItem.main_ingredients || '';
-        document.getElementById('npd-scheme-select').value = existingItem.production_scheme || 'Pabrik Sendiri';
-      } else {
-        document.getElementById('npd-product-name').value = '';
-        document.getElementById('npd-ingredients-input').value = '';
-      }
-      document.getElementById('npd-modal').classList.remove('hidden');
-      lucide.createIcons();
-    }
+  if (existingItem) {
+    // 1. Jika mode edit / rescreen
+    document.getElementById('npd-product-name').value = existingItem.product_idea_name || '';
+    document.getElementById('npd-category-select').value = existingItem.category || 'Pangan Olahan';
+    document.getElementById('npd-ingredients-input').value = existingItem.main_ingredients || '';
+    document.getElementById('npd-scheme-select').value = existingItem.production_scheme || 'Pabrik Sendiri';
+  } else {
+    // 2. Jika mode PRODUK BARU -> Reset seluruh bidang form secara bersih
+    document.getElementById('npd-product-name').value = '';
+    document.getElementById('npd-ingredients-input').value = '';
+    document.getElementById('npd-category-select').value = 'Pangan Olahan';
+    document.getElementById('npd-scheme-select').value = 'Pabrik Sendiri';
+    document.getElementById('npd-foreign-country-input').value = '';
+    
+    // Reset radio button Negara Asal ke Indonesia
+    const radioIndonesia = document.querySelector('input[name="npd_country_type"][value="Indonesia"]');
+    if (radioIndonesia) radioIndonesia.checked = true;
+    toggleCountryOriginInput(false);
+
+    // Uncheck semua checkbox klaim
+    document.querySelectorAll('input[name="npd_claim"]').forEach(cb => cb.checked = false);
+
+    // Uncheck semua checkbox kanal penjualan
+    document.querySelectorAll('input[name="npd_channel"]').forEach(cb => cb.checked = false);
+  }
+
+  document.getElementById('npd-modal').classList.remove('hidden');
+  lucide.createIcons();
+}
+
 
     function closeNpdModal() {
       document.getElementById('npd-modal').classList.add('hidden');
