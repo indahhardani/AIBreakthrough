@@ -18,7 +18,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex">
 
-  <!-- 1. LOGIN CONTAINER -->
+   <!-- 1. LOGIN CONTAINER -->
   <div id="login-view" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-6">
       <div class="text-center space-y-2">
@@ -46,25 +46,30 @@
         </button>
       </form>
 
+      <!-- SEKSI TOMBOL LOGIN UJI COBA PER ROLE -->
       <div class="border-t border-slate-800 pt-4 space-y-2">
-        <p class="text-xs text-slate-400 text-center font-medium">⚡ Auto-Fill Demo Role:</p>
+        <p class="text-xs text-slate-400 text-center font-medium">⚡ Uji Coba Login Langsung (Per Role):</p>
         <div class="grid grid-cols-2 gap-2">
-          <button onclick="fillDemo('admin', 'admin123')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs text-amber-400 font-medium text-center flex items-center justify-center gap-1">
+          <button type="button" onclick="quickLoginRole('admin', 'admin123')" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700/80 border border-amber-500/30 rounded-lg text-xs text-amber-400 font-semibold text-center flex items-center justify-center gap-1.5 transition">
             <i data-lucide="crown" class="w-3.5 h-3.5"></i> Admin
           </button>
-          <button onclick="fillDemo('legal', 'legal123')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs text-blue-400 font-medium text-center flex items-center justify-center gap-1">
-            <i data-lucide="scale" class="w-3.5 h-3.5"></i> Legal
+          <button type="button" onclick="quickLoginRole('legal', 'legal123')" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700/80 border border-blue-500/30 rounded-lg text-xs text-blue-400 font-semibold text-center flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="scale" class="w-3.5 h-3.5"></i> Legal Compliance
           </button>
-          <button onclick="fillDemo('brand_user', 'brand123')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs text-purple-400 font-medium text-center flex items-center justify-center gap-1">
+          <button type="button" onclick="quickLoginRole('ceo', 'ceo123')" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700/80 border border-emerald-500/30 rounded-lg text-xs text-emerald-400 font-semibold text-center flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="building-2" class="w-3.5 h-3.5"></i> CEO Office
+          </button>
+          <button type="button" onclick="quickLoginRole('brand_user', 'brand123')" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700/80 border border-purple-500/30 rounded-lg text-xs text-purple-400 font-semibold text-center flex items-center justify-center gap-1.5 transition">
             <i data-lucide="tag" class="w-3.5 h-3.5"></i> Brand Team
           </button>
-          <button onclick="fillDemo('retops_user', 'retops123')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs text-emerald-400 font-medium text-center flex items-center justify-center gap-1">
-            <i data-lucide="users" class="w-3.5 h-3.5"></i> Umum
-          </button>
         </div>
+        <button type="button" onclick="quickLoginRole('retops_user', 'retops123')" class="w-full py-2 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-lg text-xs text-slate-300 font-semibold text-center flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="users" class="w-3.5 h-3.5"></i> Umum (Retail Ops / FAT / HR)
+        </button>
       </div>
     </div>
   </div>
+
 
   <!-- 2. MAIN APP DASHBOARD -->
   <div id="app-view" class="hidden flex-1 flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
@@ -537,6 +542,16 @@
         console.warn('Gagal memuat master brands:', e);
       }
     }
+function quickLoginRole(username, password) {
+  document.getElementById('username-input').value = username;
+  document.getElementById('password-input').value = password;
+  
+  // Trigger event submit login otomatis
+  const loginForm = document.getElementById('form-login');
+  if (loginForm) {
+    loginForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+  }
+}
 
     function populateBrandFilters() {
       const selectHeader = document.getElementById('header-brand-filter');
