@@ -920,6 +920,97 @@
     }
 
     // ==========================================
+    // AGREEMENT MATRIX: SCAN GOOGLE DRIVE & PILIH SEMUA
+    // ==========================================
+    function toggleSelectAllContracts(master) {
+      document.querySelectorAll('.contract-checkbox').forEach(cb => { cb.checked = master.checked; });
+    }
+
+    // scan-gdrive memproses 1 file per panggilan dan mengembalikan { count, remaining, total_found, errors, failed_ids }.
+    // Jadi frontend harus memanggilnya berulang sampai remaining = 0.
+    async function handleScanGoogleDriveEdge() {
+      const btn = document.getElementById('btn-scan-drive');
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.classList.add('opacity-60', 'cursor-not-allowed');
+      const setBtn = (txt) => {
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> ${txt}`;
+        lucide.createIcons();
+      };
+      setBtn('Memindai Google Drive...');
+
+      // Batasi ke brand yang dipilih di filter atas / brand milik user tim brand
+      let brandId = null;
+      if (currentUserSession && currentUserSession.role === 'brand_team' && currentUserSession.brand_id) {
+        brandId = currentUserSession.brand_id;
+      } else if (selectedBrandFilter !== 'ALL') {
+        brandId = selectedBrandFilter;
+      }
+
+      const skip = [];          // id file yang gagal, agar tidak diulang terus
+      const errors = [];
+      let done = 0, totalFound = 0;
+
+      try {
+        for (let i = 0; i < 300; i++) {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 150000); // maks 150 dtk per file
+          let result = {};
+          try {
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/scan-gdrive`, {
+              method: 'POST',
+              signal: controller.signal,
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+              },
+              body: JSON.stringify({ skip, brand_id: brandId })
+            });
+            const raw = await response.text();
+            try { result = JSON.parse(raw); } catch (e) { result = { error: raw.slice(0, 300) }; }
+            if (!response.ok || result.error) {
+              throw new Error(result.error || `scan-gdrive mengembalikan HTTP ${response.status}`);
+            }
+          } finally {
+            clearTimeout(timer);
+          }
+
+          done += result.count || 0;
+          totalFound = result.total_found || totalFound;
+          (result.errors || []).forEach(e => errors.push(e));
+          (result.failed_ids || []).forEach(id => skip.push(id));
+
+          const remaining = result.remaining || 0;
+          setBtn(`Memindai... ${done} selesai, sisa ${remaining}`);
+
+          if (remaining <= 0) break;
+          // pengaman: tidak ada kemajuan sama sekali -> hentikan agar tidak looping
+          if (!(result.count > 0) && !(result.failed_ids || []).length) break;
+        }
+
+        await loadContracts();
+
+        let msg = `Scan Google Drive selesai.\n\nFile di folder: ${totalFound}\nBerhasil diproses: ${done}`;
+        if (done === 0 && errors.length === 0) msg += '\n\nTidak ada file baru untuk dipindai.';
+        if (errors.length) msg += `\n\nGagal (${errors.length}):\n- ` + errors.slice(0, 5).join('\n- ') + (errors.length > 5 ? '\n- ...' : '');
+        alert(msg);
+      } catch (err) {
+        console.error('scan-gdrive error:', err);
+        const msg = err.name === 'AbortError'
+          ? 'Satu file memakan waktu lebih dari 150 detik. Coba lagi, file tersebut akan dilewati bila tetap gagal.'
+          : err.message;
+        await loadContracts();
+        alert(`Gagal memindai Google Drive:\n${msg}\n\nBerhasil diproses sebelum error: ${done}`);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-60', 'cursor-not-allowed');
+        btn.innerHTML = originalHtml;
+        lucide.createIcons();
+      }
+    }
+
+    // ==========================================
     // NAVIGATION & AUTHENTICATION
     // ==========================================
     function applyRbacUI(role) {
