@@ -47,29 +47,34 @@
       </form>
 
       <!-- SEKSI TOMBOL LOGIN UJI COBA PER ROLE -->
+           <!-- SEKSI TOMBOL LOGIN UJI COBA PER ROLE -->
       <div class="border-t border-slate-800 pt-4 space-y-2">
-        <p class="text-xs text-slate-400 text-center font-medium">⚡ Uji Coba Login Langsung (Per Role):</p>
+        <p class="text-xs text-slate-400 text-center font-medium">⚡ Uji Coba Login Langsung (Per Role & Brand):</p>
         <div class="grid grid-cols-2 gap-2">
-          <button type="button" onclick="quickLoginRole('admin', 'admin123')" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700/80 border border-amber-500/30 rounded-lg text-xs text-amber-400 font-semibold text-center flex items-center justify-center gap-1.5 transition">
+          <button type="button" onclick="quickLoginRole('admin', 'admin123')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-amber-500/30 rounded-lg text-xs text-amber-400 font-semibold text-center flex items-center justify-center gap-1 transition">
             <i data-lucide="crown" class="w-3.5 h-3.5"></i> Admin
           </button>
-          <button type="button" onclick="quickLoginRole('legal', 'legal123')" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700/80 border border-blue-500/30 rounded-lg text-xs text-blue-400 font-semibold text-center flex items-center justify-center gap-1.5 transition">
-            <i data-lucide="scale" class="w-3.5 h-3.5"></i> Legal Compliance
+          <button type="button" onclick="quickLoginRole('legal', 'legal123')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-blue-500/30 rounded-lg text-xs text-blue-400 font-semibold text-center flex items-center justify-center gap-1 transition">
+            <i data-lucide="scale" class="w-3.5 h-3.5"></i> Legal
           </button>
-          <button type="button" onclick="quickLoginRole('ceo', 'ceo123')" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700/80 border border-emerald-500/30 rounded-lg text-xs text-emerald-400 font-semibold text-center flex items-center justify-center gap-1.5 transition">
+          <button type="button" onclick="quickLoginRole('ceo', 'ceo123')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-emerald-500/30 rounded-lg text-xs text-emerald-400 font-semibold text-center flex items-center justify-center gap-1 transition">
             <i data-lucide="building-2" class="w-3.5 h-3.5"></i> CEO Office
           </button>
-          <button type="button" onclick="quickLoginRole('brand_user', 'brand123')" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700/80 border border-purple-500/30 rounded-lg text-xs text-purple-400 font-semibold text-center flex items-center justify-center gap-1.5 transition">
-            <i data-lucide="tag" class="w-3.5 h-3.5"></i> Brand Team
+          <button type="button" onclick="quickLoginRole('retops_user', 'retops123')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-lg text-xs text-slate-300 font-semibold text-center flex items-center justify-center gap-1 transition">
+            <i data-lucide="users" class="w-3.5 h-3.5"></i> Umum
           </button>
         </div>
-        <button type="button" onclick="quickLoginRole('retops_user', 'retops123')" class="w-full py-2 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-lg text-xs text-slate-300 font-semibold text-center flex items-center justify-center gap-1.5 transition">
-          <i data-lucide="users" class="w-3.5 h-3.5"></i> Umum (Retail Ops / FAT / HR)
-        </button>
-      </div>
-    </div>
-  </div>
 
+        <!-- Opsi Pemisah Akun Brand Team Spesifik -->
+        <div class="pt-1 grid grid-cols-2 gap-2">
+          <button type="button" onclick="quickLoginRole('brand_user', 'brand123')" class="px-2 py-1.5 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/40 rounded-lg text-xs text-purple-300 font-semibold text-center flex items-center justify-center gap-1 transition">
+            <i data-lucide="tag" class="w-3.5 h-3.5"></i> Brand Luxcrime
+          </button>
+          <button type="button" onclick="quickLoginRole('brand_cessa', 'cessa123')" class="px-2 py-1.5 bg-pink-950/40 hover:bg-pink-900/50 border border-pink-500/40 rounded-lg text-xs text-pink-300 font-semibold text-center flex items-center justify-center gap-1 transition">
+            <i data-lucide="tag" class="w-3.5 h-3.5"></i> Brand Cessa
+          </button>
+        </div>
+      </div>
 
   <!-- 2. MAIN APP DASHBOARD -->
   <div id="app-view" class="hidden flex-1 flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
