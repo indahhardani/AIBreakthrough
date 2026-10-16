@@ -971,7 +971,7 @@
             const raw = await response.text();
             try { result = JSON.parse(raw); } catch (e) { result = { error: raw.slice(0, 300) }; }
             if (!response.ok || result.error) {
-              throw new Error(result.error || `scan-gdrive mengembalikan HTTP ${response.status}`);
+              throw new Error(result.error || `Scan-gdrive mengembalikan HTTP ${response.status}`);
             }
           } finally {
             clearTimeout(timer);
@@ -999,7 +999,7 @@
         if (unmatched.size) msg += `\n\nSubfolder dilewati (nama tidak cocok dengan brand mana pun):\n- ` + [...unmatched].join('\n- ');
         alert(msg);
       } catch (err) {
-        console.error('scan-gdrive error:', err);
+        console.error('Scan-gdrive error:', err);
         const msg = err.name === 'AbortError'
           ? 'Satu file memakan waktu lebih dari 150 detik. Coba lagi, file tersebut akan dilewati bila tetap gagal.'
           : err.message;
