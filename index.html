@@ -802,52 +802,62 @@
     }
 
     function switchTab(tabName) {
-      document.getElementById('view-vendor-contracts').classList.add('hidden');
-      document.getElementById('view-vendor-registration').classList.add('hidden');
-      document.getElementById('view-artwork-prescreening').classList.add('hidden');
-      document.getElementById('view-npd-screener').classList.add('hidden');
-      document.getElementById('view-tickets-module').classList.add('hidden');
-      document.getElementById('view-audit-trail').classList.add('hidden');
+  // 1. Sembunyikan semua tampilan modul
+  document.getElementById('view-vendor-contracts').classList.add('hidden');
+  document.getElementById('view-vendor-registration').classList.add('hidden');
+  document.getElementById('view-artwork-prescreening').classList.add('hidden');
+  document.getElementById('view-npd-screener').classList.add('hidden');
+  document.getElementById('view-tickets-module').classList.add('hidden');
+  document.getElementById('view-audit-trail').classList.add('hidden');
 
-      const resetNav = id => document.getElementById(id).className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
-      resetNav('nav-vendor-contracts');
-      resetNav('nav-vendor-registration');
-      resetNav('nav-artwork-prescreening');
-      resetNav('nav-npd-screener');
-      resetNav('nav-tickets-module');
-      resetNav('nav-audit-trail');
+  // 2. Reset status tombol navigasi
+  const resetNav = id => {
+    const el = document.getElementById(id);
+    if (el) el.className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+  };
+  resetNav('nav-vendor-contracts');
+  resetNav('nav-vendor-registration');
+  resetNav('nav-artwork-prescreening');
+  resetNav('nav-npd-screener');
+  resetNav('nav-tickets-module');
+  resetNav('nav-audit-trail');
 
-      if (tabName === 'vendor-contracts') {
-        document.getElementById('view-vendor-contracts').classList.remove('hidden');
-        document.getElementById('nav-vendor-contracts').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition";
-        document.getElementById('page-title').innerText = "Agreement Matrix";
-        loadContracts();
-      } else if (tabName === 'vendor-registration') {
-        document.getElementById('view-vendor-registration').classList.remove('hidden');
-        document.getElementById('nav-vendor-registration').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition";
-        document.getElementById('page-title').innerText = "Pendaftaran Vendor";
-        loadVendorOnboardings();
-      } else if (tabName === 'artwork-prescreening') {
-        document.getElementById('view-artwork-prescreening').classList.remove('hidden');
-        document.getElementById('nav-artwork-prescreening').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-purple-400 text-sm font-medium transition";
-        document.getElementById('page-title').innerText = "Artwork & Advertising Pre-Screening";
-      } else if (tabName === 'npd-screener') {
-        document.getElementById('view-npd-screener').classList.remove('hidden');
-        document.getElementById('nav-npd-screener').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-emerald-400 text-sm font-medium transition";
-        document.getElementById('page-title').innerText = "NPD Regulatory Feasibility Screener";
-      } else if (tabName === 'tickets-module') {
-        document.getElementById('view-tickets-module').classList.remove('hidden');
-        document.getElementById('nav-tickets-module').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-amber-400 text-sm font-medium transition";
-        document.getElementById('page-title').innerText = "Compliance Ticketing System";
-      } else if (tabName === 'audit-trail') {
-        document.getElementById('view-audit-trail').classList.remove('hidden');
-        document.getElementById('nav-audit-trail').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-amber-400 text-sm font-medium transition";
-        document.getElementById('page-title').innerText = "Audit Trail System";
-      }
+  // 3. Tampilkan modul aktif & PANGGIL FUNGSI LOAD DATA TABEL
+  if (tabName === 'vendor-contracts') {
+    document.getElementById('view-vendor-contracts').classList.remove('hidden');
+    document.getElementById('nav-vendor-contracts').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition";
+    document.getElementById('page-title').innerText = "Agreement Matrix";
+    loadContracts();
+  } else if (tabName === 'vendor-registration') {
+    document.getElementById('view-vendor-registration').classList.remove('hidden');
+    document.getElementById('nav-vendor-registration').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition";
+    document.getElementById('page-title').innerText = "Pendaftaran Vendor";
+    loadVendorOnboardings();
+  } else if (tabName === 'artwork-prescreening') {
+    document.getElementById('view-artwork-prescreening').classList.remove('hidden');
+    document.getElementById('nav-artwork-prescreening').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-purple-400 text-sm font-medium transition";
+    document.getElementById('page-title').innerText = "Artwork & Advertising Pre-Screening";
+    loadArtworkTable(); // <-- Panggil pemuat data Artwork
+  } else if (tabName === 'npd-screener') {
+    document.getElementById('view-npd-screener').classList.remove('hidden');
+    document.getElementById('nav-npd-screener').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-emerald-400 text-sm font-medium transition";
+    document.getElementById('page-title').innerText = "NPD Regulatory Feasibility Screener";
+    loadNpdProductsTable(); // <-- Panggil pemuat data NPD
+  } else if (tabName === 'tickets-module') {
+    document.getElementById('view-tickets-module').classList.remove('hidden');
+    document.getElementById('nav-tickets-module').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-amber-400 text-sm font-medium transition";
+    document.getElementById('page-title').innerText = "Compliance Ticketing System";
+    loadTicketsTable(); // <-- Panggil pemuat data Tiket
+  } else if (tabName === 'audit-trail') {
+    document.getElementById('view-audit-trail').classList.remove('hidden');
+    document.getElementById('nav-audit-trail').className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-amber-400 text-sm font-medium transition";
+    document.getElementById('page-title').innerText = "Audit Trail System";
+    loadAuditLogs(); // <-- Panggil pemuat data Audit Trail
+  }
 
-      if (window.innerWidth < 768) toggleSidebar();
-      lucide.createIcons();
-    }
+  if (window.innerWidth < 768) toggleSidebar();
+  lucide.createIcons();
+}
 
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('-translate-x-full');
