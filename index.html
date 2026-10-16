@@ -649,16 +649,20 @@
     // ==========================================
     // INITIALIZATION & BRAND LOAD
     // ==========================================
+    let brandLoadError = '';
     async function loadMasterBrands() {
+      brandLoadError = '';
       try {
-        const { data: brands, error } = await supabaseClient.from('brands').select('*').order('name', { ascending: true });
-        if (!error && brands) {
-          masterBrands = brands;
-          populateBrandFilters();
-        }
+        let res = await supabaseClient.from('brands').select('*').order('name', { ascending: true });
+        if (res.error) res = await supabaseClient.from('brands').select('*'); // fallback jika kolom name tidak ada
+        if (res.error) throw res.error;
+        masterBrands = res.data || [];
+        if (masterBrands.length === 0) brandLoadError = 'Tabel brands kosong atau tidak bisa dibaca (cek isi tabel & RLS policy SELECT).';
       } catch (e) {
-        console.warn('Gagal memuat master brands:', e);
+        brandLoadError = e.message || String(e);
+        console.error('Gagal memuat master brands:', e);
       }
+      populateBrandFilters();
     }
 
     function quickLoginRole(username, password) {
@@ -677,7 +681,7 @@
 
       selectHeader.innerHTML = `<option value="ALL">Semua Brand</option>` + masterBrands.map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('');
       if (selectOnboard) {
-        selectOnboard.innerHTML = masterBrands.map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('');
+        selectOnboard.innerHTML = brandOptions();
       }
     }
 
@@ -767,7 +771,9 @@
     // ==========================================
     // VENDOR ONBOARDING (PENDAFTARAN VENDOR BARU)
     // ==========================================
-    function openVendorOnboardingModal() {
+    async function openVendorOnboardingModal() {
+      if (!masterBrands.length) await loadMasterBrands();
+      document.getElementById('onboard-brand-select').innerHTML = brandOptions();
       document.getElementById('vendor-onboarding-modal').classList.remove('hidden');
       lucide.createIcons();
     }
@@ -865,6 +871,7 @@
       const selectedBrand = masterBrands.find(b => b.id === brand_id);
       const file = document.getElementById('vendor-pdf-file').files[0];
 
+      if (!brand_id) { alert('Brand belum terpilih. Pastikan tabel brands terisi dan dapat dibaca.'); return; }
       if (!file) { alert('Pilih 1 file PDF gabungan dokumen legalitas vendor!'); return; }
       if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) { alert('File harus berformat PDF.'); return; }
       if (file.size > 10 * 1024 * 1024) { alert('Ukuran PDF melebihi 10 MB. Silakan kompres terlebih dahulu.'); return; }
@@ -1185,14 +1192,17 @@
     }
 
     function brandOptions() {
+      if (!masterBrands.length) return `<option value="">(Brand tidak termuat${brandLoadError ? ': ' + esc(brandLoadError) : ''})</option>`;
       return masterBrands.map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('');
     }
 
-    function openArtworkModal() {
+    async function openArtworkModal() {
+      if (!masterBrands.length) await loadMasterBrands();
       document.getElementById('artwork-brand').innerHTML = brandOptions();
       openModal('artwork-modal');
     }
-    function openNpdModal() {
+    async function openNpdModal() {
+      if (!masterBrands.length) await loadMasterBrands();
       document.getElementById('npd-brand').innerHTML = brandOptions();
       openModal('npd-modal');
     }
