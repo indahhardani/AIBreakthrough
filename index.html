@@ -9,65 +9,89 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#64bcae',
+              50: '#f0f9f8',
+              100: '#dcf2ef',
+              200: '#bce4df',
+              300: '#91ceca',
+              400: '#64bcae',
+              500: '#48a093',
+              600: '#388077',
+              700: '#306761',
+              800: '#2a534f',
+              900: '#264643',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex">
 
   <!-- 1. LOGIN CONTAINER -->
-  <div id="login-view" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-6">
+  <div id="login-view" class="fixed inset-0 z-50 bg-slate-100 flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-xl space-y-6">
       <div class="text-center space-y-2">
-        <div class="inline-flex p-3 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/20 mb-1">
+        <div class="inline-flex p-3 bg-brand-50 text-brand-600 rounded-xl border border-brand-200 mb-1">
           <i data-lucide="shield-check" class="w-8 h-8"></i>
         </div>
-        <h2 class="text-2xl font-bold tracking-tight text-white">LegalOps Intelligence</h2>
-        <p class="text-xs text-slate-400">Masuk via Supabase Database (`public.users`)</p>
+        <h2 class="text-2xl font-bold tracking-tight text-slate-900">LegalOps Intelligence</h2>
+        <p class="text-xs text-slate-500">Masuk via Supabase Database (`public.users`)</p>
       </div>
 
       <form id="form-login" onsubmit="handlePureSupabaseLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Username</label>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Username</label>
           <input type="text" id="username-input" required placeholder="Masukkan username" 
-                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition">
+                 class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
         </div>
         <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Password</label>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Password</label>
           <input type="password" id="password-input" required placeholder="••••••••" 
-                 class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition">
+                 class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
         </div>
 
-        <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
+        <button type="submit" id="btn-submit" class="w-full bg-brand hover:bg-brand-500 text-white font-medium py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2 shadow-md shadow-brand/20">
           <i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB
         </button>
       </form>
 
-      <div class="border-t border-slate-800 pt-4 space-y-2">
-        <p class="text-xs text-slate-400 text-center font-medium">⚡ Uji Coba Login Langsung (Per Role & Brand):</p>
+      <div class="border-t border-slate-200 pt-4 space-y-2">
+        <p class="text-xs text-slate-500 text-center font-medium">⚡ Uji Coba Login Langsung (Per Role & Brand):</p>
         <div class="grid grid-cols-2 gap-2">
-          <button type="button" onclick="quickLoginRole('admin', 'admin123')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-amber-500/30 rounded-lg text-xs text-amber-400 font-semibold text-center flex items-center justify-center gap-1 transition">
+          <button type="button" onclick="quickLoginRole('admin', 'admin123')" class="px-2 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-lg text-xs text-amber-700 font-semibold text-center flex items-center justify-center gap-1 transition">
             <i data-lucide="crown" class="w-3.5 h-3.5"></i> Admin
           </button>
-          <button type="button" onclick="quickLoginRole('legal', 'legal123')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-blue-500/30 rounded-lg text-xs text-blue-400 font-semibold text-center flex items-center justify-center gap-1 transition">
+          <button type="button" onclick="quickLoginRole('legal', 'legal123')" class="px-2 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-300 rounded-lg text-xs text-blue-700 font-semibold text-center flex items-center justify-center gap-1 transition">
             <i data-lucide="scale" class="w-3.5 h-3.5"></i> Legal
           </button>
-          <button type="button" onclick="quickLoginRole('ceo', 'ceo123')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-emerald-500/30 rounded-lg text-xs text-emerald-400 font-semibold text-center flex items-center justify-center gap-1 transition">
+          <button type="button" onclick="quickLoginRole('ceo', 'ceo123')" class="px-2 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-lg text-xs text-emerald-700 font-semibold text-center flex items-center justify-center gap-1 transition">
             <i data-lucide="building-2" class="w-3.5 h-3.5"></i> CEO Office
           </button>
-          <button type="button" onclick="quickLoginRole('retops_user', 'retops123')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-lg text-xs text-slate-300 font-semibold text-center flex items-center justify-center gap-1 transition">
+          <button type="button" onclick="quickLoginRole('retops_user', 'retops123')" class="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg text-xs text-slate-700 font-semibold text-center flex items-center justify-center gap-1 transition">
             <i data-lucide="users" class="w-3.5 h-3.5"></i> Umum
           </button>
         </div>
 
         <div class="pt-1 grid grid-cols-2 gap-2">
-          <button type="button" onclick="quickLoginRole('brand_user', 'brand123')" class="px-2 py-1.5 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/40 rounded-lg text-xs text-purple-300 font-semibold text-center flex items-center justify-center gap-1 transition">
+          <button type="button" onclick="quickLoginRole('brand_user', 'brand123')" class="px-2 py-1.5 bg-purple-50 hover:bg-purple-100 border border-purple-300 rounded-lg text-xs text-purple-700 font-semibold text-center flex items-center justify-center gap-1 transition">
             <i data-lucide="tag" class="w-3.5 h-3.5"></i> Brand Luxcrime
           </button>
-          <button type="button" onclick="quickLoginRole('brand_cessa', 'cessa123')" class="px-2 py-1.5 bg-pink-950/40 hover:bg-pink-900/50 border border-pink-500/40 rounded-lg text-xs text-pink-300 font-semibold text-center flex items-center justify-center gap-1 transition">
+          <button type="button" onclick="quickLoginRole('brand_cessa', 'cessa123')" class="px-2 py-1.5 bg-pink-50 hover:bg-pink-100 border border-pink-300 rounded-lg text-xs text-pink-700 font-semibold text-center flex items-center justify-center gap-1 transition">
             <i data-lucide="tag" class="w-3.5 h-3.5"></i> Brand Cessa
           </button>
         </div>
@@ -79,80 +103,80 @@
   <div id="app-view" class="hidden flex-1 flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
     
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-4 flex-shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out">
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 flex flex-col justify-between p-4 flex-shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out shadow-sm">
       <div class="space-y-6">
-        <div class="flex items-center justify-between px-2 py-2">
+        <div class="flex items-center justify-between px-2 py-2 border-b border-slate-100 pb-4">
           <div class="flex items-center gap-3">
-            <div class="p-2 bg-blue-600 rounded-lg text-white">
+            <div class="p-2 bg-brand text-white rounded-lg shadow-sm">
               <i data-lucide="shield-check" class="w-5 h-5"></i>
             </div>
-            <span class="font-bold text-base tracking-wide">LegalOps AI</span>
+            <span class="font-bold text-base tracking-wide text-slate-800">LegalOps AI</span>
           </div>
-          <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
+          <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-600 p-1">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
 
         <nav class="space-y-1">
-          <button onclick="switchTab('vendor-contracts')" id="nav-vendor-contracts" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-blue-400 text-sm font-medium transition">
+          <button onclick="switchTab('vendor-contracts')" id="nav-vendor-contracts" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-brand-50 text-brand-700 text-sm font-semibold transition">
             <i data-lucide="file-text" class="w-4 h-4"></i> Agreement Matrix
           </button>
 
-          <button onclick="switchTab('vendor-registration')" id="nav-vendor-registration" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+          <button onclick="switchTab('vendor-registration')" id="nav-vendor-registration" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 text-sm font-medium transition">
             <i data-lucide="user-plus" class="w-4 h-4"></i> Pendaftaran Vendor
           </button>
 
-          <button onclick="switchTab('artwork-prescreening')" id="nav-artwork-prescreening" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+          <button onclick="switchTab('artwork-prescreening')" id="nav-artwork-prescreening" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 text-sm font-medium transition">
             <i data-lucide="scan-line" class="w-4 h-4"></i> Artwork Pre-Screening
           </button>
 
-          <button onclick="switchTab('npd-screener')" id="nav-npd-screener" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+          <button onclick="switchTab('npd-screener')" id="nav-npd-screener" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 text-sm font-medium transition">
             <i data-lucide="flask-conical" class="w-4 h-4"></i> NPD Permit Screener
           </button>
 
-          <button onclick="switchTab('tickets-module')" id="nav-tickets-module" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+          <button onclick="switchTab('tickets-module')" id="nav-tickets-module" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 text-sm font-medium transition">
             <i data-lucide="ticket" class="w-4 h-4"></i> Compliance Tickets
           </button>
 
-          <button onclick="switchTab('audit-trail')" id="nav-audit-trail" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition">
+          <button onclick="switchTab('audit-trail')" id="nav-audit-trail" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 text-sm font-medium transition">
             <i data-lucide="history" class="w-4 h-4"></i> Audit Trail Log
           </button>
         </nav>
       </div>
 
-      <div class="border-t border-slate-800 pt-3 space-y-3 mt-auto">
+      <div class="border-t border-slate-200 pt-3 space-y-3 mt-auto">
         <div class="flex items-center gap-3 px-1">
-          <div class="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 flex items-center justify-center font-bold text-xs" id="user-avatar">U</div>
+          <div class="w-8 h-8 rounded-full bg-brand-100 border border-brand-300 text-brand-700 flex items-center justify-center font-bold text-xs" id="user-avatar">U</div>
           <div class="overflow-hidden">
-            <p class="text-xs font-semibold text-slate-200 truncate" id="user-display">username</p>
-            <p class="text-[10px] uppercase font-bold text-blue-400 tracking-wider truncate" id="role-display">ROLE</p>
+            <p class="text-xs font-semibold text-slate-800 truncate" id="user-display">username</p>
+            <p class="text-[10px] uppercase font-bold text-brand-600 tracking-wider truncate" id="role-display">ROLE</p>
           </div>
         </div>
 
-        <button onclick="handleLogout()" class="w-full bg-slate-800 hover:bg-rose-900/30 hover:text-rose-400 text-slate-400 border border-slate-700 py-2 rounded-lg text-xs font-medium transition flex items-center justify-center gap-2">
+        <button onclick="handleLogout()" class="w-full bg-slate-100 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-600 border border-slate-200 py-2 rounded-lg text-xs font-medium transition flex items-center justify-center gap-2">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Keluar
         </button>
       </div>
     </aside>
 
-    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-950/80 z-30 hidden md:hidden"></div>
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/40 z-30 hidden md:hidden"></div>
 
-    <main class="flex-1 flex flex-col bg-slate-950 overflow-y-auto w-full">
-      <header class="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur flex items-center justify-between px-4 md:px-6 flex-shrink-0">
+    <main class="flex-1 flex flex-col bg-slate-50 overflow-y-auto w-full">
+      <header class="h-16 border-b border-slate-200 bg-white/80 backdrop-blur flex items-center justify-between px-4 md:px-6 flex-shrink-0 sticky top-0 z-20">
         <div class="flex items-center gap-3">
-          <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700">
+          <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
-          <h1 class="text-sm md:text-base font-semibold text-slate-100 truncate" id="page-title">Agreement Matrix</h1>
+          <h1 class="text-sm md:text-base font-bold text-slate-800 truncate" id="page-title">Agreement Matrix</h1>
         </div>
 
         <div class="flex items-center gap-3">
-          <select id="header-brand-filter" onchange="handleBrandFilterChange()" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500 hidden cursor-pointer">
+          <select id="header-brand-filter" onchange="handleBrandFilterChange()" class="bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-brand-500 cursor-pointer">
             <option value="ALL">Semua Brand</option>
           </select>
 
-          <div class="text-[10px] md:text-xs text-slate-400 bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-800">
-            Role: <span class="font-bold text-slate-200 uppercase" id="access-badge">-</span>
+          <div class="text-[10px] md:text-xs text-slate-500 bg-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-200">
+            Role: <span class="font-bold text-slate-800 uppercase" id="access-badge">-</span>
           </div>
         </div>
       </header>
@@ -161,20 +185,20 @@
         
         <!-- 1. AGREEMENT MATRIX TAB -->
         <section id="view-vendor-contracts" class="space-y-4">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <div>
-              <h2 class="text-lg font-bold text-white">Agreement Matrix</h2>
-              <p class="text-xs text-slate-400">Arsip perjanjian vendor yang terintegrasi Google Drive sub-folder Brand.</p>
+              <h2 class="text-base font-bold text-slate-800">Agreement Matrix</h2>
+              <p class="text-xs text-slate-500">Arsip perjanjian vendor yang terintegrasi Google Drive sub-folder Brand.</p>
             </div>
-            <button onclick="alert('Pindai Drive Edge Function')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2">
+            <button onclick="alert('Pindai Drive Edge Function')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-sm">
               <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)
             </button>
           </div>
 
-          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+          <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             <div class="overflow-x-auto max-h-[70vh]">
-              <table class="w-full text-left text-xs text-slate-300 border-collapse">
-                <thead class="bg-slate-950/90 backdrop-blur text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px] sticky top-0 z-10">
+              <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                <thead class="bg-slate-100 text-slate-600 uppercase tracking-wider border-b border-slate-200 text-[10px] sticky top-0 z-10">
                   <tr>
                     <th class="px-4 py-3.5 font-bold">Vendor</th>
                     <th class="px-3.5 py-3.5 font-bold">Brand</th>
@@ -185,7 +209,7 @@
                     <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
                   </tr>
                 </thead>
-                <tbody id="table-contracts-body" class="divide-y divide-slate-800/60"></tbody>
+                <tbody id="table-contracts-body" class="divide-y divide-slate-100"></tbody>
               </table>
             </div>
           </div>
@@ -193,23 +217,23 @@
 
         <!-- 2. VENDOR REGISTRATION TAB -->
         <section id="view-vendor-registration" class="hidden space-y-6">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
             <div>
-              <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                <i data-lucide="user-plus" class="w-5 h-5 text-blue-400"></i> Pendaftaran Vendor (PDF Auto Scan AI)
+              <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="user-plus" class="w-5 h-5 text-brand-600"></i> Pendaftaran Vendor (PDF Auto Scan AI)
               </h2>
-              <p class="text-xs text-slate-400 mt-1">Upload 1 file PDF gabungan ($\le$ 10 MB). AI akan memindai kelengkapan 6 dokumen legalitas secara otomatis.</p>
+              <p class="text-xs text-slate-500 mt-1">Upload 1 file PDF gabungan ($\le$ 10 MB). AI akan memindai kelengkapan 6 dokumen legalitas secara otomatis.</p>
             </div>
 
-            <button onclick="openVendorOnboardingModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-blue-600/20">
+            <button onclick="openVendorOnboardingModal()" class="bg-brand hover:bg-brand-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md shadow-brand/20">
               <i data-lucide="file-up" class="w-4 h-4"></i> Upload Berkas PDF Vendor
             </button>
           </div>
 
-          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+          <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-300 border-collapse">
-                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+              <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                <thead class="bg-slate-100 text-slate-600 uppercase tracking-wider border-b border-slate-200 text-[10px]">
                   <tr>
                     <th class="px-3 py-3.5 font-bold min-w-[150px]">Nama Vendor</th>
                     <th class="px-3 py-3.5 font-bold min-w-[100px]">Kategori</th>
@@ -223,9 +247,9 @@
                     <th class="px-3 py-3.5 font-bold text-center min-w-[110px]">Aksi</th>
                   </tr>
                 </thead>
-                <tbody id="table-vendor-onboarding-body" class="divide-y divide-slate-800/60">
+                <tbody id="table-vendor-onboarding-body" class="divide-y divide-slate-100">
                   <tr>
-                    <td colspan="10" class="px-4 py-10 text-center text-slate-500">Memuat data pendaftaran...</td>
+                    <td colspan="10" class="px-4 py-10 text-center text-slate-400">Memuat data pendaftaran...</td>
                   </tr>
                 </tbody>
               </table>
@@ -235,22 +259,22 @@
 
         <!-- 3. ARTWORK PRE-SCREENING TAB -->
         <section id="view-artwork-prescreening" class="hidden space-y-6">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
             <div>
-              <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                <i data-lucide="scan-line" class="w-5 h-5 text-purple-400"></i> Artwork & Advertising Pre-Screening
+              <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="scan-line" class="w-5 h-5 text-purple-600"></i> Artwork & Advertising Pre-Screening
               </h2>
-              <p class="text-xs text-slate-400 mt-1">Verifikasi kepatuhan kemasan & materi periklanan sesuai regulasi BPOM via AI.</p>
+              <p class="text-xs text-slate-500 mt-1">Verifikasi kepatuhan kemasan & materi periklanan sesuai regulasi BPOM via AI.</p>
             </div>
-            <button onclick="openArtworkModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2">
+            <button onclick="openArtworkModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
               <i data-lucide="plus-circle" class="w-4 h-4"></i> Periksa Artwork Baru
             </button>
           </div>
 
-          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+          <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-300 border-collapse">
-                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+              <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                <thead class="bg-slate-100 text-slate-600 uppercase tracking-wider border-b border-slate-200 text-[10px]">
                   <tr>
                     <th class="px-4 py-3.5 font-bold min-w-[110px]">ID</th>
                     <th class="px-4 py-3.5 font-bold min-w-[200px]">Nama Materi</th>
@@ -262,7 +286,7 @@
                     <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
                   </tr>
                 </thead>
-                <tbody id="table-artwork-body" class="divide-y divide-slate-800/60"></tbody>
+                <tbody id="table-artwork-body" class="divide-y divide-slate-100"></tbody>
               </table>
             </div>
           </div>
@@ -270,26 +294,26 @@
 
         <!-- 4. NPD PERMIT SCREENER TAB -->
         <section id="view-npd-screener" class="hidden space-y-6">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
             <div>
-              <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                <i data-lucide="flask-conical" class="w-5 h-5 text-emerald-400"></i> NPD Regulatory Feasibility Screener
+              <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="flask-conical" class="w-5 h-5 text-emerald-600"></i> NPD Regulatory Feasibility Screener
               </h2>
-              <p class="text-xs text-slate-400 mt-1">Lakukan skrining awal regulasi BPOM untuk ide produk baru.</p>
+              <p class="text-xs text-slate-500 mt-1">Lakukan skrining awal regulasi BPOM untuk ide produk baru.</p>
             </div>
-            <button onclick="openNpdModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2">
+            <button onclick="openNpdModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
               <i data-lucide="plus-circle" class="w-4 h-4"></i> Skrining Produk Baru
             </button>
           </div>
 
-          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+          <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-300 border-collapse">
-                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+              <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                <thead class="bg-slate-100 text-slate-600 uppercase tracking-wider border-b border-slate-200 text-[10px]">
                   <tr>
                     <th class="px-4 py-3.5 font-bold min-w-[110px]">ID Skrining</th>
                     <th class="px-4 py-3.5 font-bold min-w-[200px]">Ide Produk</th>
-                    <th class="px-4 py-3.5 font-bold min-w-[130px]">Kategori</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[130px]">Kategori BPOM</th>
                     <th class="px-4 py-3.5 font-bold min-w-[120px]">Kode Izin Utama</th>
                     <th class="px-4 py-3.5 font-bold min-w-[110px]">Pengaju</th>
                     <th class="px-4 py-3.5 font-bold min-w-[100px]">Feasibility</th>
@@ -297,7 +321,7 @@
                     <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
                   </tr>
                 </thead>
-                <tbody id="table-npd-body" class="divide-y divide-slate-800/60"></tbody>
+                <tbody id="table-npd-body" class="divide-y divide-slate-100"></tbody>
               </table>
             </div>
           </div>
@@ -305,22 +329,22 @@
 
         <!-- 5. COMPLIANCE TICKETS TAB -->
         <section id="view-tickets-module" class="hidden space-y-6">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
             <div>
-              <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                <i data-lucide="ticket" class="w-5 h-5 text-amber-400"></i> Compliance & Legal Request Ticketing
+              <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="ticket" class="w-5 h-5 text-amber-600"></i> Compliance & Legal Request Ticketing
               </h2>
-              <p class="text-xs text-slate-400 mt-1">Daftar tiket permintaan verifikasi legalitas dan perizinan BPOM.</p>
+              <p class="text-xs text-slate-500 mt-1">Daftar tiket permintaan verifikasi legalitas dan perizinan BPOM.</p>
             </div>
-            <button onclick="openCreateTicketModal()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2">
+            <button onclick="openCreateTicketModal()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
               <i data-lucide="plus-circle" class="w-4 h-4"></i> Buat Tiket Manual
             </button>
           </div>
 
-          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+          <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-300 border-collapse">
-                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+              <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                <thead class="bg-slate-100 text-slate-600 uppercase tracking-wider border-b border-slate-200 text-[10px]">
                   <tr>
                     <th class="px-4 py-3.5 font-bold min-w-[110px]">No. Tiket</th>
                     <th class="px-4 py-3.5 font-bold min-w-[200px]">Judul Permintaan</th>
@@ -332,7 +356,7 @@
                     <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
                   </tr>
                 </thead>
-                <tbody id="table-tickets-body" class="divide-y divide-slate-800/60"></tbody>
+                <tbody id="table-tickets-body" class="divide-y divide-slate-100"></tbody>
               </table>
             </div>
           </div>
@@ -340,27 +364,27 @@
 
         <!-- 6. AUDIT TRAIL LOG TAB -->
         <section id="view-audit-trail" class="hidden space-y-4">
-          <div class="flex justify-between items-center">
+          <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <div>
-              <h2 class="text-lg font-bold text-white">Audit Trail Logs</h2>
-              <p class="text-xs text-slate-400">Catatan aktivitas perubahan data real-time.</p>
+              <h2 class="text-base font-bold text-slate-800">Audit Trail Logs</h2>
+              <p class="text-xs text-slate-500">Catatan aktivitas perubahan data real-time.</p>
             </div>
-            <button onclick="loadAuditLogs()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5">
+            <button onclick="loadAuditLogs()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
             </button>
           </div>
 
-          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300">
-              <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+          <div class="bg-white border border-slate-200 rounded-xl overflow-x-auto shadow-sm">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-100 text-slate-600 uppercase tracking-wider border-b border-slate-200 text-[10px]">
                 <tr>
-                  <th class="px-4 py-3">Waktu</th>
-                  <th class="px-4 py-3">Pengguna</th>
-                  <th class="px-4 py-3">Aksi</th>
-                  <th class="px-4 py-3">Entitas</th>
+                  <th class="px-4 py-3 font-bold">Waktu</th>
+                  <th class="px-4 py-3 font-bold">Pengguna</th>
+                  <th class="px-4 py-3 font-bold">Aksi</th>
+                  <th class="px-4 py-3 font-bold">Entitas</th>
                 </tr>
               </thead>
-              <tbody id="table-audit-body" class="divide-y divide-slate-800/60"></tbody>
+              <tbody id="table-audit-body" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
         </section>
@@ -370,72 +394,71 @@
   </div>
 
   <!-- MODAL 1: VENDOR ONBOARDING PDF -->
-  <div id="vendor-onboarding-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
-        <h3 class="text-base font-bold text-white">Upload Berkas PDF Legalitas Vendor</h3>
-        <button onclick="closeVendorOnboardingModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+  <div id="vendor-onboarding-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="text-sm font-bold text-slate-800">Upload Berkas PDF Legalitas Vendor</h3>
+        <button onclick="closeVendorOnboardingModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <div class="p-6 space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Pilih Brand Terkait</label>
-          <select id="onboard-brand-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"></select>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Brand Terkait</label>
+          <select id="onboard-brand-select" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-brand-500"></select>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Unggah PDF Legalitas Gabungan (Maks 10 MB)</label>
-          <input type="file" id="onboard-pdf-file" accept="application/pdf" class="w-full text-xs text-slate-300 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:font-semibold hover:file:bg-blue-500 cursor-pointer">
-          <p class="text-[10px] text-slate-500 mt-1">AI akan memindai KTP, NPWP, Akta, NIB & Izin Usaha sekaligus dari berkas ini.</p>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Unggah PDF Legalitas Gabungan (Maks 10 MB)</label>
+          <input type="file" id="onboard-pdf-file" accept="application/pdf" class="w-full text-xs text-slate-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-brand file:text-white file:font-semibold hover:file:bg-brand-500 cursor-pointer border border-slate-200 rounded-lg">
+          <p class="text-[10px] text-slate-400 mt-1">AI akan memindai KTP, NPWP, Akta, NIB & Izin Usaha sekaligus dari berkas ini.</p>
         </div>
       </div>
 
-      <div class="px-6 py-3 border-t border-slate-800 bg-slate-950/50 flex justify-end gap-3">
-        <button onclick="closeVendorOnboardingModal()" class="bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">Batal</button>
-        <button id="btn-submit-vendor" onclick="submitVendorOnboardingDirect()" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+      <div class="px-6 py-3 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+        <button onclick="closeVendorOnboardingModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold transition">Batal</button>
+        <button id="btn-submit-vendor" onclick="submitVendorOnboardingDirect()" class="bg-brand hover:bg-brand-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
           <i data-lucide="scan-line" class="w-4 h-4"></i> SCAN & ANALISIS AI
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 2: ARTWORK PRE-SCREENING -->
-  <div id="artwork-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
-        <h3 class="text-base font-bold text-white">Pemeriksaan Artwork / Periklanan Baru</h3>
-        <button onclick="closeModal('artwork-modal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+  <!-- MODAL 2: ARTWORK PRE-SCREENING (2 OPSI MATERI: KEMASAN / IKLAN) -->
+  <div id="artwork-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border border-slate-200 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="text-sm font-bold text-slate-800">Pemeriksaan Artwork / Periklanan Baru</h3>
+        <button onclick="closeModal('artwork-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <form onsubmit="handleCreateArtwork(event)" class="p-6 space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Nama Produk / Materi</label>
-          <input type="text" id="artwork-title" required placeholder="Contoh: Design Kemasan Cushion Vol. 2" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Produk / Materi</label>
+          <input type="text" id="artwork-title" required placeholder="Contoh: Design Kemasan Cushion Vol. 2" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-500">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Jenis Materi</label>
-            <select id="artwork-type" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
-              <option value="Packaging Primary">Kemasan Primer</option>
-              <option value="Packaging Secondary">Kemasan Sekunder</option>
-              <option value="Advertising Campaign">Materi Iklan Digital</option>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Materi</label>
+            <select id="artwork-type" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-500">
+              <option value="Kemasan">Kemasan</option>
+              <option value="Iklan / Advertising">Iklan / Advertising</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Brand</label>
-            <select id="artwork-brand-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500"></select>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Brand</label>
+            <select id="artwork-brand-select" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-500"></select>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Unggah Desain (Gambar/PDF)</label>
-          <input type="file" id="artwork-file" accept="image/*,application/pdf" class="w-full text-xs text-slate-300 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:font-semibold hover:file:bg-purple-500 cursor-pointer">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Unggah Desain (Gambar/PDF)</label>
+          <input type="file" id="artwork-file" accept="image/*,application/pdf" class="w-full text-xs text-slate-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:font-semibold hover:file:bg-purple-500 cursor-pointer border border-slate-200 rounded-lg">
         </div>
 
-        <div class="pt-3 border-t border-slate-800 flex justify-end gap-3">
-          <button type="button" onclick="closeModal('artwork-modal')" class="bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">Batal</button>
-          <button type="submit" id="btn-submit-artwork" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+        <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+          <button type="button" onclick="closeModal('artwork-modal')" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold">Batal</button>
+          <button type="submit" id="btn-submit-artwork" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
             <i data-lucide="scan-line" class="w-4 h-4"></i> Skrining AI BPOM
           </button>
         </div>
@@ -443,44 +466,72 @@
     </div>
   </div>
 
-  <!-- MODAL 3: NPD PERMIT SCREENER -->
-  <div id="npd-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
-        <h3 class="text-base font-bold text-white">NPD Regulatory Feasibility Screener</h3>
-        <button onclick="closeModal('npd-modal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+  <!-- MODAL 3: NPD PERMIT SCREENER (SESUAI REVISI RESMI BPOM) -->
+  <div id="npd-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border border-slate-200 w-full max-w-xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="text-sm font-bold text-slate-800">NPD Regulatory Feasibility Screener</h3>
+        <button onclick="closeModal('npd-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <form onsubmit="handleCreateNpd(event)" class="p-6 space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Nama Ide Produk Baru</label>
-          <input type="text" id="npd-product-name" required placeholder="Contoh: Serum Vitamin C 15% + Niacinamide" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
-        </div>
-
+      <form onsubmit="handleCreateNpd(event)" class="p-6 space-y-4 overflow-y-auto flex-1">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Kategori Produk</label>
-            <select id="npd-category" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
-              <option value="Skincare">Skincare</option>
-              <option value="Decorative Cosmetics">Kosmetik / Makeup</option>
-              <option value="Bodycare">Bodycare</option>
-              <option value="Health Supplement">Suplemen / Herbal</option>
-            </select>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Ide Produk Baru</label>
+            <input type="text" id="npd-product-name" required placeholder="Contoh: Brightening Night Serum" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Klaim Utama Produk</label>
-            <input type="text" id="npd-claim" placeholder="Contoh: Brightening, Anti-aging" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Pilihan Brand</label>
+            <select id="npd-brand-select" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500"></select>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Daftar Bahan / InCI Name (Opsional)</label>
-          <textarea id="npd-ingredients" rows="3" placeholder="Masukkan daftar bahan aktif..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"></textarea>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori Produk (Regulasi Resmi BPOM)</label>
+          <select id="npd-category" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
+            <option value="Kosmetik">Kosmetik</option>
+            <option value="Pangan Olahan">Pangan Olahan</option>
+            <option value="Suplemen Kesehatan">Suplemen Kesehatan</option>
+            <option value="Obat Bahan Alam">Obat Bahan Alam</option>
+            <option value="Obat Kuasi">Obat Kuasi</option>
+          </select>
         </div>
 
-        <div class="pt-3 border-t border-slate-800 flex justify-end gap-3">
-          <button type="button" onclick="closeModal('npd-modal')" class="bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">Batal</button>
-          <button type="submit" id="btn-submit-npd" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+        <!-- CHECKLIST KANAL PENJUALAN -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Checklist Kanal Penjualan yang Direncanakan</label>
+          <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <label class="flex items-center gap-2 cursor-pointer text-slate-700">
+              <input type="checkbox" value="Toko Fisik atau Ritel" class="npd-channel-cb rounded text-emerald-600 focus:ring-emerald-500"> Toko Fisik / Ritel
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-slate-700">
+              <input type="checkbox" value="Marketplace atau E-Commerce" class="npd-channel-cb rounded text-emerald-600 focus:ring-emerald-500"> Marketplace / E-Commerce
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-slate-700">
+              <input type="checkbox" value="Website Sendiri atau Medsos" class="npd-channel-cb rounded text-emerald-600 focus:ring-emerald-500"> Website Sendiri / Medsos
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-slate-700">
+              <input type="checkbox" value="Ekspor" class="npd-channel-cb rounded text-emerald-600 focus:ring-emerald-500"> Ekspor
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-slate-700 col-span-2">
+              <input type="checkbox" value="B2B atau Distributor" class="npd-channel-cb rounded text-emerald-600 focus:ring-emerald-500"> B2B / Distributor
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Klaim Produk (Ketik Manual)</label>
+          <textarea id="npd-claim" rows="2" placeholder="Contoh: Mencerahkan kulit dalam 14 hari, Mencegah timbulnya jerawat..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Komposisi Bahan / InCI Name (Ketik Manual)</label>
+          <textarea id="npd-ingredients" rows="2" placeholder="Contoh: Aqua, Niacinamide 5%, Alpha Arbutin, Centella Asiatica..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+          <button type="button" onclick="closeModal('npd-modal')" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold">Batal</button>
+          <button type="submit" id="btn-submit-npd" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
             <i data-lucide="flask-conical" class="w-4 h-4"></i> Uji Kelayakan Regulasi
           </button>
         </div>
@@ -489,23 +540,23 @@
   </div>
 
   <!-- MODAL 4: COMPLIANCE TICKET CREATION -->
-  <div id="ticket-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
-        <h3 class="text-base font-bold text-white">Buat Tiket Permintaan Legal & Compliance</h3>
-        <button onclick="closeModal('ticket-modal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+  <div id="ticket-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border border-slate-200 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="text-sm font-bold text-slate-800">Buat Tiket Permintaan Legal & Compliance</h3>
+        <button onclick="closeModal('ticket-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <form onsubmit="handleCreateTicket(event)" class="p-6 space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Judul Permintaan / Tiket</label>
-          <input type="text" id="ticket-title" required placeholder="Contoh: Review Kontrak MoU Vendor Packaging" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Permintaan / Tiket</label>
+          <input type="text" id="ticket-title" required placeholder="Contoh: Review Kontrak MoU Vendor Packaging" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Kategori Tiket</label>
-            <select id="ticket-category" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori Tiket</label>
+            <select id="ticket-category" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
               <option value="Legal Review">Peninjauan Perjanjian / Legal</option>
               <option value="BPOM Consultation">KONSULTASI REGULASI BPOM</option>
               <option value="Vendor Verification">Verifikasi Izin Vendor</option>
@@ -513,8 +564,8 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Prioritas Tiket</label>
-            <select id="ticket-priority" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Prioritas Tiket</label>
+            <select id="ticket-priority" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
               <option value="Medium">Medium (Sedang)</option>
               <option value="High">High (Tinggi)</option>
               <option value="Urgent">Urgent (Mendesak)</option>
@@ -524,13 +575,13 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Rincian Deskripsi Permintaan</label>
-          <textarea id="ticket-description" rows="3" required placeholder="Jelaskan kebutuhan legalitas secara rinci..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500"></textarea>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Rincian Deskripsi Permintaan</label>
+          <textarea id="ticket-description" rows="3" required placeholder="Jelaskan kebutuhan legalitas secara rinci..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500"></textarea>
         </div>
 
-        <div class="pt-3 border-t border-slate-800 flex justify-end gap-3">
-          <button type="button" onclick="closeModal('ticket-modal')" class="bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold">Batal</button>
-          <button type="submit" id="btn-submit-ticket" class="bg-amber-600 hover:bg-amber-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+        <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+          <button type="button" onclick="closeModal('ticket-modal')" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold">Batal</button>
+          <button type="submit" id="btn-submit-ticket" class="bg-amber-600 hover:bg-amber-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
             <i data-lucide="send" class="w-4 h-4"></i> Submit Tiket
           </button>
         </div>
@@ -539,17 +590,17 @@
   </div>
 
   <!-- MODAL 5: DETAIL ROW DATA -->
-  <div id="detail-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
-        <h3 class="text-base font-bold text-white">Detail Rekam Data</h3>
-        <button onclick="closeModal('detail-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+  <div id="detail-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border border-slate-200 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="text-sm font-bold text-slate-800">Detail Rekam Data</h3>
+        <button onclick="closeModal('detail-modal')" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg bg-slate-100"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <div id="detail-body" class="p-6 overflow-y-auto flex-1 text-xs text-slate-300 space-y-2"></div>
+      <div id="detail-body" class="p-6 overflow-y-auto flex-1 text-xs text-slate-700 space-y-2"></div>
     </div>
   </div>
 
-  <!-- SCRIPT ENGINE (LENGKAP SEMUA HANDLER & MODAL TRIGGER) -->
+  <!-- SCRIPT ENGINE UTUH -->
   <script>
     const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV'; 
@@ -573,6 +624,7 @@
           document.getElementById('header-brand-filter').innerHTML = `<option value="ALL">Semua Brand</option>` + optionsHtml;
           document.getElementById('onboard-brand-select').innerHTML = optionsHtml;
           document.getElementById('artwork-brand-select').innerHTML = optionsHtml;
+          document.getElementById('npd-brand-select').innerHTML = optionsHtml;
         }
       } catch (e) {}
     }
@@ -622,7 +674,6 @@
     function openModal(id) { document.getElementById(id)?.classList.remove('hidden'); lucide.createIcons(); }
     function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
     
-    // EXPLICIT MODAL TRIGGERS
     function openVendorOnboardingModal() { openModal('vendor-onboarding-modal'); }
     function closeVendorOnboardingModal() { closeModal('vendor-onboarding-modal'); }
     function openArtworkModal() { openModal('artwork-modal'); }
@@ -637,37 +688,37 @@
       const navIds = ['nav-vendor-contracts', 'nav-vendor-registration', 'nav-artwork-prescreening', 'nav-npd-screener', 'nav-tickets-module', 'nav-audit-trail'];
       navIds.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+        if (el) el.className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 text-sm font-medium transition";
       });
 
       if (tab === 'vendor-contracts') {
         document.getElementById('view-vendor-contracts')?.classList.remove('hidden');
-        document.getElementById('nav-vendor-contracts')?.classList.add('bg-slate-800', 'text-blue-400');
+        document.getElementById('nav-vendor-contracts')?.classList.add('bg-brand-50', 'text-brand-700', 'font-semibold');
         document.getElementById('page-title').innerText = "Agreement Matrix";
         loadContracts();
       } else if (tab === 'vendor-registration') {
         document.getElementById('view-vendor-registration')?.classList.remove('hidden');
-        document.getElementById('nav-vendor-registration')?.classList.add('bg-slate-800', 'text-blue-400');
+        document.getElementById('nav-vendor-registration')?.classList.add('bg-brand-50', 'text-brand-700', 'font-semibold');
         document.getElementById('page-title').innerText = "Pendaftaran Vendor";
         loadVendorOnboardings();
       } else if (tab === 'artwork-prescreening') {
         document.getElementById('view-artwork-prescreening')?.classList.remove('hidden');
-        document.getElementById('nav-artwork-prescreening')?.classList.add('bg-slate-800', 'text-purple-400');
+        document.getElementById('nav-artwork-prescreening')?.classList.add('bg-brand-50', 'text-brand-700', 'font-semibold');
         document.getElementById('page-title').innerText = "Artwork Pre-Screening";
         loadArtworkTable();
       } else if (tab === 'npd-screener') {
         document.getElementById('view-npd-screener')?.classList.remove('hidden');
-        document.getElementById('nav-npd-screener')?.classList.add('bg-slate-800', 'text-emerald-400');
+        document.getElementById('nav-npd-screener')?.classList.add('bg-brand-50', 'text-brand-700', 'font-semibold');
         document.getElementById('page-title').innerText = "NPD Permit Screener";
         loadNpdProductsTable();
       } else if (tab === 'tickets-module') {
         document.getElementById('view-tickets-module')?.classList.remove('hidden');
-        document.getElementById('nav-tickets-module')?.classList.add('bg-slate-800', 'text-amber-400');
+        document.getElementById('nav-tickets-module')?.classList.add('bg-brand-50', 'text-brand-700', 'font-semibold');
         document.getElementById('page-title').innerText = "Compliance Tickets";
         loadTicketsTable();
       } else if (tab === 'audit-trail') {
         document.getElementById('view-audit-trail')?.classList.remove('hidden');
-        document.getElementById('nav-audit-trail')?.classList.add('bg-slate-800', 'text-amber-400');
+        document.getElementById('nav-audit-trail')?.classList.add('bg-brand-50', 'text-brand-700', 'font-semibold');
         document.getElementById('page-title').innerText = "Audit Trail Log";
         loadAuditLogs();
       }
@@ -679,67 +730,67 @@
     // DATA LOADERS
     async function loadContracts() {
       const tbody = document.getElementById('table-contracts-body');
-      tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">Memuat data kontrak...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Memuat data kontrak...</td></tr>`;
       try {
         const { data } = await supabaseClient.from('vendor_contracts').select('*').order('created_at', { ascending: false });
         if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">Belum ada kontrak.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Belum ada kontrak.</td></tr>`;
           return;
         }
         tbody.innerHTML = data.map(c => `
-          <tr class="border-b border-slate-800 text-xs hover:bg-slate-800/40">
-            <td class="px-4 py-3 font-bold">${esc(c.vendor_name)}</td>
+          <tr class="border-b border-slate-100 text-xs hover:bg-slate-50">
+            <td class="px-4 py-3 font-bold text-slate-800">${esc(c.vendor_name)}</td>
             <td class="px-3.5 py-3">${esc(c.brand_name || 'General')}</td>
             <td class="px-3.5 py-3">${esc(c.agreement_type || '-')}</td>
             <td class="px-3.5 py-3">${esc(c.jangka_waktu_perjanjian || '-')}</td>
             <td class="px-3.5 py-3">${esc(c.payment_terms || '-')}</td>
-            <td class="px-3.5 py-3 font-bold text-emerald-400">${esc(c.status || 'Aktif')}</td>
-            <td class="px-4 py-3 text-center"><a href="${esc(c.gdrive_web_link)}" target="_blank" class="text-blue-400 underline">Buka Drive</a></td>
+            <td class="px-3.5 py-3 font-bold text-emerald-600">${esc(c.status || 'Aktif')}</td>
+            <td class="px-4 py-3 text-center"><a href="${esc(c.gdrive_web_link)}" target="_blank" class="text-brand-600 font-semibold hover:underline">Buka Drive</a></td>
           </tr>
         `).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-rose-400">Gagal memuat: ${esc(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-rose-500">Gagal memuat: ${esc(err.message)}</td></tr>`;
       }
     }
 
     async function loadVendorOnboardings() {
       const tbody = document.getElementById('table-vendor-onboarding-body');
-      tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-500">Memuat data vendor...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400">Memuat data vendor...</td></tr>`;
 
       try {
         const { data: list, error } = await supabaseClient.from('vendor_onboardings').select('*').order('created_at', { ascending: false });
         if (error) throw error;
 
         if (!list || list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-500">Belum ada vendor terdaftar.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400">Belum ada vendor terdaftar.</td></tr>`;
           return;
         }
 
-        const checkIcon = (v) => v ? `<span class="text-emerald-400 font-bold">🟢 Ada</span>` : `<span class="text-rose-400 font-bold">🔴 Tidak</span>`;
+        const checkIcon = (v) => v ? `<span class="text-emerald-600 font-bold">🟢 Ada</span>` : `<span class="text-rose-500 font-bold">🔴 Tidak</span>`;
 
         tbody.innerHTML = list.map(v => {
           const isReady = v.status === 'Ready for Agreement';
 
           return `
-            <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
-              <td class="px-3 py-3 font-semibold text-slate-100">${esc(v.vendor_name)}</td>
-              <td class="px-3 py-3 text-slate-300">${esc(v.vendor_category)}</td>
+            <tr class="hover:bg-slate-50 transition border-b border-slate-100 text-xs">
+              <td class="px-3 py-3 font-semibold text-slate-800">${esc(v.vendor_name)}</td>
+              <td class="px-3 py-3 text-slate-600">${esc(v.vendor_category)}</td>
               <td class="px-2 py-3 text-center">${checkIcon(v.ktp_direktur_exists)}</td>
               <td class="px-2 py-3 text-center">${checkIcon(v.npwp_exists)}</td>
               <td class="px-2 py-3 text-center">${checkIcon(v.akta_pendirian_exists)}</td>
               <td class="px-2 py-3 text-center">${checkIcon(v.akta_perubahan_exists)}</td>
               <td class="px-2 py-3 text-center">${checkIcon(v.nib_exists)}</td>
               <td class="px-2 py-3 text-center">${checkIcon(v.izin_usaha_exists)}</td>
-              <td class="px-3 py-3 text-center font-bold ${isReady ? 'text-emerald-400' : 'text-amber-400'}">
+              <td class="px-3 py-3 text-center font-bold ${isReady ? 'text-emerald-600' : 'text-amber-600'}">
                 ${esc(v.status)}
               </td>
               <td class="px-3 py-3 text-center">
                 ${isReady ? `
-                  <button onclick="alert('Lanjut pembuatan agreement')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px]">
+                  <button onclick="alert('Lanjut pembuatan agreement')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px] shadow-sm">
                     Buat Agreement
                   </button>
                 ` : `
-                  <button onclick="alert('Dokumen belum lengkap! Flag AI: ${esc(JSON.stringify(v.ai_missing_flags))}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-semibold text-[10px]">
+                  <button onclick="alert('Dokumen belum lengkap! Flag AI: ${esc(JSON.stringify(v.ai_missing_flags))}')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded border border-slate-300 font-semibold text-[10px]">
                     Cek Kekurangan
                   </button>
                 `}
@@ -748,107 +799,107 @@
           `;
         }).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-6 text-center text-rose-400">Error: ${esc(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
       }
     }
 
     async function loadArtworkTable() {
       const tbody = document.getElementById('table-artwork-body');
-      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Memuat data artwork...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data artwork...</td></tr>`;
       try {
         const { data } = await supabaseClient.from('artwork_prescreenings').select('*').order('created_at', { ascending: false });
         if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat artwork.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada riwayat artwork.</td></tr>`;
           return;
         }
         tbody.innerHTML = data.map(r => `
-          <tr class="hover:bg-slate-800/40 border-b border-slate-800 text-xs">
-            <td class="px-4 py-3 font-mono">${esc(String(r.id).slice(0, 8))}</td>
-            <td class="px-4 py-3">${esc(r.title || r.product_name)}</td>
+          <tr class="hover:bg-slate-50 border-b border-slate-100 text-xs">
+            <td class="px-4 py-3 font-mono text-slate-500">${esc(String(r.id).slice(0, 8))}</td>
+            <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.title || r.product_name)}</td>
             <td class="px-4 py-3">${esc(r.material_type)}</td>
             <td class="px-4 py-3">${esc(r.brand_name || 'General')}</td>
-            <td class="px-4 py-3 font-bold text-purple-400">${esc(r.compliance_score || 0)}/100</td>
-            <td class="px-4 py-3">${esc(r.bpom_status || 'Pending')}</td>
+            <td class="px-4 py-3 font-bold text-purple-600">${esc(r.compliance_score || 0)}/100</td>
+            <td class="px-4 py-3 font-semibold text-emerald-600">${esc(r.bpom_status || 'Pending')}</td>
             <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 text-center"><button onclick="showDetail('artwork_prescreenings', '${r.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px]">Detail</button></td>
+            <td class="px-4 py-3 text-center"><button onclick="showDetail('artwork_prescreenings', '${r.id}')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded text-[10px]">Detail</button></td>
           </tr>
         `).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400">Error: ${esc(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
       }
     }
 
     async function loadNpdProductsTable() {
       const tbody = document.getElementById('table-npd-body');
-      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Memuat data NPD...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data NPD...</td></tr>`;
       try {
         const { data } = await supabaseClient.from('npd_permit_screenings').select('*').order('created_at', { ascending: false });
         if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat NPD.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada riwayat NPD.</td></tr>`;
           return;
         }
         tbody.innerHTML = data.map(r => `
-          <tr class="hover:bg-slate-800/40 border-b border-slate-800 text-xs">
-            <td class="px-4 py-3 font-mono">${esc(String(r.id).slice(0, 8))}</td>
-            <td class="px-4 py-3">${esc(r.product_idea_name)}</td>
+          <tr class="hover:bg-slate-50 border-b border-slate-100 text-xs">
+            <td class="px-4 py-3 font-mono text-slate-500">${esc(String(r.id).slice(0, 8))}</td>
+            <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.product_idea_name)}</td>
             <td class="px-4 py-3">${esc(r.category)}</td>
             <td class="px-4 py-3">${esc(r.matched_permit_code || 'BPOM RI')}</td>
             <td class="px-4 py-3">${esc(r.created_by || 'system')}</td>
-            <td class="px-4 py-3 font-bold text-emerald-400">${esc(r.feasibility_score || 0)}/100</td>
+            <td class="px-4 py-3 font-bold text-emerald-600">${esc(r.feasibility_score || 0)}/100</td>
             <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 text-center"><button onclick="showDetail('npd_permit_screenings', '${r.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px]">Detail</button></td>
+            <td class="px-4 py-3 text-center"><button onclick="showDetail('npd_permit_screenings', '${r.id}')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded text-[10px]">Detail</button></td>
           </tr>
         `).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400">Error: ${esc(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
       }
     }
 
     async function loadTicketsTable() {
       const tbody = document.getElementById('table-tickets-body');
-      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Memuat data tiket...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data tiket...</td></tr>`;
       try {
         const { data } = await supabaseClient.from('tickets').select('*').order('created_at', { ascending: false });
         if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada tiket.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada tiket.</td></tr>`;
           return;
         }
         tbody.innerHTML = data.map(r => `
-          <tr class="hover:bg-slate-800/40 border-b border-slate-800 text-xs">
-            <td class="px-4 py-3 font-mono text-amber-400">${esc(r.ticket_no || ('TKT-' + String(r.id).slice(0, 6)))}</td>
-            <td class="px-4 py-3">${esc(r.title)}</td>
+          <tr class="hover:bg-slate-50 border-b border-slate-100 text-xs">
+            <td class="px-4 py-3 font-mono text-amber-700 font-bold">${esc(r.ticket_no || ('TKT-' + String(r.id).slice(0, 6)))}</td>
+            <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.title)}</td>
             <td class="px-4 py-3">${esc(r.category)}</td>
             <td class="px-4 py-3">${esc(r.priority)}</td>
             <td class="px-4 py-3">${esc(r.created_by)}</td>
-            <td class="px-4 py-3 font-bold">${esc(r.status)}</td>
+            <td class="px-4 py-3 font-bold text-amber-600">${esc(r.status)}</td>
             <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 text-center"><button onclick="showDetail('tickets', '${r.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px]">Detail</button></td>
+            <td class="px-4 py-3 text-center"><button onclick="showDetail('tickets', '${r.id}')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded text-[10px]">Detail</button></td>
           </tr>
         `).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400">Error: ${esc(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
       }
     }
 
     async function loadAuditLogs() {
       const tbody = document.getElementById('table-audit-body');
-      tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Memuat log aktivitas...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400">Memuat log aktivitas...</td></tr>`;
       try {
         const { data } = await supabaseClient.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(50);
         if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Belum ada log aktivitas.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400">Belum ada log aktivitas.</td></tr>`;
           return;
         }
         tbody.innerHTML = data.map(r => `
-          <tr class="border-b border-slate-800 text-xs">
-            <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleString('id-ID') : '-'}</td>
-            <td class="px-4 py-3">${esc(r.username || r.created_by)}</td>
+          <tr class="border-b border-slate-100 text-xs hover:bg-slate-50">
+            <td class="px-4 py-3 text-slate-500">${r.created_at ? new Date(r.created_at).toLocaleString('id-ID') : '-'}</td>
+            <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.username || r.created_by)}</td>
             <td class="px-4 py-3">${esc(r.action)}</td>
             <td class="px-4 py-3">${esc(r.entity || r.table_name)}</td>
           </tr>
         `).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">Belum ada log aktivitas.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400">Belum ada log aktivitas.</td></tr>`;
       }
     }
 
@@ -857,9 +908,9 @@
       const body = document.getElementById('detail-body');
       if (data) {
         body.innerHTML = Object.entries(data).map(([k, v]) => `
-          <div class="border-b border-slate-800 pb-1">
-            <span class="text-[10px] text-slate-500 uppercase font-bold">${esc(k)}</span>
-            <p class="text-slate-200">${esc(typeof v === 'object' ? JSON.stringify(v) : v)}</p>
+          <div class="border-b border-slate-100 pb-1.5">
+            <span class="text-[10px] text-slate-400 uppercase font-bold">${esc(k)}</span>
+            <p class="text-slate-800 font-medium">${esc(typeof v === 'object' ? JSON.stringify(v) : v)}</p>
           </div>
         `).join('');
         openModal('detail-modal');
@@ -960,6 +1011,10 @@
       const product_idea_name = document.getElementById('npd-product-name').value;
       const category = document.getElementById('npd-category').value;
       const claims = document.getElementById('npd-claim').value;
+      const ingredients = document.getElementById('npd-ingredients').value;
+
+      // KUMPULKAN CHECKLIST KANAL PENJUALAN
+      const selectedChannels = Array.from(document.querySelectorAll('.npd-channel-cb:checked')).map(cb => cb.value);
 
       const btn = document.getElementById('btn-submit-npd');
       btn.disabled = true;
@@ -969,6 +1024,8 @@
           product_idea_name,
           category,
           claims,
+          ingredients,
+          sales_channels: selectedChannels,
           feasibility_score: Math.floor(Math.random() * 15) + 85,
           matched_permit_code: 'BPOM NA-' + Math.floor(10000000 + Math.random() * 90000000),
           created_by: currentUserSession ? currentUserSession.username : 'system'
