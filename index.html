@@ -1989,8 +1989,7 @@
         btn.disabled = false;
       }
     }
-
-           async function downloadArtworkPdf() {
+    async function downloadArtworkPdf() {
       const c = currentArtworkResult;
       if (!c) return;
       if (!window.jspdf) { alert('Library PDF belum termuat. Muat ulang halaman lalu coba lagi.'); return; }
@@ -2067,7 +2066,149 @@
           doc.addImage(imageBase64Data, 'JPEG', imgX, imgY, imgW, imgH, undefined, 'FAST');
           doc.setDrawColor(203, 213, 225);
           doc.rect(imgX, imgY, imgW, imgH);
+        } catch (e) {
+          drawPlaceholderImage(doc, imgX, imgY, imgW, imgH);
         }
+      } else {
+        drawPlaceholderImage(doc, imgX, imgY, imgW, imgH);
+      }
+
+      // Metadata & Metriks (Di Sebelah Kanan Gambar)
+      const infoX = imgX + imgW + 18;
+      let infoY = y + 24;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(15, 23, 42);
+      doc.text(String(c.title || 'Materi Desain Artwork'), infoX, infoY);
+
+      infoY += 16;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`🏷️ Brand: ${c.brand_name || 'General'}   |   Versi: ${c.version || 'v1.0'} (${c.material_type || 'Kemasan'})`, infoX, infoY);
+
+      infoY += 14;
+      doc.text(`📋 Kategori BPOM: ${d.product_category || 'Pangan Olahan'}`, infoX, infoY);
+
+      infoY += 14;
+      doc.text(`📅 Tanggal Audit: ${new Date(c.created_at || Date.now()).toLocaleDateString('id-ID')}`, infoX, infoY);
+
+      infoY += 20;
+
+      // BADGES METRIK
+      const boxW = 110;
+      const boxH = 45;
+
+      // Box 1: Compliance Score
+      let scoreColor = [225, 29, 72]; // Merah
+      if (score >= 75) scoreColor = [16, 185, 129]; // Hijau
+      else if (score >= 50) scoreColor = [217, 119, 6]; // Oranye
+
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(infoX, infoY, boxW, boxH, 4, 4, 'FD');
+      doc.setFontSize(7.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 116, 139);
+      doc.text('COMPLIANCE SCORE', infoX + 8, infoY + 14);
+      doc.setFontSize(13); doc.setTextColor(...scoreColor);
+      doc.text(`${score}/100`, infoX + 8, infoY + 34);
+
+      // Box 2: Status BPOM
+      const bpomStatus = d.bpom_status || 'Non-Compliant';
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(infoX + boxW + 10, infoY, boxW + 10, boxH, 4, 4, 'FD');
+      doc.setFontSize(7.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 116, 139);
+      doc.text('STATUS BPOM', infoX + boxW + 18, infoY + 14);
+      doc.setFontSize(9.5); doc.setTextColor(bpomStatus === 'Compliant' ? 16 : 225, bpomStatus === 'Compliant' ? 185 : 29, bpomStatus === 'Compliant' ? 129 : 72);
+      doc.text(bpomStatus, infoX + boxW + 18, infoY + 33);
+
+      y += cardHeight + 20;
+
+      // --- HELPER PAGE BREAK & SECTION BLOCK ---
+      const checkPageBreak = (neededHeight) => {
+        if (y + neededHeight > H - M) {
+          doc.addPage();
+          y = M + 10;
+        }
+      };
+
+      const drawSectionBlock = (title, items, colorRgb) => {
+        items = Array.isArray(items) ? items : [];
+        checkPageBreak(40);
+
+        doc.setFillColor(...colorRgb);
+        doc.rect(M, y, 4, 14, 'F');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10.5);
+        doc.setTextColor(...colorRgb);
+        doc.text(`${title} (${items.length})`, M + 10, y + 11);
+        y += 20;
+
+        if (items.length === 0) {
+          doc.setFont('helvetica', 'italic'); doc.setFontSize(8.5); doc.setTextColor(148, 163, 184);
+          doc.text('Tidak ditemukan temuan pada kategori ini.', M + 10, y);
+          y += 16;
+          return;
+        }
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(30, 41, 59);
+
+        items.forEach((item, idx) => {
+          const formattedText = `${idx + 1}. ${item}`;
+          const lines = doc.splitTextToSize(formattedText, maxW - 15);
+          checkPageBreak(lines.length * 11 + 6);
+
+          lines.forEach(line => {
+            doc.text(line, M + 10, y);
+            y += 11;
+          });
+          y += 3;
+        });
+        y += 10;
+      };
+
+      // --- 4. TEMUAN EVALUASI REGULASI BPOM DENGAN EMOTIKON ---
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(15, 23, 42);
+      doc.text('🔍 RINCIAN EVALUASI REGULASI BPOM', M, y);
+      y += 16;
+
+      // High Risk Items
+      drawSectionBlock('🚨 HIGH RISK (RISIKO TINGGI PELANGGARAN HUKUM)', d.high_risk_items, [225, 29, 72]);
+
+      // Need Adjustment Items
+      drawSectionBlock('⚠️ NEED ADJUSTMENT / REMOVAL (PERLU REVISI/HAPUS)', d.need_adjustment_items, [217, 119, 6]);
+
+      // Compliant Items
+      drawSectionBlock('🟢 COMPLIANT (SESUAI ATURAN BPOM)', d.compliant_items, [16, 185, 129]);
+
+      // --- 5. FOOTER CATATAN HUKUM ---
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(7.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text('Dokumen ini dihasilkan secara otomatis oleh Enterprise LegalOps AI. Wajib divalidasi oleh Tim Legal sebelum cetak masal.', M, H - 20);
+
+      // Simpan PDF
+      const slug = String(c.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'artwork';
+      doc.save(`Artwork-Evaluation-${slug}.pdf`);
+      logAudit('Unduh PDF Artwork', 'artwork_prescreenings', c.id, { summary: c.title });
+    }
+
+    // Function Pembantu Gambar Placeholder jika gambar tidak ada/gagal load
+    function drawPlaceholderImage(doc, x, y, w, h) {
+      doc.setFillColor(241, 245, 249);
+      doc.setDrawColor(203, 213, 225);
+      doc.rect(x, y, w, h, 'FD');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text('🖼️ PREVIEW DESAIN', x + (w / 2), y + (h / 2), { align: 'center' });
+    }
+
 
     async function createNpdTicket() {
       const c = currentNpdResult;
