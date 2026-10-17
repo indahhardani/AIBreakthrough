@@ -158,7 +158,7 @@
 
       <div class="p-4 md:p-6 space-y-6">
         
-        <!-- AGREEMENT MATRIX -->
+        <!-- 1. AGREEMENT MATRIX TAB -->
         <section id="view-vendor-contracts" class="space-y-4">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
@@ -190,7 +190,7 @@
           </div>
         </section>
 
-        <!-- VENDOR REGISTRATION (SINGLE PDF UPLOAD & 6 DOKUMEN STATUS) -->
+        <!-- 2. VENDOR REGISTRATION TAB -->
         <section id="view-vendor-registration" class="hidden space-y-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
             <div>
@@ -232,43 +232,135 @@
           </div>
         </section>
 
-        <!-- ARTWORK TAB -->
+        <!-- 3. ARTWORK PRE-SCREENING TAB -->
         <section id="view-artwork-prescreening" class="hidden space-y-6">
-          <div class="flex justify-between items-center bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <h2 class="text-lg font-bold text-white">Artwork Pre-Screening</h2>
-            <button onclick="openModal('artwork-modal')" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold">+ Periksa Artwork</button>
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <i data-lucide="scan-line" class="w-5 h-5 text-purple-400"></i> Artwork & Advertising Pre-Screening
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">Verifikasi kepatuhan kemasan & materi periklanan sesuai regulasi BPOM via AI.</p>
+            </div>
+            <button onclick="openArtworkModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Periksa Artwork Baru
+            </button>
           </div>
-          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300"><tbody id="table-artwork-body"></tbody></table>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                  <tr>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">ID</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[200px]">Nama Materi</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[130px]">Jenis</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Brand</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Skor AI</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Status BPOM</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Tanggal</th>
+                    <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="table-artwork-body" class="divide-y divide-slate-800/60"></tbody>
+              </table>
+            </div>
           </div>
         </section>
 
-        <!-- NPD TAB -->
+        <!-- 4. NPD PERMIT SCREENER TAB -->
         <section id="view-npd-screener" class="hidden space-y-6">
-          <div class="flex justify-between items-center bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <h2 class="text-lg font-bold text-white">NPD Screener</h2>
-            <button onclick="openModal('npd-modal')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold">+ Skrining Produk</button>
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <i data-lucide="flask-conical" class="w-5 h-5 text-emerald-400"></i> NPD Regulatory Feasibility Screener
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">Lakukan skrining awal regulasi BPOM untuk ide produk baru.</p>
+            </div>
+            <button onclick="openNpdModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Skrining Produk Baru
+            </button>
           </div>
-          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300"><tbody id="table-npd-body"></tbody></table>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                  <tr>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">ID Skrining</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[200px]">Ide Produk</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[130px]">Kategori</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[120px]">Kode Izin Utama</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Pengaju</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Feasibility</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Tanggal</th>
+                    <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="table-npd-body" class="divide-y divide-slate-800/60"></tbody>
+              </table>
+            </div>
           </div>
         </section>
 
-        <!-- TICKETS TAB -->
+        <!-- 5. COMPLIANCE TICKETS TAB -->
         <section id="view-tickets-module" class="hidden space-y-6">
-          <div class="flex justify-between items-center bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <h2 class="text-lg font-bold text-white">Compliance Tickets</h2>
-            <button onclick="openModal('ticket-modal')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold">+ Buat Tiket</button>
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <i data-lucide="ticket" class="w-5 h-5 text-amber-400"></i> Compliance & Legal Request Ticketing
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">Daftar tiket permintaan verifikasi legalitas dan perizinan BPOM.</p>
+            </div>
+            <button onclick="openCreateTicketModal()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Buat Tiket Manual
+            </button>
           </div>
-          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300"><tbody id="table-tickets-body"></tbody></table>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                  <tr>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">No. Tiket</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[200px]">Judul Permintaan</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[130px]">Kategori</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Prioritas</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Pengaju</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Status</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Tanggal</th>
+                    <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="table-tickets-body" class="divide-y divide-slate-800/60"></tbody>
+              </table>
+            </div>
           </div>
         </section>
 
-        <!-- AUDIT TAB -->
+        <!-- 6. AUDIT TRAIL LOG TAB -->
         <section id="view-audit-trail" class="hidden space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <h2 class="text-lg font-bold text-white">Audit Trail Logs</h2>
+              <p class="text-xs text-slate-400">Catatan aktivitas perubahan data real-time.</p>
+            </div>
+            <button onclick="loadAuditLogs()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+            </button>
+          </div>
+
           <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300"><tbody id="table-audit-body"></tbody></table>
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[10px]">
+                <tr>
+                  <th class="px-4 py-3">Waktu</th>
+                  <th class="px-4 py-3">Pengguna</th>
+                  <th class="px-4 py-3">Aksi</th>
+                  <th class="px-4 py-3">Entitas</th>
+                </tr>
+              </thead>
+              <tbody id="table-audit-body" class="divide-y divide-slate-800/60"></tbody>
+            </table>
           </div>
         </section>
 
@@ -276,7 +368,7 @@
     </main>
   </div>
 
-  <!-- MODAL SINGLE UPLOAD PDF VENDOR -->
+  <!-- MODAL VENDOR ONBOARDING PDF -->
   <div id="vendor-onboarding-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
@@ -306,6 +398,18 @@
     </div>
   </div>
 
+  <!-- MODAL DETAIL ROW DATA -->
+  <div id="detail-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <h3 class="text-base font-bold text-white">Detail Rekam Data</h3>
+        <button onclick="closeModal('detail-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="detail-body" class="p-6 overflow-y-auto flex-1 text-xs text-slate-300 space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- SCRIPT ENGINE -->
   <script>
     const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_W2Zw97arVf-nr4UB7t1B_A_O2258rVV'; 
@@ -314,6 +418,7 @@
     let currentUserSession = null;
     let masterBrands = [];
     let selectedBrandFilter = 'ALL';
+    const rowCache = {};
 
     lucide.createIcons();
 
@@ -368,23 +473,264 @@
       location.reload();
     }
 
-    function openVendorOnboardingModal() { document.getElementById('vendor-onboarding-modal').classList.remove('hidden'); }
-    function closeVendorOnboardingModal() { document.getElementById('vendor-onboarding-modal').classList.add('hidden'); }
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.toggle('hidden');
+    }
 
-    // UPLOAD & SCAN AI VENDOR (SINGLE PDF $\le$ 10 MB)
+    function openModal(id) { document.getElementById(id)?.classList.remove('hidden'); lucide.createIcons(); }
+    function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
+    function openVendorOnboardingModal() { openModal('vendor-onboarding-modal'); }
+    function closeVendorOnboardingModal() { closeModal('vendor-onboarding-modal'); }
+
+    // FUNGSI SWITCH TABL LENGKAP UNTUK SEMUA MODUL
+    function switchTab(tab) {
+      const allTabs = ['view-vendor-contracts', 'view-vendor-registration', 'view-artwork-prescreening', 'view-npd-screener', 'view-tickets-module', 'view-audit-trail'];
+      allTabs.forEach(id => document.getElementById(id)?.classList.add('hidden'));
+
+      const navIds = ['nav-vendor-contracts', 'nav-vendor-registration', 'nav-artwork-prescreening', 'nav-npd-screener', 'nav-tickets-module', 'nav-audit-trail'];
+      navIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.className = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm font-medium transition";
+      });
+
+      if (tab === 'vendor-contracts') {
+        document.getElementById('view-vendor-contracts')?.classList.remove('hidden');
+        document.getElementById('nav-vendor-contracts')?.classList.add('bg-slate-800', 'text-blue-400');
+        document.getElementById('page-title').innerText = "Agreement Matrix";
+        loadContracts();
+      } else if (tab === 'vendor-registration') {
+        document.getElementById('view-vendor-registration')?.classList.remove('hidden');
+        document.getElementById('nav-vendor-registration')?.classList.add('bg-slate-800', 'text-blue-400');
+        document.getElementById('page-title').innerText = "Pendaftaran Vendor";
+        loadVendorOnboardings();
+      } else if (tab === 'artwork-prescreening') {
+        document.getElementById('view-artwork-prescreening')?.classList.remove('hidden');
+        document.getElementById('nav-artwork-prescreening')?.classList.add('bg-slate-800', 'text-purple-400');
+        document.getElementById('page-title').innerText = "Artwork Pre-Screening";
+        loadArtworkTable();
+      } else if (tab === 'npd-screener') {
+        document.getElementById('view-npd-screener')?.classList.remove('hidden');
+        document.getElementById('nav-npd-screener')?.classList.add('bg-slate-800', 'text-emerald-400');
+        document.getElementById('page-title').innerText = "NPD Permit Screener";
+        loadNpdProductsTable();
+      } else if (tab === 'tickets-module') {
+        document.getElementById('view-tickets-module')?.classList.remove('hidden');
+        document.getElementById('nav-tickets-module')?.classList.add('bg-slate-800', 'text-amber-400');
+        document.getElementById('page-title').innerText = "Compliance Tickets";
+        loadTicketsTable();
+      } else if (tab === 'audit-trail') {
+        document.getElementById('view-audit-trail')?.classList.remove('hidden');
+        document.getElementById('nav-audit-trail')?.classList.add('bg-slate-800', 'text-amber-400');
+        document.getElementById('page-title').innerText = "Audit Trail Log";
+        loadAuditLogs();
+      }
+
+      if (window.innerWidth < 768) toggleSidebar();
+      lucide.createIcons();
+    }
+
+    // LOAD CONTRACTS
+    async function loadContracts() {
+      const tbody = document.getElementById('table-contracts-body');
+      tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">Memuat data kontrak...</td></tr>`;
+      try {
+        const { data } = await supabaseClient.from('vendor_contracts').select('*').order('created_at', { ascending: false });
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">Belum ada kontrak.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = data.map(c => `
+          <tr class="border-b border-slate-800 text-xs hover:bg-slate-800/40">
+            <td class="px-4 py-3 font-bold">${esc(c.vendor_name)}</td>
+            <td class="px-3.5 py-3">${esc(c.brand_name || 'General')}</td>
+            <td class="px-3.5 py-3">${esc(c.agreement_type || '-')}</td>
+            <td class="px-3.5 py-3">${esc(c.jangka_waktu_perjanjian || '-')}</td>
+            <td class="px-3.5 py-3">${esc(c.payment_terms || '-')}</td>
+            <td class="px-3.5 py-3 font-bold text-emerald-400">${esc(c.status || 'Aktif')}</td>
+            <td class="px-4 py-3 text-center"><a href="${esc(c.gdrive_web_link)}" target="_blank" class="text-blue-400 underline">Buka Drive</a></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-rose-400">Gagal memuat: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    // LOAD VENDOR ONBOARDING (PDF 6 STATUS)
+    async function loadVendorOnboardings() {
+      const tbody = document.getElementById('table-vendor-onboarding-body');
+      tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-500">Memuat data vendor...</td></tr>`;
+
+      try {
+        const { data: list, error } = await supabaseClient.from('vendor_onboardings').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+
+        if (!list || list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-500">Belum ada vendor terdaftar.</td></tr>`;
+          return;
+        }
+
+        const checkIcon = (v) => v ? `<span class="text-emerald-400 font-bold">🟢 Ada</span>` : `<span class="text-rose-400 font-bold">🔴 Tidak</span>`;
+
+        tbody.innerHTML = list.map(v => {
+          const isReady = v.status === 'Ready for Agreement';
+
+          return `
+            <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
+              <td class="px-3 py-3 font-semibold text-slate-100">${esc(v.vendor_name)}</td>
+              <td class="px-3 py-3 text-slate-300">${esc(v.vendor_category)}</td>
+              <td class="px-2 py-3 text-center">${checkIcon(v.ktp_direktur_exists)}</td>
+              <td class="px-2 py-3 text-center">${checkIcon(v.npwp_exists)}</td>
+              <td class="px-2 py-3 text-center">${checkIcon(v.akta_pendirian_exists)}</td>
+              <td class="px-2 py-3 text-center">${checkIcon(v.akta_perubahan_exists)}</td>
+              <td class="px-2 py-3 text-center">${checkIcon(v.nib_exists)}</td>
+              <td class="px-2 py-3 text-center">${checkIcon(v.izin_usaha_exists)}</td>
+              <td class="px-3 py-3 text-center font-bold ${isReady ? 'text-emerald-400' : 'text-amber-400'}">
+                ${esc(v.status)}
+              </td>
+              <td class="px-3 py-3 text-center">
+                ${isReady ? `
+                  <button onclick="alert('Lanjut ke pembuatan agreement')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px]">
+                    Buat Agreement
+                  </button>
+                ` : `
+                  <button onclick="alert('Dokumen belum lengkap! Dokumen kurang: ${esc(JSON.stringify(v.ai_missing_flags))}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-semibold text-[10px]">
+                    Cek Kekurangan
+                  </button>
+                `}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-6 text-center text-rose-400">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    // LOAD ARTWORK
+    async function loadArtworkTable() {
+      const tbody = document.getElementById('table-artwork-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Memuat data artwork...</td></tr>`;
+      try {
+        const { data } = await supabaseClient.from('artwork_prescreenings').select('*').order('created_at', { ascending: false });
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat artwork.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = data.map(r => `
+          <tr class="hover:bg-slate-800/40 border-b border-slate-800 text-xs">
+            <td class="px-4 py-3 font-mono">${esc(String(r.id).slice(0, 8))}</td>
+            <td class="px-4 py-3">${esc(r.title || r.product_name)}</td>
+            <td class="px-4 py-3">${esc(r.material_type)}</td>
+            <td class="px-4 py-3">${esc(r.brand_name || 'General')}</td>
+            <td class="px-4 py-3 font-bold text-purple-400">${esc(r.compliance_score || 0)}/100</td>
+            <td class="px-4 py-3">${esc(r.bpom_status || 'Pending')}</td>
+            <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
+            <td class="px-4 py-3 text-center"><button onclick="showDetail('artwork_prescreenings', '${r.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px]">Detail</button></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    // LOAD NPD
+    async function loadNpdProductsTable() {
+      const tbody = document.getElementById('table-npd-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Memuat data NPD...</td></tr>`;
+      try {
+        const { data } = await supabaseClient.from('npd_permit_screenings').select('*').order('created_at', { ascending: false });
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada riwayat NPD.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = data.map(r => `
+          <tr class="hover:bg-slate-800/40 border-b border-slate-800 text-xs">
+            <td class="px-4 py-3 font-mono">${esc(String(r.id).slice(0, 8))}</td>
+            <td class="px-4 py-3">${esc(r.product_idea_name)}</td>
+            <td class="px-4 py-3">${esc(r.category)}</td>
+            <td class="px-4 py-3">${esc(r.matched_permit_code || 'BPOM RI')}</td>
+            <td class="px-4 py-3">${esc(r.created_by || 'system')}</td>
+            <td class="px-4 py-3 font-bold text-emerald-400">${esc(r.feasibility_score || 0)}/100</td>
+            <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
+            <td class="px-4 py-3 text-center"><button onclick="showDetail('npd_permit_screenings', '${r.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px]">Detail</button></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    // LOAD TICKETS
+    async function loadTicketsTable() {
+      const tbody = document.getElementById('table-tickets-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Memuat data tiket...</td></tr>`;
+      try {
+        const { data } = await supabaseClient.from('tickets').select('*').order('created_at', { ascending: false });
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Belum ada tiket.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = data.map(r => `
+          <tr class="hover:bg-slate-800/40 border-b border-slate-800 text-xs">
+            <td class="px-4 py-3 font-mono text-amber-400">${esc(r.ticket_no || ('TKT-' + r.id))}</td>
+            <td class="px-4 py-3">${esc(r.title)}</td>
+            <td class="px-4 py-3">${esc(r.category)}</td>
+            <td class="px-4 py-3">${esc(r.priority)}</td>
+            <td class="px-4 py-3">${esc(r.created_by)}</td>
+            <td class="px-4 py-3 font-bold">${esc(r.status)}</td>
+            <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
+            <td class="px-4 py-3 text-center"><button onclick="showDetail('tickets', '${r.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px]">Detail</button></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-400">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    // LOAD AUDIT LOGS
+    async function loadAuditLogs() {
+      const tbody = document.getElementById('table-audit-body');
+      tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Memuat log aktivitas...</td></tr>`;
+      try {
+        const { data } = await supabaseClient.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(50);
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Belum ada log aktivitas.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = data.map(r => `
+          <tr class="border-b border-slate-800 text-xs">
+            <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleString('id-ID') : '-'}</td>
+            <td class="px-4 py-3">${esc(r.username || r.created_by)}</td>
+            <td class="px-4 py-3">${esc(r.action)}</td>
+            <td class="px-4 py-3">${esc(r.entity || r.table_name)}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">Belum ada log aktivitas.</td></tr>`;
+      }
+    }
+
+    async function showDetail(table, id) {
+      const { data } = await supabaseClient.from(table).select('*').eq('id', id).single();
+      const body = document.getElementById('detail-body');
+      if (data) {
+        body.innerHTML = Object.entries(data).map(([k, v]) => `
+          <div class="border-b border-slate-800 pb-1">
+            <span class="text-[10px] text-slate-500 uppercase font-bold">${esc(k)}</span>
+            <p class="text-slate-200">${esc(typeof v === 'object' ? JSON.stringify(v) : v)}</p>
+          </div>
+        `).join('');
+        openModal('detail-modal');
+      }
+    }
+
     async function submitVendorOnboardingDirect() {
       const fileInput = document.getElementById('onboard-pdf-file');
       const file = fileInput.files[0];
 
-      if (!file) {
-        alert("Pilih file PDF legalitas vendor terlebih dahulu!");
-        return;
-      }
-
-      if (file.size > 10 * 1024 * 1024) {
-        alert("Ukuran file melebihi batas maksimal 10 MB!");
-        return;
-      }
+      if (!file) { alert("Pilih file PDF legalitas vendor terlebih dahulu!"); return; }
+      if (file.size > 10 * 1024 * 1024) { alert("Ukuran file melebihi batas maksimal 10 MB!"); return; }
 
       const brand_id = document.getElementById('onboard-brand-select').value;
       const selectedBrand = masterBrands.find(b => b.id === brand_id);
@@ -430,82 +776,6 @@
         btn.innerHTML = `<i data-lucide="scan-line" class="w-4 h-4"></i> SCAN & ANALISIS AI`;
         lucide.createIcons();
       }
-    }
-
-    async function loadVendorOnboardings() {
-      const tbody = document.getElementById('table-vendor-onboarding-body');
-      tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-500">Memuat data vendor...</td></tr>`;
-
-      try {
-        let query = supabaseClient.from('vendor_onboardings').select('*').order('created_at', { ascending: false });
-        const { data: list, error } = await query;
-        if (error) throw error;
-
-        if (!list || list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-500">Belum ada vendor terdaftar.</td></tr>`;
-          return;
-        }
-
-        const checkIcon = (v) => v ? `<span class="text-emerald-400 font-bold">🟢 Ada</span>` : `<span class="text-rose-400 font-bold">🔴 Tidak</span>`;
-
-        tbody.innerHTML = list.map(v => {
-          const isReady = v.status === 'Ready for Agreement';
-
-          return `
-            <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50 text-xs">
-              <td class="px-3 py-3 font-semibold text-slate-100">${esc(v.vendor_name)}</td>
-              <td class="px-3 py-3 text-slate-300">${esc(v.vendor_category)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.ktp_direktur_exists)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.npwp_exists)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.akta_pendirian_exists)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.akta_perubahan_exists)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.nib_exists)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.izin_usaha_exists)}</td>
-              <td class="px-3 py-3 text-center font-bold ${isReady ? 'text-emerald-400' : 'text-amber-400'}">
-                ${esc(v.status)}
-              </td>
-              <td class="px-3 py-3 text-center">
-                ${isReady ? `
-                  <button onclick="alert('Lanjut pembuatan agreement')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px]">
-                    Buat Agreement
-                  </button>
-                ` : `
-                  <button onclick="alert('Dokumen belum lengkap! Flag AI: ${esc(JSON.stringify(v.ai_missing_flags))}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-semibold text-[10px]">
-                    Cek Kekurangan
-                  </button>
-                `}
-              </td>
-            </tr>
-          `;
-        }).join('');
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-6 text-center text-rose-400">Error: ${esc(err.message)}</td></tr>`;
-      }
-    }
-
-    function switchTab(tab) {
-      ['view-vendor-contracts', 'view-vendor-registration', 'view-artwork-prescreening', 'view-npd-screener', 'view-tickets-module', 'view-audit-trail'].forEach(id => {
-        document.getElementById(id)?.classList.add('hidden');
-      });
-
-      if (tab === 'vendor-contracts') { document.getElementById('view-vendor-contracts')?.classList.remove('hidden'); loadContracts(); }
-      if (tab === 'vendor-registration') { document.getElementById('view-vendor-registration')?.classList.remove('hidden'); loadVendorOnboardings(); }
-    }
-
-    async function loadContracts() {
-      const tbody = document.getElementById('table-contracts-body');
-      const { data } = await supabaseClient.from('vendor_contracts').select('*');
-      tbody.innerHTML = (data || []).map(c => `
-        <tr class="border-b border-slate-800 text-xs">
-          <td class="px-4 py-3 font-bold">${esc(c.vendor_name)}</td>
-          <td class="px-3.5 py-3">${esc(c.brand_name || 'General')}</td>
-          <td class="px-3.5 py-3">${esc(c.agreement_type || '-')}</td>
-          <td class="px-3.5 py-3">${esc(c.jangka_waktu_perjanjian || '-')}</td>
-          <td class="px-3.5 py-3">${esc(c.payment_terms || '-')}</td>
-          <td class="px-3.5 py-3 font-bold text-emerald-400">${esc(c.status || 'Aktif')}</td>
-          <td class="px-4 py-3 text-center"><a href="${esc(c.gdrive_web_link)}" target="_blank" class="text-blue-400 underline">Buka Drive</a></td>
-        </tr>
-      `).join('');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
