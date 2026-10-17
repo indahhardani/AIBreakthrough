@@ -1008,7 +1008,7 @@
           recommendations: ['Pastikan nomor izin edar dicetak dengan kontras warna yang cukup.']
         };
 
-        // 3. Panggil Edge Function scan-artwork-prescreening
+        // 3. Panggil Edge Function Scan-artwork
         try {
           const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/Scan-artwork`, {
             method: "POST",
@@ -1116,7 +1116,7 @@
         };
 
         try {
-          const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/scan-npd-screener`, {
+          const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/scan-npd-permit`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
