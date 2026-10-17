@@ -980,7 +980,7 @@
             <td class="px-3.5 py-3 align-top">${catTags}</td>
             ${umum.map(cell).join('')}${spec.map(cell).join('')}
             <td class="px-3.5 py-3 align-top">${expiryBadge(c.expiration_date)}</td>
-            <td class="px-3.5 py-3 align-top"><div class="font-bold ${c.status === 'Kadaluwarsa' ? 'text-rose-600' : 'text-emerald-600'}">${esc(c.status || 'Aktif')}</div>${verifiedBadge(c)}</td>
+            <td class="px-3.5 py-3 align-top"><div class="font-bold ${c.status === 'Kadaluwarsa' ? 'text-rose-600' : c.status === 'Menunggu Dokumen' ? 'text-amber-600' : 'text-emerald-600'}">${esc(c.status || 'Aktif')}</div>${verifiedBadge(c)}</td>
             <td class="px-4 py-3 text-center align-top space-y-1">
               <button onclick="openContractModal('${esc(c.id)}')" class="block w-full px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px] font-semibold">Detail</button>
               <a href="${esc(safeUrl(c.gdrive_web_link))}" target="_blank" rel="noopener" class="block text-brand-700 font-bold hover:underline text-[10px]">Buka PDF</a>
@@ -1504,17 +1504,69 @@
               ${!isReady && flags.length ? `<div class="mt-1 text-[10px] text-rose-600 text-left space-y-0.5">${flags.map(f => '<div>&bull; ' + esc(f) + '</div>').join('')}</div>` : ''}
             </td>
             <td class="px-3 py-3 align-top text-center space-y-1">
-              ${isReady ? `<button onclick="createAgreementFromVendor('${eid}')" class="block w-full px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px] shadow-sm">Buat Agreement</button>` : ''}
+              ${isReady ? (v.agreement_id
+                ? `<button onclick="createAgreementFromVendor('${eid}')" class="block w-full px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-400 rounded font-bold text-[10px]">Lihat Agreement</button>`
+                : `<button id="btn-agr-${eid}" onclick="createAgreementFromVendor('${eid}')" class="block w-full px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white rounded font-bold text-[10px] shadow-sm">Buat Agreement</button>`) : ''}
               <button onclick="openVendorDetail('${eid}')" class="block w-full px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 rounded border border-brand-300 font-semibold text-[10px]">Detail</button>
             </td>
           </tr>`;
       }).join('');
     }
 
-    function createAgreementFromVendor(id) {
+    // Buat baris perjanjian kosong dari vendor yang dokumennya lengkap, tautkan ke vendor,
+    // lalu buka formulir edit di Agreement Matrix agar Legal bisa melengkapinya.
+    async function createAgreementFromVendor(id) {
       const v = vendorsData.find(x => x.id === id);
       if (!v) return;
-      alert('Lanjut pembuatan agreement untuk ' + v.vendor_name);
+
+      // Sudah pernah dibuat: langsung buka perjanjiannya
+      if (v.agreement_id) { await openAgreementOfVendor(v.agreement_id); return; }
+
+      if (!confirm('Buat perjanjian baru untuk vendor "' + v.vendor_name + '"?\n\nSistem membuat baris perjanjian kosong (status "Menunggu Dokumen") di Agreement Matrix, lalu membuka formulir untuk dilengkapi.')) return;
+
+      const btn = document.getElementById('btn-agr-' + id);
+      if (btn) btn.disabled = true;
+      try {
+        const row = {
+          vendor_name: v.vendor_name,
+          brand_id: v.brand_id || null,
+          brand_name: v.brand_name || null,
+          agreement_type: 'Perjanjian Vendor ' + v.vendor_name,
+          contract_number: '-',
+          agreement_categories: ['vendor'],
+          custom_fields: {},
+          edited_fields: [],
+          status: 'Menunggu Dokumen',
+          is_verified_by_legal: false,
+          gdrive_web_link: v.gdrive_folder_link || null
+        };
+        const { data: created, error } = await supabaseClient.from('vendor_contracts').insert([row]).select().single();
+        if (error) throw error;
+
+        // Tautkan ke vendor (kolom agreement_id; lihat SQL penambahan kolom)
+        const link = await supabaseClient.from('vendor_onboardings')
+          .update({ agreement_id: String(created.id), updated_at: new Date().toISOString() }).eq('id', id);
+        if (link.error) {
+          alert('Perjanjian berhasil dibuat, tetapi gagal menautkan ke vendor (' + link.error.message + ').\nPastikan kolom agreement_id sudah ditambahkan di tabel vendor_onboardings.');
+        } else {
+          v.agreement_id = String(created.id);
+        }
+        logAudit('Buat Agreement dari Vendor', 'vendor_contracts', created.id, { summary: v.vendor_name, brand: v.brand_name || '' });
+        renderVendorOnboardings();
+        await openAgreementOfVendor(String(created.id), true);
+      } catch (err) {
+        alert('Gagal membuat perjanjian: ' + err.message);
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function openAgreementOfVendor(agreementId, edit = false) {
+      activeAgrTab = 'all';
+      switchTab('vendor-contracts');
+      await loadContracts();
+      const c = contractsData.find(x => String(x.id) === String(agreementId));
+      if (!c) { alert('Perjanjian yang tertaut sudah tidak ditemukan di Agreement Matrix.'); return; }
+      openContractModal(c.id, edit);
     }
 
     // ---------- Scan folder vendor (satu vendor per putaran, klasifikasi dari nama file) ----------
