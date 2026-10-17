@@ -968,40 +968,51 @@
       }
     }
 
-    async function handleCreateArtwork(e) {
+        async function handleCreateArtwork(e) {
       e.preventDefault();
+      
       const title = document.getElementById('artwork-title').value;
       const material_type = document.getElementById('artwork-type').value;
       const brand_id = document.getElementById('artwork-brand-select').value;
       const selectedBrand = masterBrands.find(b => b.id === brand_id);
+
+      // 1. Ambil elemen file input dan dapatkan nama berkasnya
+      const fileInput = document.getElementById('artwork-file');
+      const file = fileInput.files[0];
+      const file_name = file ? file.name : null; // Ambil nama file (misal: IMG_0395.webp)
 
       const btn = document.getElementById('btn-submit-artwork');
       btn.disabled = true;
       btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memproses...`;
 
       try {
+        // 2. Simpan data lengkap ke Supabase
         const { error } = await supabaseClient.from('artwork_prescreenings').insert([{
-          title,
+          title: title,
           product_name: title,
-          material_type,
-          brand_id,
+          material_type: material_type,
+          brand_id: brand_id,
           brand_name: selectedBrand ? selectedBrand.name : 'General',
+          file_name: file_name, // Menyimpan nama berkas ke kolom file_name
           compliance_score: Math.floor(Math.random() * 20) + 80,
           bpom_status: 'Compliant',
           created_by: currentUserSession ? currentUserSession.username : 'system'
         }]);
 
         if (error) throw error;
+
         closeModal('artwork-modal');
         loadArtworkTable();
-        alert('Data Artwork berhasil disimpan!');
+        alert('Data Artwork & Nama File berhasil disimpan!');
       } catch (err) {
         alert('Error: ' + err.message);
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<i data-lucide="scan-line" class="w-4 h-4"></i> Skrining AI BPOM`;
+        lucide.createIcons();
       }
     }
+
 
     async function handleCreateNpd(e) {
       e.preventDefault();
