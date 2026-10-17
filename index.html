@@ -456,7 +456,7 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Unggah Desain (Gambar/PDF)</label>
-          <input type="file" id="artwork-file" accept="image/*,application/pdf" class="w-full text-xs text-slate-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:font-bold hover:file:bg-purple-500 cursor-pointer border border-brand-200 rounded-lg">
+          <input type="file" id="artwork-file" required accept="image/*,application/pdf" class="w-full text-xs text-slate-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:font-bold hover:file:bg-purple-500 cursor-pointer border border-brand-200 rounded-lg">
         </div>
 
         <div class="pt-3 border-t border-brand-200 flex justify-end gap-3">
@@ -596,6 +596,20 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL: HASIL SKRINING ARTWORK -->
+  <div id="artwork-result-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-2 border-brand-200 w-full max-w-xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
+        <h3 class="text-sm font-bold text-brand-900">Hasil Pemeriksaan Artwork</h3>
+        <button onclick="closeModal('artwork-result-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="artwork-result-body" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs"></div>
+      <div class="px-6 py-3 border-t border-brand-200 flex justify-end">
+        <button onclick="closeModal('artwork-result-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Tutup</button>
+      </div>
     </div>
   </div>
 
@@ -867,11 +881,11 @@
             <td class="px-4 py-3 font-mono text-slate-500">${esc(String(r.id).slice(0, 8))}</td>
             <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.title || r.product_name)}</td>
             <td class="px-4 py-3">${esc(r.material_type)}</td>
-            <td class="px-4 py-3">${esc(r.brand_name || 'General')}</td>
-            <td class="px-4 py-3 font-bold text-purple-600">${esc(r.compliance_score || 0)}/100</td>
-            <td class="px-4 py-3 font-semibold text-emerald-600">${esc(r.bpom_status || 'Pending')}</td>
+            <td class="px-4 py-3">${esc(r.brand_name ?? '-')}</td>
+            <td class="px-4 py-3 font-bold text-purple-600">${r.compliance_score != null ? esc(r.compliance_score) + '/100' : '-'}</td>
+            <td class="px-4 py-3 font-semibold ${artStatusColor(r.bpom_status)}">${esc(r.bpom_status ?? '-')}</td>
             <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 text-center"><button onclick="showDetail('artwork_prescreenings', '${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button></td>
+            <td class="px-4 py-3 text-center"><button onclick="showArtworkDetail('${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button></td>
           </tr>
         `).join('');
       } catch (err) {
@@ -1009,6 +1023,51 @@
         <p class="text-[10px] text-slate-400">Ringkasan AI, belum divalidasi Legal.</p>
       `;
       openModal('npd-result-modal');
+    }
+
+    function artStatusColor(st) {
+      return st === 'Compliant' ? 'text-emerald-600' : st === 'Need Adjustment' ? 'text-amber-600' : st === 'Non-Compliant' ? 'text-rose-600' : 'text-slate-700';
+    }
+
+    function showArtworkResult(d, title, rec = {}) {
+      const score = Number(d.compliance_score);
+      const box = (label, value, cls = '') => `
+        <div class="bg-brand-50 border border-brand-200 rounded-lg p-3">
+          <p class="text-[10px] uppercase font-bold text-brand-700">${label}</p>
+          <p class="font-bold mt-1 ${cls || 'text-slate-800'}">${value}</p>
+        </div>`;
+      const list = (label, arr, cls) => {
+        arr = Array.isArray(arr) ? arr : [];
+        return `<div>
+          <p class="text-[10px] uppercase font-bold ${cls} mb-1">${label} (${arr.length})</p>
+          ${arr.length ? '<ul class="list-disc pl-4 space-y-1 text-slate-700">' + arr.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '<p class="text-slate-400">Tidak ada.</p>'}
+        </div>`;
+      };
+      const info = [rec.brand_name, rec.material_type, rec.file_name].filter(Boolean).map(esc).join(' &middot; ');
+      document.getElementById('artwork-result-body').innerHTML = `
+        <p class="text-slate-500">Materi: <span class="font-semibold text-slate-800">${esc(title)}</span>${info ? ' &middot; ' + info : ''}</p>
+        <div class="grid grid-cols-2 gap-3">
+          ${box('Kategori Produk', esc(d.product_category))}
+          ${box('Skor Kepatuhan', esc(score) + '/100', 'text-base ' + (score >= 75 ? 'text-emerald-600' : score >= 50 ? 'text-amber-600' : 'text-rose-600'))}
+          ${box('Status BPOM', esc(d.bpom_status), artStatusColor(d.bpom_status))}
+          ${box('Status Halal', esc(d.halal_status), artStatusColor(d.halal_status))}
+        </div>
+        ${list('Risiko Tinggi', d.high_risk_items, 'text-rose-600')}
+        ${list('Perlu Penyesuaian', d.need_adjustment_items, 'text-amber-600')}
+        ${list('Sudah Sesuai', d.compliant_items, 'text-emerald-600')}
+        <p class="text-[10px] text-slate-400">Ringkasan AI, belum divalidasi Legal.</p>
+      `;
+      openModal('artwork-result-modal');
+    }
+
+    async function showArtworkDetail(id) {
+      const { data } = await supabaseClient.from('artwork_prescreenings').select('*').eq('id', id).single();
+      if (!data) return;
+      if (data.analysis_result && data.analysis_result.product_category) {
+        showArtworkResult(data.analysis_result, data.title || data.product_name, data);
+      } else {
+        showDetail('artwork_prescreenings', id); // data lama tanpa hasil analisis lengkap
+      }
     }
 
     async function showNpdDetail(id) {
@@ -1234,21 +1293,21 @@
       }
     }
 
-           async function handleCreateArtwork(e) {
+    async function handleCreateArtwork(e) {
       e.preventDefault();
-      
-      const title = document.getElementById('artwork-title').value;
-      const material_type = document.getElementById('artwork-type').value;
-      const brand_id = document.getElementById('artwork-brand-select').value;
-      
-      // Ambil nama brand dari masterBrands
-      const selectedBrandObj = masterBrands.find(b => String(b.id) === String(brand_id));
-      const brand_name = selectedBrandObj ? selectedBrandObj.name : 'General';
+      const form = e.target;
 
-      // 1. Ambil file yang diunggah dan baca sebagai Base64
-      const fileInput = document.getElementById('artwork-file');
-      const file = fileInput.files[0];
-      const file_name = file ? file.name : null;
+      const title = document.getElementById('artwork-title').value.trim();
+      const material_type = document.getElementById('artwork-type').value;
+      const brandSelectEl = document.getElementById('artwork-brand-select');
+      const brand_id = brandSelectEl ? brandSelectEl.value : '';
+      if (!brand_id) { alert('Silakan pilih Brand terlebih dahulu!'); return; }
+      const selectedBrandObj = masterBrands.find(b => String(b.id) === String(brand_id));
+      const brand_name = selectedBrandObj ? selectedBrandObj.name : (brandSelectEl.selectedOptions[0]?.text || '');
+
+      const file = document.getElementById('artwork-file').files[0];
+      if (!file) { alert('Pilih file desain (gambar/PDF) terlebih dahulu!'); return; }
+      if (file.size > 3.5 * 1024 * 1024) { alert('Ukuran file melebihi 3.5 MB. Silakan kompres file Anda.'); return; }
 
       const btn = document.getElementById('btn-submit-artwork');
       btn.disabled = true;
@@ -1256,75 +1315,43 @@
       lucide.createIcons();
 
       try {
-        let file_base64 = null;
-        if (file) {
-          file_base64 = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(String(reader.result).split(',')[1]);
-            reader.onerror = error => reject(error);
-            reader.readAsDataURL(file);
-          });
+        const imageBase64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result).split(',')[1]);
+          reader.onerror = () => reject(new Error('Gagal membaca file.'));
+          reader.readAsDataURL(file);
+        });
+
+        // Analisis AI + penyimpanan dilakukan oleh Edge Function (tanpa data default / fallback)
+        const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/Scan-artwork`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            title,
+            materialType: material_type,
+            imageBase64,
+            mimeType: file.type || 'image/png',
+            fileName: file.name,
+            brand_id,
+            brand_name,
+            username: currentUserSession ? currentUserSession.username : 'system'
+          })
+        });
+        const resData = await aiResponse.json().catch(() => ({}));
+        if (!aiResponse.ok || resData.error) {
+          throw new Error(resData.error || ('Edge Function gagal (HTTP ' + aiResponse.status + ')'));
         }
+        if (!resData.saved_id) throw new Error('Analisis selesai tetapi gagal tersimpan ke database.');
 
-        // 2. Persiapkan Fallback Data AI jika Edge Function Offline
-        let aiResult = {
-          compliance_score: 88,
-          bpom_status: 'Compliant',
-          findings: ['Pencantuman netto dan komposisi sudah sesuai kriteria BPOM.'],
-          recommendations: ['Pastikan nomor izin edar dicetak dengan kontras warna yang cukup.']
-        };
-
-        // 3. Panggil Edge Function scan-artwork-prescreening
-        try {
-          const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/Scan-artwork`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": SUPABASE_ANON_KEY,
-              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({
-              title,
-              material_type,
-              brand_id,
-              brand_name,
-              file_name,
-              file_base64
-            })
-          });
-
-          if (aiResponse.ok) {
-            const resData = await aiResponse.json();
-            if (resData && resData.data) {
-              aiResult = resData.data;
-            }
-          }
-        } catch (edgeErr) {
-          console.warn("Edge Function offline/fallback to default AI logic:", edgeErr);
-        }
-
-        // 4. Simpan Data Input + File Name + Hasil AI ke Supabase
-        const { error } = await supabaseClient.from('artwork_prescreenings').insert([{
-          title: title,
-          product_name: title,
-          material_type: material_type,
-          brand_id: brand_id,
-          brand_name: brand_name,
-          file_name: file_name,
-          compliance_score: aiResult.compliance_score || 85,
-          bpom_status: aiResult.bpom_status || 'Compliant',
-          findings: aiResult.findings || [],
-          recommendations: aiResult.recommendations || [],
-          created_by: currentUserSession ? currentUserSession.username : 'system'
-        }]);
-
-        if (error) throw error;
-
+        form.reset();
         closeModal('artwork-modal');
         loadArtworkTable();
-        logAudit('Skrining Artwork', 'artwork_prescreenings', null, { summary: file_name, status_bpom: aiResult.bpom_status });
-        alert(`Skrining Artwork AI Selesai!\nStatus BPOM: ${aiResult.bpom_status}\nFile Name: ${file_name}`);
-
+        showArtworkResult(resData.data, title, { id: resData.saved_id, brand_name, material_type, file_name: file.name, created_at: new Date().toISOString() });
+        logAudit('Skrining Artwork', 'artwork_prescreenings', resData.saved_id, { summary: title, status_bpom: resData.data.bpom_status, skor: resData.data.compliance_score });
       } catch (err) {
         alert('Error: ' + err.message);
       } finally {
