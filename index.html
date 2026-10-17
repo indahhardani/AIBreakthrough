@@ -1989,7 +1989,7 @@
         btn.disabled = false;
       }
     }
-    async function downloadArtworkPdf() {
+      async function downloadArtworkPdf() {
       const c = currentArtworkResult;
       if (!c) return;
       if (!window.jspdf) { alert('Library PDF belum termuat. Muat ulang halaman lalu coba lagi.'); return; }
@@ -2012,7 +2012,7 @@
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
-      doc.text('🛡️ LEGALOPS & COMPLIANCE INTELLIGENCE', M, 28);
+      doc.text('LEGALOPS & COMPLIANCE INTELLIGENCE', M, 28);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
@@ -2020,7 +2020,7 @@
 
       y = 75;
 
-      // --- 2. ALERT BANNER VALIDASI LEGAL (Sangat Jelas & Beda Warna) ---
+      // --- 2. ALERT BANNER VALIDASI LEGAL ---
       doc.setFillColor(254, 242, 242); // Rose/Merah Muda
       doc.setDrawColor(248, 113, 113); // Border Merah
       doc.setLineWidth(1);
@@ -2028,13 +2028,13 @@
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
-      doc.setTextColor(185, 28, 28); // Teks Merah Gelap
-      doc.text('⚠️ CATATAN PENTING: DRAFT HASIL ANALISIS AI — WAJIB DIVALIDASI OLEH TIM LEGAL', M + 12, y + 20);
+      doc.setTextColor(185, 28, 28);
+      doc.text('CATATAN PENTING: DRAFT HASIL ANALISIS AI -- WAJIB DIVALIDASI OLEH TIM LEGAL', M + 12, y + 20);
 
       y += 42;
 
-      // --- 3. KARTU UTAMA: PREVIEW GAMBAR DIPERBESAR + METADATA & BADGES ---
-      const cardHeight = 185; // Ukuran tinggi kartu disesuaikan
+      // --- 3. KARTU UTAMA: PREVIEW GAMBAR + METADATA & BADGES ---
+      const cardHeight = 185;
       doc.setFillColor(248, 250, 252);
       doc.setDrawColor(226, 232, 240);
       doc.roundedRect(M, y, maxW, cardHeight, 6, 6, 'FD');
@@ -2055,7 +2055,7 @@
         }
       }
 
-      // Ukuran Gambar Diperbesar (Lebar: 140pt, Tinggi: 160pt)
+      // Ukuran Gambar Preview (Lebar: 140pt, Tinggi: 160pt)
       const imgW = 140;
       const imgH = 160;
       const imgX = M + 12;
@@ -2086,13 +2086,13 @@
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8.5);
       doc.setTextColor(71, 85, 105);
-      doc.text(`🏷️ Brand: ${c.brand_name || 'General'}   |   Versi: ${c.version || 'v1.0'} (${c.material_type || 'Kemasan'})`, infoX, infoY);
+      doc.text(`Brand: ${c.brand_name || 'General'}   |   Versi: ${c.version || 'v1.0'} (${c.material_type || 'Kemasan'})`, infoX, infoY);
 
       infoY += 14;
-      doc.text(`📋 Kategori BPOM: ${d.product_category || 'Pangan Olahan'}`, infoX, infoY);
+      doc.text(`Kategori BPOM: ${d.product_category || 'Pangan Olahan'}`, infoX, infoY);
 
       infoY += 14;
-      doc.text(`📅 Tanggal Audit: ${new Date(c.created_at || Date.now()).toLocaleDateString('id-ID')}`, infoX, infoY);
+      doc.text(`Tanggal Audit: ${new Date(c.created_at || Date.now()).toLocaleDateString('id-ID')}`, infoX, infoY);
 
       infoY += 20;
 
@@ -2132,17 +2132,45 @@
         }
       };
 
-      const drawSectionBlock = (title, items, colorRgb) => {
+      const drawSectionBlock = (title, items, colorRgb, iconType) => {
         items = Array.isArray(items) ? items : [];
         checkPageBreak(40);
 
+        // Bar garis warna di sebelah kiri
         doc.setFillColor(...colorRgb);
         doc.rect(M, y, 4, 14, 'F');
+
+        // Menggambar Ikon Vektor Geometris (Bukan Emoji Unicode)
+        if (iconType === 'high_risk') {
+          // Lingkaran Merah dengan tanda '!'
+          doc.setFillColor(225, 29, 72);
+          doc.circle(M + 14, y + 7, 6, 'F');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8);
+          doc.setTextColor(255, 255, 255);
+          doc.text('!', M + 12.5, y + 10);
+        } else if (iconType === 'adjustment') {
+          // Lingkaran Oranye dengan tanda '!'
+          doc.setFillColor(217, 119, 6);
+          doc.circle(M + 14, y + 7, 6, 'F');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8);
+          doc.setTextColor(255, 255, 255);
+          doc.text('!', M + 12.5, y + 10);
+        } else if (iconType === 'compliant') {
+          // Lingkaran Hijau dengan tanda centang 'v'
+          doc.setFillColor(16, 185, 129);
+          doc.circle(M + 14, y + 7, 6, 'F');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(7);
+          doc.setTextColor(255, 255, 255);
+          doc.text('v', M + 12, y + 9.5);
+        }
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(10.5);
         doc.setTextColor(...colorRgb);
-        doc.text(`${title} (${items.length})`, M + 10, y + 11);
+        doc.text(`${title} (${items.length})`, M + 26, y + 11);
         y += 20;
 
         if (items.length === 0) {
@@ -2170,21 +2198,21 @@
         y += 10;
       };
 
-      // --- 4. TEMUAN EVALUASI REGULASI BPOM DENGAN EMOTIKON ---
+      // --- 4. TEMUAN EVALUASI REGULASI BPOM ---
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(15, 23, 42);
-      doc.text('🔍 RINCIAN EVALUASI REGULASI BPOM', M, y);
+      doc.text('RINCIAN EVALUASI REGULASI BPOM', M, y);
       y += 16;
 
       // High Risk Items
-      drawSectionBlock('🚨 HIGH RISK (RISIKO TINGGI PELANGGARAN HUKUM)', d.high_risk_items, [225, 29, 72]);
+      drawSectionBlock('HIGH RISK (RISIKO TINGGI PELANGGARAN HUKUM)', d.high_risk_items, [225, 29, 72], 'high_risk');
 
       // Need Adjustment Items
-      drawSectionBlock('⚠️ NEED ADJUSTMENT / REMOVAL (PERLU REVISI/HAPUS)', d.need_adjustment_items, [217, 119, 6]);
+      drawSectionBlock('NEED ADJUSTMENT / REMOVAL (PERLU REVISI/HAPUS)', d.need_adjustment_items, [217, 119, 6], 'adjustment');
 
       // Compliant Items
-      drawSectionBlock('🟢 COMPLIANT (SESUAI ATURAN BPOM)', d.compliant_items, [16, 185, 129]);
+      drawSectionBlock('COMPLIANT (SESUAI ATURAN BPOM)', d.compliant_items, [16, 185, 129], 'compliant');
 
       // --- 5. FOOTER CATATAN HUKUM ---
       doc.setFont('helvetica', 'italic');
@@ -2206,7 +2234,7 @@
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
-      doc.text('🖼️ PREVIEW DESAIN', x + (w / 2), y + (h / 2), { align: 'center' });
+      doc.text('PREVIEW DESAIN', x + (w / 2), y + (h / 2), { align: 'center' });
     }
 
 
