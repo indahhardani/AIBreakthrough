@@ -242,7 +242,7 @@
               <h2 class="text-base font-bold text-brand-900 flex items-center gap-2">
                 <i data-lucide="folder-search" class="w-5 h-5 text-brand"></i> Pendaftaran Vendor (Scan Folder Google Drive)
               </h2>
-              <p class="text-xs text-brand-700 mt-1">AI memeriksa folder tiap vendor (Brand &gt; Kategori Vendor &gt; Nama Vendor). Dokumen wajib: KTP Direktur, NPWP, Akta Pendirian, NIB, Izin Usaha. Akta Perubahan opsional. Jika lengkap, vendor otomatis siap diajukan agreement.</p>
+              <p class="text-xs text-brand-700 mt-1">Folder vendor dikenali dari nama yang diawali CV atau PT, di kedalaman folder berapa pun. AI membaca isi tiap folder. Dokumen wajib: KTP Direktur, NPWP, Akta Pendirian, NIB, Izin Usaha. Akta Perubahan opsional. Jika lengkap, vendor otomatis siap diajukan agreement.</p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button id="btn-vendor-rescan" onclick="startVendorScan({ rescanAll: true })" class="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
@@ -1528,6 +1528,17 @@
     }
     function closeVendorScanPanel() { document.getElementById('vscan-panel').classList.add('hidden'); }
 
+    async function callVendorFn(payload) {
+      const res = await fetch(VENDOR_SCAN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify(payload)
+      });
+      const r = await res.json().catch(() => ({}));
+      if (!res.ok || r.error) throw new Error(r.error || ('Edge Function gagal (HTTP ' + res.status + ')'));
+      return r;
+    }
+
     async function startVendorScan({ rescanAll = false, vendorFolderId = null } = {}) {
       if (vendorScanRunning) return;
       if (rescanAll && !vendorFolderId && !confirm('Scan ulang semua vendor?\n\nSemua file dibaca ulang oleh AI dan memakai kredit AI. Koreksi manual Legal TIDAK akan ditimpa.')) return;
@@ -1540,42 +1551,41 @@
       const brandName = brandId ? ((masterBrands.find(b => String(b.id) === String(brandId)) || {}).name || '') : '';
       const rescanBefore = rescanAll ? new Date().toISOString() : undefined;
       const title = (rescanAll ? 'Scan Ulang Vendor' : 'Scan Folder Vendor') + (brandName && !vendorFolderId ? ' (brand ' + brandName + ')' : '');
-      const skip = [];
       const errors = [];
-      let total = 0, fatal = null, unmatched = [], missing = 0, guard = 0, trace = [];
+      let vendors = [], trace = [], missing = 0, done = 0, fatal = null;
 
-      vendorScanUi({ title, pct: 3, text: 'Menelusuri folder Google Drive...' });
+      vendorScanUi({ title, pct: 3, text: 'Mencari folder vendor (nama diawali CV / PT) di Google Drive...' });
       try {
-        for (let i = 0; i < 5000 && !vendorScanCancelled; i++) {
-          const res = await fetch(VENDOR_SCAN_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-            body: JSON.stringify({
-              skip,
-              brand_id: brandId || undefined,
-              vendor_folder_id: vendorFolderId || undefined,
-              rescan_all: rescanAll || undefined,
-              rescan_before: rescanBefore
-            })
-          });
-          const r = await res.json().catch(() => ({}));
-          if (!res.ok || r.error) throw new Error(r.error || ('Edge Function gagal (HTTP ' + res.status + ')'));
+        // Fase 1: daftar folder vendor
+        if (vendorFolderId) {
+          const row = vendorsData.find(v => v.gdrive_folder_id === vendorFolderId);
+          if (row) vendors = [{ id: row.gdrive_folder_id, name: row.vendor_name, category: row.vendor_category, brand_id: row.brand_id, brand_name: row.brand_name, path: row.gdrive_folder_path }];
+        } else {
+          const r = await callVendorFn({ action: 'discover', brand_id: brandId || undefined });
+          vendors = r.vendors || [];
+          trace = r.trace || [];
+          missing = (r.missing_folders || []).length;
+        }
 
-          unmatched = r.unmatched_folders || unmatched;
-          if (r.trace) trace = r.trace;
-          if (typeof r.total_vendors === 'number') total = r.total_vendors;
-          (r.errors || []).forEach(m => errors.push(m));
-
-          if (r.finished_all) { missing = (r.missing_folders || []).length; break; }
-
-          if (!r.pending) { skip.push(r.vendor_folder_id); guard = 0; }
-          else if (++guard > 60) throw new Error('Satu folder vendor tidak kunjung selesai diproses.');
-
-          vendorScanUi({
-            title,
-            pct: total ? Math.round((skip.length / total) * 100) : 100,
-            text: `Memeriksa vendor ${Math.min(skip.length + (r.pending ? 1 : 0), total)} dari ${total}: ${r.vendor_name || ''}...`
-          });
+        // Fase 2: periksa satu vendor per putaran (file yang belum dibaca AI diproses bertahap)
+        for (const v of vendors) {
+          if (vendorScanCancelled) break;
+          try {
+            for (let guard = 0; guard < 60 && !vendorScanCancelled; guard++) {
+              vendorScanUi({
+                title,
+                pct: Math.round((done / vendors.length) * 100),
+                text: `Memeriksa vendor ${done + 1} dari ${vendors.length}: ${v.name}...`
+              });
+              const r = await callVendorFn({ action: 'process', vendor: v, rescan_all: rescanAll || undefined, rescan_before: rescanBefore });
+              (r.errors || []).forEach(m => errors.push(m));
+              if (!r.pending) break;
+              if (guard === 59) throw new Error('tidak kunjung selesai diproses');
+            }
+          } catch (e) {
+            errors.push(`${v.name}: ${e.message}`);
+          }
+          if (!vendorScanCancelled) done++;
         }
       } catch (e) {
         fatal = e.message;
@@ -1586,22 +1596,23 @@
 
       const lines = [];
       errors.forEach(m => lines.push(`<p class="text-rose-600">&bull; ${esc(m)}</p>`));
-      if (unmatched.length) lines.push(`<p class="text-amber-700">Folder tidak cocok dengan brand mana pun (nama folder harus sama dengan nama/kode brand): <b>${esc(unmatched.join(', '))}</b></p>`);
-      if (!total && trace.length) lines.push(`<div class="mt-1 p-2 rounded-lg bg-brand-50 border border-brand-200 text-slate-600 space-y-0.5"><p class="font-bold text-brand-800">Hasil penelusuran folder:</p>${trace.map(t => '<p class="whitespace-pre">' + esc(t) + '</p>').join('')}<p class="text-slate-400 pt-1">Struktur yang dibaca: Folder induk &gt; Brand &gt; Kategori Vendor &gt; Nama Vendor.</p></div>`);
+      if (!vendors.length && trace.length) {
+        lines.push(`<div class="mt-1 p-2 rounded-lg bg-brand-50 border border-brand-200 text-slate-600 space-y-0.5"><p class="font-bold text-brand-800">Hasil penelusuran folder:</p>${trace.map(t => '<p class="whitespace-pre-wrap">' + esc(t) + '</p>').join('')}<p class="text-slate-400 pt-1">Folder vendor dikenali dari nama yang diawali CV atau PT.</p></div>`);
+      }
       if (missing) lines.push(`<p class="text-amber-700">${missing} vendor ditandai "Folder Tidak Ditemukan" karena foldernya sudah tidak ada di Drive.</p>`);
       if (fatal) lines.push(`<p class="text-rose-600 font-semibold">Berhenti karena error: ${esc(fatal)}</p>`);
 
       const state = fatal ? 'Berhenti karena error' : vendorScanCancelled ? 'Dihentikan' : 'Selesai';
       vendorScanUi({
         title,
-        pct: total && !fatal && !vendorScanCancelled ? 100 : (total ? Math.round((skip.length / total) * 100) : 0),
-        text: total || skip.length ? `${state}: ${skip.length} dari ${total} vendor diperiksa.` : `${state}: tidak ada folder vendor yang ditemukan.`,
+        pct: vendors.length && !fatal && !vendorScanCancelled ? 100 : (vendors.length ? Math.round((done / vendors.length) * 100) : 0),
+        text: vendors.length ? `${state}: ${done} dari ${vendors.length} vendor diperiksa.` : `${state}: tidak ada folder vendor (CV / PT) yang ditemukan.`,
         detail: lines.join(''),
         finished: true
       });
       await loadVendorOnboardings();
       logAudit(rescanAll ? 'Scan Ulang Folder Vendor' : 'Scan Folder Vendor', 'vendor_onboardings', null,
-        { summary: `${skip.length} vendor diperiksa` + (brandName && !vendorFolderId ? ', brand ' + brandName : '') });
+        { summary: `${done} vendor diperiksa` + (brandName && !vendorFolderId ? ', brand ' + brandName : '') });
     }
 
     // ---------- Detail vendor + koreksi jenis dokumen manual ----------
