@@ -1989,7 +1989,8 @@
         btn.disabled = false;
       }
     }
-         async function downloadArtworkPdf() {
+          async function downloadArtworkPdf() {
+      // Pastikan mengambil object data artwork yang sedang aktif
       const c = currentArtworkResult;
       if (!c) return;
       if (!window.jspdf) { alert('Library PDF belum termuat. Muat ulang halaman lalu coba lagi.'); return; }
@@ -2002,24 +2003,51 @@
       const maxW = W - 2 * M;
       let y = 0;
 
-      const d = c.d || {};
-      const score = Number(d.compliance_score || 0);
+      // Adaptasi Mapping Kolom Data (Mendukung 'analysis_result' maupun 'd')
+      const d = c.analysis_result || c.d || {};
+      const score = Number(d.compliance_score || c.compliance_score || 0);
 
-      // --- 1. HEADER ATAS (Judul & Subjudul) ---
+      // Extract array temuan evaluasi secara aman
+      const highRiskItems = d.high_risk_items || d.high_risk || [];
+      const needAdjItems = d.need_adjustment_items || d.need_adjustment || d.medium_risk_items || [];
+      const compliantItems = d.compliant_items || d.compliant || d.low_risk_items || [];
+
+      // --- 1. HEADER ATAS ---
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
       doc.setTextColor(15, 23, 42);
-      doc.text('LEGALOPS & COMPLIANCE INTELLIGENCE', M, 32);
+      doc.text('LEGALOPS & COMPLIANCE INTELLIGENCE', M, 30);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
+      doc.setFontSize(9.5);
       doc.setTextColor(71, 85, 105);
-      doc.text('Laporan Evaluasi Kepatuhan Artwork & Materi Iklan JDIH BPOM', M, 48);
+      doc.text('Laporan Evaluasi Kepatuhan Artwork & Materi Iklan JDIH BPOM', M, 44);
 
-      y = 60;
+      y = 56;
 
-      // --- 2. KARTU UTAMA ---
-      const cardH = 210;
+      // --- 2. ALERT BANNER DRAFT ANALISIS AI ---
+      doc.setFillColor(254, 242, 242);
+      doc.setDrawColor(248, 113, 113);
+      doc.setLineWidth(1);
+      doc.roundedRect(M, y, maxW, 26, 4, 4, 'FD');
+
+      // Ikon Warning Vektor
+      doc.setFillColor(225, 29, 72);
+      doc.circle(M + 15, y + 13, 6, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(255, 255, 255);
+      doc.text('!', M + 13.5, y + 15.5);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(185, 28, 28);
+      doc.text('DRAFT HASIL ANALISIS AI -- WAJIB DIVALIDASI OLEH TIM LEGAL SEBELUM CETAK MASAL', M + 28, y + 16.5);
+
+      y += 36;
+
+      // --- 3. KARTU UTAMA PRODUK & METADATA ---
+      const cardH = 195;
       doc.setFillColor(248, 250, 252);
       doc.setDrawColor(226, 232, 240);
       doc.roundedRect(M, y, maxW, cardH, 6, 6, 'FD');
@@ -2028,7 +2056,7 @@
       const fileInput = document.getElementById('artwork-file');
       let imageBase64Data = null;
 
-      if (fileInput && fileInput.files[0] && fileInput.files[0].type.startsWith('image/')) {
+      if (fileInput && fileInput.files && fileInput.files[0] && fileInput.files[0].type.startsWith('image/')) {
         try {
           imageBase64Data = await new Promise((resolve) => {
             const reader = new FileReader();
@@ -2036,15 +2064,15 @@
             reader.readAsDataURL(fileInput.files[0]);
           });
         } catch (e) {
-          console.warn('Gagal memuat gambar:', e);
+          console.warn('Gagal memuat preview gambar:', e);
         }
       }
 
-      // Preview Gambar di Kiri (Lebar: 150pt, Tinggi: 180pt)
-      const imgW = 150;
-      const imgH = 180;
-      const imgX = M + 15;
-      const imgY = y + 15;
+      // Preview Gambar di Kiri
+      const imgW = 140;
+      const imgH = 168;
+      const imgX = M + 13;
+      const imgY = y + 13.5;
 
       if (imageBase64Data) {
         try {
@@ -2058,61 +2086,48 @@
         drawPlaceholderImage(doc, imgX, imgY, imgW, imgH);
       }
 
-      // Kolom Kanan: Metadata Produk
+      // Metadata Produk (Adaptasi Kolom Database)
       const rightX = imgX + imgW + 20;
-      let rightY = y + 25;
+      let rightY = y + 24;
 
-      // Judul Produk
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
       doc.text('JUDUL PRODUK', rightX, rightY);
 
-      rightY += 14;
-      doc.setFontSize(12);
+      rightY += 15;
+      doc.setFontSize(13);
       doc.setTextColor(15, 23, 42);
-      doc.text(String(c.title || 'Almond'), rightX, rightY);
-
-      // Banner "DRAFT HASIL ANALISIS AI (BELUM DIVALIDASI LEGAL)"
-      rightY += 12;
-      doc.setFillColor(254, 242, 242);
-      doc.setDrawColor(254, 202, 202);
-      doc.roundedRect(rightX, rightY, maxW - (imgW + 50), 22, 3, 3, 'FD');
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.5);
-      doc.setTextColor(185, 28, 28);
-      doc.text('DRAFT HASIL ANALISIS AI (BELUM DIVALIDASI LEGAL)', rightX + 8, rightY + 14);
+      doc.text(String(c.title || c.product_name || 'Artwork Product'), rightX, rightY);
 
       // Detail Versi & Kategori
-      rightY += 34;
+      rightY += 26;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
       doc.text('VERSI & TIPE MATERI', rightX, rightY);
-
       doc.text('KATEGORI JDIH', rightX + 160, rightY);
 
-      rightY += 12;
+      rightY += 13;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9.5);
       doc.setTextColor(15, 23, 42);
-      doc.text(`${c.version || 'v1'} (${c.material_type || 'Kemasan'})`, rightX, rightY);
-      doc.text(String(d.product_category || 'Pangan Olahan'), rightX + 160, rightY);
+      doc.text(`${c.version || 'v1.0'} (${c.material_type || 'Kemasan'})`, rightX, rightY);
+      doc.text(String(d.product_category || c.product_category || 'Pangan Olahan'), rightX + 160, rightY);
 
       // Tanggal Audit
-      rightY += 16;
+      rightY += 18;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(100, 116, 139);
       doc.text(`Tanggal Audit: ${new Date(c.created_at || Date.now()).toLocaleDateString('id-ID')}`, rightX, rightY);
 
-      // --- KOTAK METRICS (Compliance Score, Status BPOM, Status Halal) ---
-      rightY += 18;
+      // Kotak Metrics (Compliance Score, Status BPOM, Status Halal)
+      rightY += 20;
       const metricW = 85;
       const metricH = 42;
 
-      // 1. Score
+      // 1. Compliance Score
       let scoreColor = [225, 29, 72];
       if (score >= 75) scoreColor = [16, 185, 129];
       else if (score >= 50) scoreColor = [217, 119, 6];
@@ -2126,7 +2141,7 @@
       doc.text(`${score}/100`, rightX + 6, rightY + 30);
 
       // 2. Status BPOM
-      const bpomStatus = d.bpom_status || 'Non-Compliant';
+      const bpomStatus = d.bpom_status || c.bpom_status || 'Non-Compliant';
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(rightX + metricW + 8, rightY, metricW + 10, metricH, 4, 4, 'FD');
       doc.setFontSize(6.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 116, 139);
@@ -2134,8 +2149,8 @@
       doc.setFontSize(8.5); doc.setTextColor(bpomStatus === 'Compliant' ? 16 : 225, bpomStatus === 'Compliant' ? 185 : 29, bpomStatus === 'Compliant' ? 129 : 72);
       doc.text(bpomStatus, rightX + metricW + 14, rightY + 30);
 
-      // 3. Status Halal (Diambil dari hasil AI: d.halal_status)
-      const halalStatus = d.halal_status || 'Non-Compliant';
+      // 3. Status Halal
+      const halalStatus = d.halal_status || c.halal_status || 'Non-Compliant';
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(rightX + (metricW * 2) + 22, rightY, metricW + 10, metricH, 4, 4, 'FD');
       doc.setFontSize(6.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 116, 139);
@@ -2143,65 +2158,110 @@
       doc.setFontSize(8.5); doc.setTextColor(halalStatus === 'Compliant' || halalStatus === 'Certified' ? 16 : 225, halalStatus === 'Compliant' || halalStatus === 'Certified' ? 185 : 29, halalStatus === 'Compliant' || halalStatus === 'Certified' ? 129 : 72);
       doc.text(halalStatus, rightX + (metricW * 2) + 28, rightY + 30);
 
-      y += cardH + 25;
+      y += cardH + 20;
 
-      // --- 3. BLOK EVALUASI REGULASI ---
-      const checkPageBreak = (neededH) => {
-        if (y + neededH > H - M) {
-          doc.addPage();
-          y = M + 10;
-        }
-      };
-
+      // --- 4. RINCIAN EVALUASI DALAM BINGKAI EYE-CATCHING ---
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(15, 23, 42);
       doc.text('RINCIAN EVALUASI REGULASI JDIH BPOM', M, y);
-      y += 18;
+      y += 15;
 
-      const drawSectionBlock = (title, items, colorRgb) => {
+      const checkPageBreak = (neededH) => {
+        if (y + neededH > H - M) {
+          doc.addPage();
+          y = M + 15;
+        }
+      };
+
+      const drawFramedSection = (title, items, borderRgb, bgRgb, iconType) => {
         items = Array.isArray(items) ? items : [];
-        checkPageBreak(35);
+
+        let contentH = 28;
+        const preparedLines = [];
+
+        if (items.length === 0) {
+          contentH += 16;
+        } else {
+          items.forEach((item, idx) => {
+            const formattedText = `${idx + 1}. ${item}`;
+            const lines = doc.splitTextToSize(formattedText, maxW - 30);
+            preparedLines.push(lines);
+            contentH += (lines.length * 11) + 5;
+          });
+        }
+        contentH += 6;
+
+        checkPageBreak(contentH + 10);
+
+        doc.setFillColor(...bgRgb);
+        doc.setDrawColor(...borderRgb);
+        doc.setLineWidth(1);
+        doc.roundedRect(M, y, maxW, contentH, 6, 6, 'FD');
+
+        let innerY = y + 18;
+        const iconX = M + 18;
+        const iconY = y + 14;
+
+        if (iconType === 'high_risk') {
+          doc.setFillColor(225, 29, 72);
+          doc.circle(iconX, iconY, 6.5, 'F');
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
+          doc.text('!', iconX - 1.5, iconY + 2.5);
+        } else if (iconType === 'adjustment') {
+          doc.setFillColor(217, 119, 6);
+          doc.circle(iconX, iconY, 6.5, 'F');
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
+          doc.text('!', iconX - 1.5, iconY + 2.5);
+        } else if (iconType === 'compliant') {
+          doc.setFillColor(16, 185, 129);
+          doc.circle(iconX, iconY, 6.5, 'F');
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(255, 255, 255);
+          doc.text('v', iconX - 2, iconY + 2.5);
+        }
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(9.5);
-        doc.setTextColor(...colorRgb);
-        doc.text(title, M, y);
-        y += 14;
+        doc.setTextColor(...borderRgb);
+        doc.text(`${title} (${items.length})`, M + 32, innerY - 4);
+
+        innerY += 12;
 
         if (items.length === 0) {
-          doc.setFont('helvetica', 'italic'); doc.setFontSize(8.5); doc.setTextColor(148, 163, 184);
-          doc.text('Tidak ditemukan temuan pada kategori ini.', M, y);
-          y += 16;
-          return;
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(8.5);
+          doc.setTextColor(148, 163, 184);
+          doc.text('Tidak ditemukan temuan pada kategori ini.', M + 15, innerY);
+        } else {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8.5);
+          doc.setTextColor(30, 41, 59);
+
+          preparedLines.forEach((lines) => {
+            lines.forEach((line) => {
+              doc.text(line, M + 15, innerY);
+              innerY += 11;
+            });
+            innerY += 5;
+          });
         }
 
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8.5);
-        doc.setTextColor(30, 41, 59);
-
-        const fullText = items.map((item, idx) => `${idx + 1}. ${item}`).join(' ');
-        const lines = doc.splitTextToSize(fullText, maxW);
-        checkPageBreak(lines.length * 11 + 10);
-
-        lines.forEach(line => {
-          doc.text(line, M, y);
-          y += 11;
-        });
-        y += 12;
+        y += contentH + 12;
       };
 
-      // High Risk
-      drawSectionBlock('HIGH RISK (RISIKO TINGGI PELANGGARAN HUKUM)', d.high_risk_items, [225, 29, 72]);
+      // Render 3 Bingkai Evaluasi Berdasarkan Variabel Adaptif
+      drawFramedSection('HIGH RISK (RISIKO TINGGI PELANGGARAN HUKUM)', highRiskItems, [225, 29, 72], [254, 242, 242], 'high_risk');
+      drawFramedSection('NEED ADJUSTMENT / REMOVAL (PERLU REVISI/HAPUS)', needAdjItems, [217, 119, 6], [255, 251, 235], 'adjustment');
+      drawFramedSection('COMPLIANT (SESUAI ATURAN JDIH BPOM)', compliantItems, [16, 185, 129], [240, 253, 244], 'compliant');
 
-      // Need Adjustment
-      drawSectionBlock('NEED ADJUSTMENT/REMOVAL (PERLU REVISI/HAPUS)', d.need_adjustment_items, [217, 119, 6]);
-
-      // Compliant
-      drawSectionBlock('COMPLIANT (SESUAI ATURAN JDIH BPOM)', d.compliant_items, [16, 185, 129]);
+      // --- 5. FOOTER ---
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(7.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text('Dokumen ini dihasilkan secara otomatis oleh Enterprise LegalOps AI. Wajib divalidasi oleh Tim Legal sebelum cetak masal.', M, H - 20);
 
       // Simpan PDF
-      const slug = String(c.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'artwork';
+      const slug = String(c.title || 'artwork').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'artwork';
       doc.save(`Artwork-Evaluation-${slug}.pdf`);
       logAudit('Unduh PDF Artwork', 'artwork_prescreenings', c.id, { summary: c.title });
     }
@@ -2215,7 +2275,6 @@
       doc.setTextColor(148, 163, 184);
       doc.text('PREVIEW DESAIN', x + (w / 2), y + (h / 2), { align: 'center' });
     }
-
 
     async function createNpdTicket() {
       const c = currentNpdResult;
