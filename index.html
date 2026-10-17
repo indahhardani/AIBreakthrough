@@ -607,8 +607,14 @@
         <button onclick="closeModal('artwork-result-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div id="artwork-result-body" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs"></div>
-      <div class="px-6 py-3 border-t border-brand-200 flex justify-end">
+      <div class="px-6 py-3 border-t border-brand-200 flex flex-wrap justify-end gap-2">
         <button onclick="closeModal('artwork-result-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Tutup</button>
+        <button onclick="downloadArtworkPdf()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+          <i data-lucide="download" class="w-4 h-4"></i> Download PDF
+        </button>
+        <button id="btn-artwork-ticket" onclick="createArtworkTicket()" class="bg-amber-600 hover:bg-amber-500 disabled:opacity-60 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+          <i data-lucide="ticket" class="w-4 h-4"></i> Buat Tiket ke Legal
+        </button>
       </div>
     </div>
   </div>
@@ -1029,7 +1035,17 @@
       return st === 'Compliant' ? 'text-emerald-600' : st === 'Need Adjustment' ? 'text-amber-600' : st === 'Non-Compliant' ? 'text-rose-600' : 'text-slate-700';
     }
 
+    let currentArtworkResult = null;
+
     function showArtworkResult(d, title, rec = {}) {
+      currentArtworkResult = {
+        d, title, id: rec.id || null, brand_id: rec.brand_id || null, brand_name: rec.brand_name || null,
+        material_type: rec.material_type || null, file_name: rec.file_name || null,
+        created_at: rec.created_at || new Date().toISOString()
+      };
+      const tb = document.getElementById('btn-artwork-ticket');
+      tb.disabled = false;
+      tb.innerHTML = '<i data-lucide="ticket" class="w-4 h-4"></i> Buat Tiket ke Legal';
       const score = Number(d.compliance_score);
       const box = (label, value, cls = '') => `
         <div class="bg-brand-50 border border-brand-200 rounded-lg p-3">
@@ -1068,6 +1084,114 @@
       } else {
         showDetail('artwork_prescreenings', id); // data lama tanpa hasil analisis lengkap
       }
+    }
+
+    async function createArtworkTicket() {
+      const c = currentArtworkResult;
+      if (!c) return;
+      const btn = document.getElementById('btn-artwork-ticket');
+      btn.disabled = true;
+      try {
+        const d = c.d;
+        const score = Number(d.compliance_score);
+        const title = 'Review Artwork: ' + c.title;
+        const { data: ex } = await supabaseClient.from('tickets').select('ticket_number').eq('title', title).limit(1);
+        if (ex && ex.length) {
+          alert('Tiket untuk artwork ini sudah ada: ' + ex[0].ticket_number);
+          btn.innerHTML = 'Tiket Sudah Ada';
+          return;
+        }
+        const bullets = (arr) => Array.isArray(arr) && arr.length ? arr.map(x => '- ' + x).join('\n') : '-';
+        const description = [
+          'Permintaan review Legal atas hasil pemeriksaan artwork (ringkasan AI, belum divalidasi).',
+          '',
+          'Materi: ' + c.title,
+          c.brand_name ? 'Brand: ' + c.brand_name : null,
+          c.material_type ? 'Jenis materi: ' + c.material_type : null,
+          c.file_name ? 'File: ' + c.file_name : null,
+          'Kategori produk: ' + d.product_category,
+          'Skor kepatuhan: ' + score + '/100',
+          'Status BPOM: ' + d.bpom_status,
+          'Status halal: ' + d.halal_status,
+          '',
+          'Risiko tinggi:',
+          bullets(d.high_risk_items),
+          '',
+          'Perlu penyesuaian:',
+          bullets(d.need_adjustment_items)
+        ].filter(x => x !== null).join('\n');
+
+        const row = {
+          ticket_number: 'TKT-' + Math.floor(1000 + Math.random() * 9000),
+          title,
+          category: 'BPOM Consultation',
+          priority: (d.bpom_status === 'Non-Compliant' || (d.high_risk_items || []).length > 0 || score < 50) ? 'High' : 'Medium',
+          description,
+          status: 'Open',
+          brand_id: c.brand_id || null,
+          brand_name: c.brand_name || null,
+          requested_by: currentUserSession ? currentUserSession.username : 'system'
+        };
+        const { error } = await supabaseClient.from('tickets').insert([row]);
+        if (error) throw error;
+        btn.innerHTML = 'Tiket Terkirim';
+        loadTicketsTable();
+        logAudit('Buat Tiket dari Artwork', 'tickets', null, { summary: c.title, ticket_number: row.ticket_number, artwork_id: c.id });
+        alert('Tiket ke Legal berhasil dibuat!');
+      } catch (err) {
+        alert('Error: ' + err.message);
+        btn.disabled = false;
+      }
+    }
+
+    function downloadArtworkPdf() {
+      const c = currentArtworkResult;
+      if (!c) return;
+      if (!window.jspdf) { alert('Library PDF belum termuat. Muat ulang halaman lalu coba lagi.'); return; }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+      const M = 40, maxW = W - 2 * M;
+      let y = M;
+      const write = (str, size = 10, bold = false, indent = 0) => {
+        doc.setFont('helvetica', bold ? 'bold' : 'normal');
+        doc.setFontSize(size);
+        doc.splitTextToSize(String(str ?? '-'), maxW - indent).forEach(line => {
+          if (y + size + 4 > H - M) { doc.addPage(); y = M; }
+          doc.text(line, M + indent, y + size);
+          y += size + 4;
+        });
+      };
+      const section = (t) => { y += 8; write(t, 11, true); };
+      const list = (title, arr) => {
+        section(title + ' (' + (Array.isArray(arr) ? arr.length : 0) + ')');
+        if (!Array.isArray(arr) || !arr.length) { write('Tidak ada.', 10, false, 8); return; }
+        arr.forEach(x => write('- ' + x, 10, false, 8));
+      };
+      const d = c.d;
+
+      write('Hasil Pemeriksaan Artwork', 16, true);
+      write('Ringkasan AI, belum divalidasi Legal.', 9);
+      y += 6;
+      write('Materi: ' + c.title, 10, true);
+      if (c.brand_name) write('Brand: ' + c.brand_name);
+      if (c.material_type) write('Jenis materi: ' + c.material_type);
+      if (c.file_name) write('File: ' + c.file_name);
+      write('Tanggal: ' + new Date(c.created_at).toLocaleDateString('id-ID'));
+
+      section('Ringkasan');
+      write('Kategori produk: ' + d.product_category);
+      write('Skor kepatuhan: ' + d.compliance_score + '/100');
+      write('Status BPOM: ' + d.bpom_status);
+      write('Status halal: ' + d.halal_status);
+
+      list('Risiko Tinggi', d.high_risk_items);
+      list('Perlu Penyesuaian', d.need_adjustment_items);
+      list('Sudah Sesuai', d.compliant_items);
+
+      const slug = String(c.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'artwork';
+      doc.save('Artwork-' + slug + '.pdf');
+      logAudit('Unduh PDF Artwork', 'artwork_prescreenings', c.id, { summary: c.title });
     }
 
     async function showNpdDetail(id) {
@@ -1350,7 +1474,7 @@
         form.reset();
         closeModal('artwork-modal');
         loadArtworkTable();
-        showArtworkResult(resData.data, title, { id: resData.saved_id, brand_name, material_type, file_name: file.name, created_at: new Date().toISOString() });
+        showArtworkResult(resData.data, title, { id: resData.saved_id, brand_id, brand_name, material_type, file_name: file.name, created_at: new Date().toISOString() });
         logAudit('Skrining Artwork', 'artwork_prescreenings', resData.saved_id, { summary: title, status_bpom: resData.data.bpom_status, skor: resData.data.compliance_score });
       } catch (err) {
         alert('Error: ' + err.message);
