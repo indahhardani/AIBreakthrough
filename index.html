@@ -1003,12 +1003,19 @@
       }
     }
 
-       async function handleCreateNpd(e) {
+           async function handleCreateNpd(e) {
       e.preventDefault();
+      
+      // 1. Ambil nilai input dari form
       const product_idea_name = document.getElementById('npd-product-name').value;
       const category = document.getElementById('npd-category').value;
       const claims = document.getElementById('npd-claim').value;
       const ingredients = document.getElementById('npd-ingredients').value;
+
+      // Ambil brand_id dan cari brand_name yang sesuai dari masterBrands
+      const brand_id = document.getElementById('npd-brand-select').value;
+      const selectedBrand = masterBrands.find(b => b.id === brand_id);
+      const brand_name = selectedBrand ? selectedBrand.name : 'General';
 
       // Kumpulkan checklist kanal penjualan yang dipilih
       const selectedChannels = Array.from(document.querySelectorAll('.npd-channel-cb:checked')).map(cb => cb.value);
@@ -1019,7 +1026,7 @@
       lucide.createIcons();
 
       try {
-        // 1. Panggil Edge Function untuk Analisis Regulasi AI BPOM
+        // 2. Analisis Regulasi AI BPOM (dengan fallback data jika Edge Function offline)
         let aiResult = {
           feasibility_score: 85,
           matched_permit_code: 'BPOM NA-' + Math.floor(10000000 + Math.random() * 90000000),
@@ -1043,6 +1050,8 @@
               category,
               claims,
               ingredients,
+              brand_id,
+              brand_name,
               sales_channels: selectedChannels
             })
           });
@@ -1057,12 +1066,14 @@
           console.warn("Edge Function offline/fallback to default AI logic:", edgeErr);
         }
 
-        // 2. Simpan Data Input + Hasil AI ke Supabase Database
+        // 3. Simpan Data Input + Relasi Brand + Hasil AI ke Supabase Database
         const { error } = await supabaseClient.from('npd_permit_screenings').insert([{
           product_idea_name,
           category,
           claims,
           ingredients,
+          brand_id,            // Relasi UUID ke tabel brands
+          brand_name,          // Nama Brand (Teks)
           sales_channels: selectedChannels,
           feasibility_score: aiResult.feasibility_score || 85,
           matched_permit_code: aiResult.matched_permit_code || 'BPOM NA-PENDING',
@@ -1075,7 +1086,7 @@
 
         closeModal('npd-modal');
         loadNpdProductsTable();
-        alert('Skrining AI BPOM Selesai! Hasil analisa regulasi dan izin edar telah diperbarui.');
+        alert('Skrining AI BPOM Selesai! Data Brand, Regulasi, dan Izin Edar berhasil tersimpan.');
 
       } catch (err) {
         alert('Error: ' + err.message);
