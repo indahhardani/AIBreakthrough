@@ -841,9 +841,9 @@
             <td class="px-4 py-3 font-mono text-slate-500">${esc(String(r.id).slice(0, 8))}</td>
             <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.product_idea_name)}</td>
             <td class="px-4 py-3">${esc(r.category)}</td>
-            <td class="px-4 py-3">${esc(r.matched_permit_code || 'BPOM RI')}</td>
+            <td class="px-4 py-3">${esc(r.matched_permit_code ?? '-')}</td>
             <td class="px-4 py-3">${esc(r.created_by || 'system')}</td>
-            <td class="px-4 py-3 font-bold text-emerald-600">${esc(r.feasibility_score || 0)}/100</td>
+            <td class="px-4 py-3 font-bold text-emerald-600">${r.feasibility_score != null ? esc(r.feasibility_score) + '/100' : '-'}</td>
             <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
             <td class="px-4 py-3 text-center"><button onclick="showDetail('npd_permit_screenings', '${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button></td>
           </tr>
@@ -1008,7 +1008,7 @@
           recommendations: ['Pastikan nomor izin edar dicetak dengan kontras warna yang cukup.']
         };
 
-        // 3. Panggil Edge Function Scan-artwork
+        // 3. Panggil Edge Function scan-artwork-prescreening
         try {
           const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/Scan-artwork`, {
             method: "POST",
@@ -1104,63 +1104,34 @@
       lucide.createIcons();
 
       try {
-        // 2. Analisis Regulasi AI BPOM
-        let aiResult = {
-          feasibility_score: 85,
-          matched_permit_code: 'BPOM NA-' + Math.floor(10000000 + Math.random() * 90000000),
-          required_permits: ['Izin Edar BPOM ' + category, 'Sertifikat Halal MUI', 'Uji Stabilitas & Mikro'],
-          regulatory_warnings: [
-            'Pastikan batasan persentase bahan aktif sesuai lampiran PerBPOM.',
-            'Klaim produk wajib didukung dengan dokumen Evidence of Efficacy.'
-          ]
-        };
-
-        try {
-          const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/scan-npd-permit`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": SUPABASE_ANON_KEY,
-              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({
-              product_idea_name,
-              category,
-              claims,
-              ingredients,
-              brand_id,
-              brand_name,
-              sales_channels: selectedChannels
-            })
-          });
-
-          if (aiResponse.ok) {
-            const resData = await aiResponse.json();
-            if (resData && resData.data) {
-              aiResult = resData.data;
-            }
-          }
-        } catch (edgeErr) {
-          console.warn("Edge Function offline/fallback to default AI logic:", edgeErr);
+        // 2. Analisis AI BPOM lewat Edge Function (tanpa data default / fallback).
+        // Edge Function yang menyimpan hasilnya ke database.
+        const claimList = claims.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+        const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/scan-npd-permit`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            productName: product_idea_name,
+            category,
+            claims: claimList,
+            mainIngredients: ingredients,
+            salesChannels: selectedChannels,
+            username: currentUserSession ? currentUserSession.username : 'system',
+            brand_id,
+            brand_name
+          })
+        });
+        const resData = await aiResponse.json().catch(() => ({}));
+        if (!aiResponse.ok || resData.error) {
+          throw new Error(resData.error || ('Edge Function gagal (HTTP ' + aiResponse.status + ')'));
         }
-
-        // 3. Simpan ke Supabase Database dengan jaminan brand_id dan brand_name terisi
-        const { error } = await supabaseClient.from('npd_permit_screenings').insert([{
-          product_idea_name,
-          category,
-          claims,
-          ingredients,
-          brand_id: brand_id,       // Mengirimkan ID brand yang dipilih
-          brand_name: brand_name,   // Mengirimkan Nama brand
-          sales_channels: selectedChannels,
-          feasibility_score: aiResult.feasibility_score || 85,
-          matched_permit_code: aiResult.matched_permit_code || 'BPOM NA-PENDING',
-          required_permits: aiResult.required_permits || [],
-          regulatory_warnings: aiResult.regulatory_warnings || [],
-          created_by: currentUserSession ? currentUserSession.username : 'system'
-        }]);
-
-        if (error) throw error;
+        if (!resData.saved_id) {
+          throw new Error('Analisis selesai tetapi gagal tersimpan ke database.');
+        }
 
         closeModal('npd-modal');
         loadNpdProductsTable();
