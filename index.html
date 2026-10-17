@@ -2104,66 +2104,170 @@
         btn.disabled = false;
       }
     }
-
     function downloadNpdPdf() {
       const c = currentNpdResult;
       if (!c) return;
       if (!window.jspdf) { alert('Library PDF belum termuat. Muat ulang halaman lalu coba lagi.'); return; }
+      
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-      const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
-      const M = 40, maxW = W - 2 * M;
-      let y = M;
-      const write = (str, size = 10, bold = false, indent = 0) => {
-        doc.setFont('helvetica', bold ? 'bold' : 'normal');
-        doc.setFontSize(size);
-        doc.splitTextToSize(String(str ?? '-'), maxW - indent).forEach(line => {
-          if (y + size + 4 > H - M) { doc.addPage(); y = M; }
-          doc.text(line, M + indent, y + size);
-          y += size + 4;
-        });
-      };
-      const section = (t) => { y += 8; write(t, 11, true); };
+      const W = doc.internal.pageSize.getWidth();
+      const H = doc.internal.pageSize.getHeight();
+      const M = 40;
+      const maxW = W - 2 * M;
+      let y = 0;
+
       const d = c.d;
+      const score = Number(d.feasibility_score || 0);
 
-      write('Hasil Skrining Regulasi NPD', 16, true);
-      write('Ringkasan AI, belum divalidasi Legal.', 9);
-      y += 6;
-      write('Produk: ' + c.name, 10, true);
-      if (c.brand_name) write('Brand: ' + c.brand_name);
-      if (c.target_age) write('Usia target pasar: ' + c.target_age);
-      if (c.production_scheme) write('Skema produksi: ' + c.production_scheme);
-      if (c.country_of_origin) write('Negara asal: ' + c.country_of_origin);
-      write('Tanggal: ' + new Date(c.created_at).toLocaleDateString('id-ID'));
+      // --- 1. HEADER BANNER (Teal Brand `#64bcae`) ---
+      doc.setFillColor(100, 188, 174); // #64bcae
+      doc.rect(0, 0, W, 75, 'F');
 
-      section('Ringkasan');
-      write('Kategori produk: ' + d.product_category);
-      write('Kecocokan izin BPOM: ' + d.primary_permit_code);
-      write('Feasibility skor: ' + d.feasibility_score + '/100' + (d.feasibility_status ? ' (' + d.feasibility_status + ')' : ''));
-      write('Estimasi waktu pendaftaran: ' + d.estimated_timeline);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('Laporan Skrining Regulasi NPD', M, 35);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text('Enterprise LegalOps & BPOM Compliance Intelligence', M, 52);
 
-      const permits = Array.isArray(d.required_permits) ? d.required_permits : [];
-      section('Izin yang Harus Dipenuhi (' + permits.length + ')');
-      if (!permits.length) write('-');
-      permits.forEach((p, i) => {
-        write((i + 1) + '. ' + p.permit_name + (p.code ? ' (' + p.code + ')' : ''), 10, true);
-        if (p.authority) write('Instansi: ' + p.authority, 10, false, 14);
-        if (p.description) write(p.description, 10, false, 14);
-      });
+      y = 95;
 
-      const list = (title, arr) => {
-        if (!Array.isArray(arr) || !arr.length) return;
-        section(title);
-        arr.forEach(x => write('- ' + x, 10, false, 8));
+      // --- 2. KARTU INFORMASI PRODUK (Light Gray Box) ---
+      doc.setFillColor(245, 247, 250);
+      doc.setDrawColor(220, 225, 230);
+      doc.roundedRect(M, y, maxW, 70, 6, 6, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(30, 41, 59);
+      doc.text(String(c.name || 'Produk Baru'), M + 15, y + 25);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Brand: ${c.brand_name || 'General'}   |   Target Usia: ${c.target_age || '-'}`, M + 15, y + 42);
+      doc.text(`Skema Produksi: ${c.production_scheme || '-'}` + (c.country_of_origin ? ` (${c.country_of_origin})` : '') + `   |   Tanggal: ${new Date(c.created_at).toLocaleDateString('id-ID')}`, M + 15, y + 56);
+
+      y += 85;
+
+      // --- 3. METRICS CARDS (3 Kolom Berwarna) ---
+      const colW = (maxW - 20) / 3;
+
+      // Card 1: Kategori Produk
+      doc.setFillColor(240, 249, 248);
+      doc.setDrawColor(188, 228, 223);
+      doc.roundedRect(M, y, colW, 55, 5, 5, 'FD');
+      doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(48, 103, 97);
+      doc.text('KATEGORI PRODUK', M + 10, y + 18);
+      doc.setFontSize(10); doc.setTextColor(30, 41, 59);
+      doc.text(String(d.product_category || '-'), M + 10, y + 36);
+
+      // Card 2: Kode Izin BPOM
+      doc.setFillColor(240, 249, 248);
+      doc.setDrawColor(188, 228, 223);
+      doc.roundedRect(M + colW + 10, y, colW, 55, 5, 5, 'FD');
+      doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(48, 103, 97);
+      doc.text('KODE IZIN UTAMA', M + colW + 20, y + 18);
+      doc.setFontSize(10); doc.setTextColor(30, 41, 59);
+      doc.text(String(d.primary_permit_code || '-'), M + colW + 20, y + 36);
+
+      // Card 3: Skor Feasibility (Dinamis Warna: Hijau/Kuning/Merah)
+      let scoreBg = [236, 253, 245], scoreBorder = [167, 243, 208], scoreText = [5, 150, 105];
+      if (score < 50) {
+        scoreBg = [254, 242, 242]; scoreBorder = [254, 202, 202]; scoreText = [225, 29, 72];
+      } else if (score < 75) {
+        scoreBg = [254, 252, 232]; scoreBorder = [254, 240, 138]; scoreText = [202, 138, 4];
+      }
+
+      doc.setFillColor(...scoreBg);
+      doc.setDrawColor(...scoreBorder);
+      doc.roundedRect(M + (colW * 2) + 20, y, colW, 55, 5, 5, 'FD');
+      doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(...scoreText);
+      doc.text('SKOR FEASIBILITY', M + (colW * 2) + 30, y + 18);
+      doc.setFontSize(12);
+      doc.text(`${score}/100`, M + (colW * 2) + 30, y + 38);
+
+      y += 70;
+
+      // --- HELPER FUNCTION UNTUK KONTEN MENGALIR ---
+      const checkPageBreak = (neededHeight) => {
+        if (y + neededHeight > H - M) {
+          doc.addPage();
+          y = M + 10;
+        }
       };
-      list('Peringatan Regulasi', d.regulatory_warnings);
-      list('Checklist Dokumen Awal', d.initial_documents);
-      if (d.action_plan) { section('Rencana Tindakan'); write(d.action_plan); }
 
+      const drawSectionHeader = (title) => {
+        checkPageBreak(25);
+        doc.setFillColor(100, 188, 174);
+        doc.rect(M, y, 4, 14, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(30, 41, 59);
+        doc.text(title, M + 10, y + 11);
+        y += 22;
+      };
+
+      // --- 4. LIST IZIN BPOM YANG HARUS DIPENUHI ---
+      const permits = Array.isArray(d.required_permits) ? d.required_permits : [];
+      drawSectionHeader(`Daftar Izin Wajib (${permits.length})`);
+
+      if (permits.length === 0) {
+        doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.setTextColor(148, 163, 184);
+        doc.text('Tidak ada daftar izin khusus.', M + 10, y);
+        y += 15;
+      } else {
+        permits.forEach((p, idx) => {
+          checkPageBreak(40);
+          doc.setFillColor(250, 250, 250);
+          doc.setDrawColor(230, 230, 230);
+          doc.roundedRect(M + 5, y, maxW - 5, 36, 4, 4, 'FD');
+
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(15, 23, 42);
+          doc.text(`${idx + 1}. ${p.permit_name || 'Izin Regulasi'}` + (p.code ? ` (${p.code})` : ''), M + 15, y + 15);
+
+          if (p.authority) {
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(72, 160, 147);
+            doc.text(`Instansi: ${p.authority}`, M + 15, y + 27);
+          }
+          y += 42;
+        });
+      }
+
+      y += 10;
+
+      // --- 5. PERINGATAN REGULASI ---
+      const warnings = Array.isArray(d.regulatory_warnings) ? d.regulatory_warnings : [];
+      if (warnings.length > 0) {
+        drawSectionHeader('Peringatan Regulasi & Masukan AI');
+        warnings.forEach((warn) => {
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(225, 29, 72);
+          const lines = doc.splitTextToSize(`• ${warn}`, maxW - 15);
+          checkPageBreak(lines.length * 12 + 5);
+          lines.forEach(line => {
+            doc.text(line, M + 10, y);
+            y += 12;
+          });
+        });
+        y += 10;
+      }
+
+      // --- 6. FOOTER WATERMARK ---
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text('Dokumen ini dihasilkan secara otomatis oleh Enterprise LegalOps AI Screener. Rujuk ke Tim Legal untuk validasi final.', M, H - 20);
+
+      // Save PDF
       const slug = String(c.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'produk';
-      doc.save('Skrining-NPD-' + slug + '.pdf');
+      doc.save(`Skrining-NPD-${slug}.pdf`);
       logAudit('Unduh PDF Skrining NPD', 'npd_permit_screenings', c.id, { summary: c.name });
     }
+
+ 
 
     // Tampilkan nilai dengan rapi (tanpa tanda kutip / kurung JSON)
     function fmtLabel(k) { return String(k).replace(/_/g, ' '); }
