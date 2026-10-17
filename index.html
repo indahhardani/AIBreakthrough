@@ -2120,7 +2120,21 @@
       const d = c.d;
       const score = Number(d.feasibility_score || 0);
 
-      // --- 1. HEADER BANNER (Teal Brand `#64bcae`) ---
+      // --- 1. WATERMARK TRANSPARAN "PERLU VALIDASI LEGAL" ---
+      const drawWatermark = () => {
+        doc.saveGraphicsState();
+        doc.setGState(new doc.GState({ opacity: 0.08 })); // Transparansi halus
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(38);
+        doc.setTextColor(225, 29, 72); // Merah/Rose
+        // Tulis diagonal di tengah halaman
+        doc.text('DRAFT - PERLU VALIDASI LEGAL', W / 2, H / 2, { align: 'center', angle: 35 });
+        doc.restoreGraphicsState();
+      };
+
+      drawWatermark();
+
+      // --- 2. HEADER BANNER (Teal Brand `#64bcae`) ---
       doc.setFillColor(100, 188, 174); // #64bcae
       doc.rect(0, 0, W, 75, 'F');
 
@@ -2135,7 +2149,7 @@
 
       y = 95;
 
-      // --- 2. KARTU INFORMASI PRODUK (Light Gray Box) ---
+      // --- 3. KARTU INFORMASI PRODUK ---
       doc.setFillColor(245, 247, 250);
       doc.setDrawColor(220, 225, 230);
       doc.roundedRect(M, y, maxW, 70, 6, 6, 'FD');
@@ -2153,10 +2167,10 @@
 
       y += 85;
 
-      // --- 3. METRICS CARDS (3 Kolom Berwarna) ---
+      // --- 4. METRICS CARDS (3 Kolom Berwarna) ---
       const colW = (maxW - 20) / 3;
 
-      // Card 1: Kategori Produk
+      // Card 1: Kategori
       doc.setFillColor(240, 249, 248);
       doc.setDrawColor(188, 228, 223);
       doc.roundedRect(M, y, colW, 55, 5, 5, 'FD');
@@ -2165,7 +2179,7 @@
       doc.setFontSize(10); doc.setTextColor(30, 41, 59);
       doc.text(String(d.product_category || '-'), M + 10, y + 36);
 
-      // Card 2: Kode Izin BPOM
+      // Card 2: Kode Izin
       doc.setFillColor(240, 249, 248);
       doc.setDrawColor(188, 228, 223);
       doc.roundedRect(M + colW + 10, y, colW, 55, 5, 5, 'FD');
@@ -2174,7 +2188,7 @@
       doc.setFontSize(10); doc.setTextColor(30, 41, 59);
       doc.text(String(d.primary_permit_code || '-'), M + colW + 20, y + 36);
 
-      // Card 3: Skor Feasibility (Dinamis Warna: Hijau/Kuning/Merah)
+      // Card 3: Skor Feasibility
       let scoreBg = [236, 253, 245], scoreBorder = [167, 243, 208], scoreText = [5, 150, 105];
       if (score < 50) {
         scoreBg = [254, 242, 242]; scoreBorder = [254, 202, 202]; scoreText = [225, 29, 72];
@@ -2192,10 +2206,11 @@
 
       y += 70;
 
-      // --- HELPER FUNCTION UNTUK KONTEN MENGALIR ---
+      // --- HELPER UNTUK HALAMAN BARU & WATERMARK ---
       const checkPageBreak = (neededHeight) => {
         if (y + neededHeight > H - M) {
           doc.addPage();
+          drawWatermark(); // Gambar watermark lagi di halaman baru
           y = M + 10;
         }
       };
@@ -2211,7 +2226,58 @@
         y += 22;
       };
 
-      // --- 4. LIST IZIN BPOM YANG HARUS DIPENUHI ---
+      // --- 5. ALERT BOX KHUSUS (CATATAN KHUSUS / PERINGATAN REGULASI) ---
+      const warnings = Array.isArray(d.regulatory_warnings) ? d.regulatory_warnings : [];
+      if (warnings.length > 0 || score < 75) {
+        checkPageBreak(60);
+        // Box Merah/Oranye Alert
+        const alertBg = score < 50 ? [254, 242, 242] : [255, 251, 235];
+        const alertBorder = score < 50 ? [248, 113, 113] : [251, 191, 36];
+        const alertHeader = score < 50 ? [185, 28, 28] : [180, 83, 9];
+
+        doc.setFillColor(...alertBg);
+        doc.setDrawColor(...alertBorder);
+        doc.setLineWidth(1);
+
+        // Hitung perkiraan tinggi box alert
+        let warningTextLines = [];
+        warnings.forEach(w => {
+          const lines = doc.splitTextToSize(`• ${w}`, maxW - 40);
+          warningTextLines.push(...lines);
+        });
+        
+        const boxHeight = Math.max(50, 28 + (warningTextLines.length * 12));
+        doc.roundedRect(M, y, maxW, boxHeight, 6, 6, 'FD');
+
+        // Draw Badge Icon Alert [!]
+        doc.setFillColor(...alertBorder);
+        doc.circle(M + 20, y + 20, 10, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(255, 255, 255);
+        doc.text('!', M + 18, y + 24);
+
+        // Header Alert Text
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(...alertHeader);
+        doc.text('PERATURAN & ATENSI KHUSUS AI', M + 38, y + 23);
+
+        // Isi Pesan Alert
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(51, 65, 85);
+        
+        let textY = y + 38;
+        warningTextLines.forEach(line => {
+          doc.text(line, M + 38, textY);
+          textY += 12;
+        });
+
+        y += boxHeight + 15;
+      }
+
+      // --- 6. LIST IZIN BPOM YANG HARUS DIPENUHI ---
       const permits = Array.isArray(d.required_permits) ? d.required_permits : [];
       drawSectionHeader(`Daftar Izin Wajib (${permits.length})`);
 
@@ -2239,27 +2305,11 @@
 
       y += 10;
 
-      // --- 5. PERINGATAN REGULASI ---
-      const warnings = Array.isArray(d.regulatory_warnings) ? d.regulatory_warnings : [];
-      if (warnings.length > 0) {
-        drawSectionHeader('Peringatan Regulasi & Masukan AI');
-        warnings.forEach((warn) => {
-          doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(225, 29, 72);
-          const lines = doc.splitTextToSize(`• ${warn}`, maxW - 15);
-          checkPageBreak(lines.length * 12 + 5);
-          lines.forEach(line => {
-            doc.text(line, M + 10, y);
-            y += 12;
-          });
-        });
-        y += 10;
-      }
-
-      // --- 6. FOOTER WATERMARK ---
+      // --- 7. FOOTER WATERMARK CATATAN HUKUM ---
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
-      doc.text('Dokumen ini dihasilkan secara otomatis oleh Enterprise LegalOps AI Screener. Rujuk ke Tim Legal untuk validasi final.', M, H - 20);
+      doc.text('Dokumen ini dihasilkan otomatis oleh Enterprise LegalOps AI. Wajib divalidasi oleh Tim Legal sebelum pengajuan resmi BPOM.', M, H - 20);
 
       // Save PDF
       const slug = String(c.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'produk';
@@ -2267,7 +2317,6 @@
       logAudit('Unduh PDF Skrining NPD', 'npd_permit_screenings', c.id, { summary: c.name });
     }
 
- 
 
     // Tampilkan nilai dengan rapi (tanpa tanda kutip / kurung JSON)
     function fmtLabel(k) { return String(k).replace(/_/g, ' '); }
