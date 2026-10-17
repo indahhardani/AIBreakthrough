@@ -1877,6 +1877,23 @@
       openModal('npd-result-modal');
     }
 
+    async function showNpdDetail(id) {
+      const { data, error } = await supabaseClient
+        .from('npd_permit_screenings').select('*').eq('id', id).single();
+      if (error || !data) { alert('Gagal memuat detail skrining NPD.'); return; }
+
+      const d = data.analysis_result;
+      if (d && d.product_category) {
+        showNpdResult(d, data.product_idea_name, {
+          id: data.id, brand_id: data.brand_id, brand_name: data.brand_name,
+          target_age: data.target_age, production_scheme: data.production_scheme,
+          country_of_origin: data.country_of_origin, created_at: data.created_at
+        });
+      } else {
+        showDetail('npd_permit_screenings', id); // data lama tanpa analysis_result
+      }
+    }
+
     function artStatusColor(st) {
       return st === 'Compliant' ? 'text-emerald-600' : st === 'Need Adjustment' ? 'text-amber-600' : st === 'Non-Compliant' ? 'text-rose-600' : 'text-slate-700';
     }
