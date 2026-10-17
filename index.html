@@ -242,7 +242,7 @@
               <h2 class="text-base font-bold text-brand-900 flex items-center gap-2">
                 <i data-lucide="folder-search" class="w-5 h-5 text-brand"></i> Pendaftaran Vendor (Scan Folder Google Drive)
               </h2>
-              <p class="text-xs text-brand-700 mt-1">Folder vendor dikenali dari nama yang diawali CV atau PT, di kedalaman folder berapa pun. AI membaca isi tiap folder. Dokumen wajib: KTP Direktur, NPWP, Akta Pendirian, NIB, Izin Usaha. Akta Perubahan opsional. Jika lengkap, vendor otomatis siap diajukan agreement.</p>
+              <p class="text-xs text-brand-700 mt-1">Folder vendor dikenali dari nama yang diawali CV atau PT, di kedalaman folder berapa pun. Jenis dokumen dikenali dari NAMA FILE (isi file tidak dibaca dan tidak dikirim ke AI). Dokumen wajib: KTP Direktur, NPWP, Akta Pendirian, NIB, Izin Usaha. Akta Perubahan opsional. Jika lengkap, vendor otomatis siap diajukan agreement.</p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button id="btn-vendor-rescan" onclick="startVendorScan({ rescanAll: true })" class="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
@@ -1517,7 +1517,7 @@
       alert('Lanjut pembuatan agreement untuk ' + v.vendor_name);
     }
 
-    // ---------- Scan folder vendor (satu vendor per putaran, file baru dibaca AI) ----------
+    // ---------- Scan folder vendor (satu vendor per putaran, klasifikasi dari nama file) ----------
     function vendorScanUi({ title, pct, text, detail = '', finished = false }) {
       document.getElementById('vscan-panel').classList.remove('hidden');
       document.getElementById('vscan-title').innerText = title;
@@ -1549,7 +1549,7 @@
 
     async function startVendorScan({ rescanAll = false, vendorFolderId = null } = {}) {
       if (vendorScanRunning) return;
-      if (rescanAll && !vendorFolderId && !confirm('Scan ulang semua vendor?\n\nSemua file dibaca ulang oleh AI dan memakai kredit AI. Koreksi manual Legal TIDAK akan ditimpa.')) return;
+      if (rescanAll && !vendorFolderId && !confirm('Scan ulang semua vendor?\n\nNama semua file diperiksa ulang (isi file tidak dibaca). Koreksi manual Legal TIDAK akan ditimpa.')) return;
 
       vendorScanRunning = true;
       vendorScanCancelled = false;
@@ -1575,7 +1575,7 @@
           missing = (r.missing_folders || []).length;
         }
 
-        // Fase 2: periksa satu vendor per putaran (file yang belum dibaca AI diproses bertahap)
+        // Fase 2: periksa satu vendor per putaran
         for (const v of vendors) {
           if (vendorScanCancelled) break;
           try {
@@ -1647,7 +1647,7 @@
         ${flags.length ? `<div class="bg-rose-50 border border-rose-200 rounded-lg p-3 space-y-1"><p class="text-[10px] uppercase font-bold text-rose-700">Yang belum terpenuhi</p>${flags.map(f => '<p class="text-rose-700">&bull; ' + esc(f) + '</p>').join('')}</div>` : ''}
         <div>
           <p class="text-[11px] uppercase font-extrabold tracking-wider text-brand-800 mb-2">File di folder (${vendorFilesCache.length})</p>
-          <p class="text-slate-500 mb-2">Jika AI salah mengenali jenis dokumen, centang jenis yang benar lalu simpan. Koreksi manual tidak ditimpa saat scan ulang.</p>
+          <p class="text-slate-500 mb-2">Jenis dokumen dikenali dari nama file. Jika salah atau belum terklasifikasi, centang jenis yang benar lalu simpan. Koreksi manual tidak ditimpa saat scan ulang.</p>
           <div class="space-y-2">
             ${vendorFilesCache.length ? vendorFilesCache.map(f => {
               const types = Array.isArray(f.doc_types) ? f.doc_types : [];
@@ -1660,12 +1660,12 @@
                 <div class="flex flex-wrap gap-x-4 gap-y-1">
                   ${VENDOR_DOCS.map(d => `<label class="flex items-center gap-1.5 cursor-pointer text-slate-700 font-medium"><input type="checkbox" data-file="${esc(f.id)}" data-type="${d.key}" ${types.includes(d.key) ? 'checked' : ''} class="rounded text-brand-600"> ${esc(d.label)}</label>`).join('')}
                 </div>
-                ${f.error ? `<p class="text-rose-600">${esc(f.error)}</p>` : (f.ai_note ? `<p class="text-slate-400">${esc(f.ai_note)}</p>` : '')}
+                ${f.error ? `<p class="text-rose-600">${esc(f.error)}</p>` : (f.ai_note ? `<p class="${/Belum terklasifikasi|Perlu dicek/.test(f.ai_note) ? 'text-amber-700 font-medium' : 'text-slate-400'}">${esc(f.ai_note)}</p>` : '')}
               </div>`;
             }).join('') : '<p class="text-slate-400">Tidak ada file.</p>'}
           </div>
         </div>
-        <p class="text-[10px] text-slate-400">${scanned ? 'Terakhir di-scan: ' + esc(scanned) + '. ' : ''}Pengenalan dokumen oleh AI belum divalidasi Legal.</p>
+        <p class="text-[10px] text-slate-400">${scanned ? 'Terakhir di-scan: ' + esc(scanned) + '. ' : ''}Status berdasarkan nama file, isi dokumen belum diverifikasi Legal.</p>
       `;
       document.getElementById('vendor-detail-footer').innerHTML = `
         <button onclick="closeModal('vendor-detail-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Tutup</button>
