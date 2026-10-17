@@ -489,14 +489,9 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori Produk (Regulasi Resmi BPOM)</label>
-          <select id="npd-category" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
-            <option value="Kosmetik">Kosmetik</option>
-            <option value="Pangan Olahan">Pangan Olahan</option>
-            <option value="Suplemen Kesehatan">Suplemen Kesehatan</option>
-            <option value="Obat Bahan Alam">Obat Bahan Alam</option>
-            <option value="Obat Kuasi">Obat Kuasi</option>
-          </select>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Usia Target Pasar</label>
+          <input type="text" id="npd-target-age" required placeholder="Contoh: Dewasa 25-40 tahun / Anak 6-12 tahun" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
+          <p class="text-[10px] text-slate-400 mt-1">Kategori produk (pangan/suplemen/obat bahan alam/kosmetik) ditentukan otomatis oleh AI.</p>
         </div>
 
         <div>
@@ -587,6 +582,20 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL: HASIL SKRINING NPD -->
+  <div id="npd-result-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-2 border-brand-200 w-full max-w-xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
+        <h3 class="text-sm font-bold text-brand-900">Hasil Skrining Regulasi NPD</h3>
+        <button onclick="closeModal('npd-result-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="npd-result-body" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs"></div>
+      <div class="px-6 py-3 border-t border-brand-200 flex justify-end">
+        <button onclick="closeModal('npd-result-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Tutup</button>
+      </div>
     </div>
   </div>
 
@@ -901,6 +910,39 @@
       }
     }
 
+    function showNpdResult(d, productName) {
+      const permits = Array.isArray(d.required_permits) ? d.required_permits : [];
+      const score = Number(d.feasibility_score);
+      const color = score >= 75 ? 'text-emerald-600' : score >= 50 ? 'text-amber-600' : 'text-rose-600';
+      const box = (label, value, extra = '') => `
+        <div class="bg-brand-50 border border-brand-200 rounded-lg p-3">
+          <p class="text-[10px] uppercase font-bold text-brand-700">${label}</p>
+          <p class="font-bold text-slate-800 mt-1 ${extra}">${value}</p>
+        </div>`;
+      document.getElementById('npd-result-body').innerHTML = `
+        <p class="text-slate-500">Produk: <span class="font-semibold text-slate-800">${esc(productName)}</span></p>
+        <div class="grid grid-cols-2 gap-3">
+          ${box('Kategori Produk', esc(d.product_category))}
+          ${box('Kecocokan Izin BPOM', esc(d.primary_permit_code))}
+          ${box('Feasibility Skor', esc(score) + '/100' + (d.feasibility_status ? ' <span class="text-[10px] font-semibold text-slate-500">(' + esc(d.feasibility_status) + ')</span>' : ''), 'text-base ' + color)}
+          ${box('Estimasi Waktu Pendaftaran', esc(d.estimated_timeline))}
+        </div>
+        <div>
+          <p class="text-[10px] uppercase font-bold text-brand-700 mb-2">Izin yang Harus Dipenuhi (${permits.length})</p>
+          <div class="space-y-2">
+            ${permits.length ? permits.map(p => `
+              <div class="border border-brand-200 rounded-lg p-3">
+                <p class="font-bold text-slate-800">${esc(p.permit_name)}${p.code ? ' <span class="font-mono text-[10px] text-slate-500">(' + esc(p.code) + ')</span>' : ''}</p>
+                ${p.authority ? '<p class="text-[10px] text-brand-700 font-semibold">' + esc(p.authority) + '</p>' : ''}
+                ${p.description ? '<p class="text-slate-600 mt-1">' + esc(p.description) + '</p>' : ''}
+              </div>`).join('') : '<p class="text-slate-400">Tidak ada izin yang terdaftar.</p>'}
+          </div>
+        </div>
+        <p class="text-[10px] text-slate-400">Ringkasan AI, belum divalidasi Legal.</p>
+      `;
+      openModal('npd-result-modal');
+    }
+
     async function showDetail(table, id) {
       const { data } = await supabaseClient.from(table).select('*').eq('id', id).single();
       const body = document.getElementById('detail-body');
@@ -1091,7 +1133,7 @@
 
       // Ambil data input form lainnya
       const product_idea_name = document.getElementById('npd-product-name').value;
-      const category = document.getElementById('npd-category').value;
+      const target_age = document.getElementById('npd-target-age').value.trim();
       const claims = document.getElementById('npd-claim').value;
       const ingredients = document.getElementById('npd-ingredients').value;
 
@@ -1116,7 +1158,7 @@
           },
           body: JSON.stringify({
             productName: product_idea_name,
-            category,
+            targetAge: target_age,
             claims: claimList,
             mainIngredients: ingredients,
             salesChannels: selectedChannels,
@@ -1133,9 +1175,10 @@
           throw new Error('Analisis selesai tetapi gagal tersimpan ke database.');
         }
 
+        e.target.reset();
         closeModal('npd-modal');
         loadNpdProductsTable();
-        alert(`Skrining AI BPOM Selesai!\nBrand: ${brand_name}\nData berhasil tersimpan.`);
+        showNpdResult(resData.data, product_idea_name);
 
       } catch (err) {
         alert('Error: ' + err.message);
