@@ -237,17 +237,37 @@
 
         <!-- 2. VENDOR REGISTRATION TAB -->
         <section id="view-vendor-registration" class="hidden space-y-6">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-2 border-brand-200 rounded-xl p-5 shadow-sm">
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white border-2 border-brand-200 rounded-xl p-5 shadow-sm">
             <div>
               <h2 class="text-base font-bold text-brand-900 flex items-center gap-2">
-                <i data-lucide="user-plus" class="w-5 h-5 text-brand"></i> Pendaftaran Vendor (PDF Auto Scan AI)
+                <i data-lucide="folder-search" class="w-5 h-5 text-brand"></i> Pendaftaran Vendor (Scan Folder Google Drive)
               </h2>
-              <p class="text-xs text-brand-700 mt-1">Upload 1 file PDF gabungan ($\le$ 10 MB). AI akan memindai kelengkapan 6 dokumen legalitas secara otomatis.</p>
+              <p class="text-xs text-brand-700 mt-1">AI memeriksa folder tiap vendor (Brand &gt; Kategori Vendor &gt; Nama Vendor). Dokumen wajib: KTP Direktur, NPWP, Akta Pendirian, NIB, Izin Usaha. Akta Perubahan opsional. Jika lengkap, vendor otomatis siap diajukan agreement.</p>
             </div>
+            <div class="flex flex-wrap gap-2">
+              <button id="btn-vendor-rescan" onclick="startVendorScan({ rescanAll: true })" class="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Scan Ulang Semua
+              </button>
+              <button id="btn-vendor-scan" onclick="startVendorScan()" class="bg-brand hover:bg-brand-600 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md shadow-brand/30">
+                <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Folder Vendor
+              </button>
+            </div>
+          </div>
 
-            <button onclick="openVendorOnboardingModal()" class="bg-brand hover:bg-brand-600 text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md shadow-brand/30">
-              <i data-lucide="file-up" class="w-4 h-4"></i> Upload Berkas PDF Vendor
-            </button>
+          <!-- Panel progres scan vendor -->
+          <div id="vscan-panel" class="hidden bg-white border-2 border-emerald-300 rounded-xl p-4 shadow-sm space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <p id="vscan-title" class="text-sm font-bold text-brand-900">Scan Folder Vendor</p>
+              <div class="flex gap-2">
+                <button id="vscan-cancel" onclick="cancelVendorScan()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3 py-1 rounded-lg text-[11px] font-bold">Hentikan</button>
+                <button id="vscan-close" onclick="closeVendorScanPanel()" class="hidden bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 px-3 py-1 rounded-lg text-[11px] font-bold">Tutup</button>
+              </div>
+            </div>
+            <div class="w-full bg-brand-100 rounded-full h-2.5 overflow-hidden">
+              <div id="vscan-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all" style="width:0%"></div>
+            </div>
+            <p id="vscan-text" class="text-xs text-slate-600"></p>
+            <div id="vscan-detail" class="text-[11px] space-y-1"></div>
           </div>
 
           <div class="bg-white border-2 border-brand-200 rounded-xl overflow-hidden shadow-sm">
@@ -255,16 +275,16 @@
               <table class="w-full text-left text-xs text-slate-700 border-collapse">
                 <thead class="bg-brand-100 text-brand-900 uppercase tracking-wider border-b border-brand-200 text-[10px] font-bold">
                   <tr>
-                    <th class="px-3 py-3.5 font-bold min-w-[150px]">Nama Vendor</th>
+                    <th class="px-3 py-3.5 font-bold min-w-[170px]">Nama Vendor</th>
                     <th class="px-3 py-3.5 font-bold min-w-[100px]">Kategori</th>
                     <th class="px-2 py-3.5 font-bold text-center">KTP Direktur</th>
                     <th class="px-2 py-3.5 font-bold text-center">NPWP</th>
                     <th class="px-2 py-3.5 font-bold text-center">Akta Pendirian</th>
-                    <th class="px-2 py-3.5 font-bold text-center">Akta Perubahan</th>
+                    <th class="px-2 py-3.5 font-bold text-center">Akta Perubahan (opsional)</th>
                     <th class="px-2 py-3.5 font-bold text-center">NIB</th>
                     <th class="px-2 py-3.5 font-bold text-center">Izin Usaha</th>
-                    <th class="px-3 py-3.5 font-bold text-center min-w-[130px]">Status</th>
-                    <th class="px-3 py-3.5 font-bold text-center min-w-[110px]">Aksi</th>
+                    <th class="px-3 py-3.5 font-bold text-center min-w-[150px]">Status</th>
+                    <th class="px-3 py-3.5 font-bold text-center min-w-[150px]">Aksi</th>
                   </tr>
                 </thead>
                 <tbody id="table-vendor-onboarding-body" class="divide-y divide-brand-100">
@@ -413,33 +433,15 @@
     </main>
   </div>
 
-  <!-- MODAL 1: VENDOR ONBOARDING PDF -->
-  <div id="vendor-onboarding-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white border-2 border-brand-200 w-full max-w-md rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+  <!-- MODAL: DETAIL VENDOR (hasil scan folder + koreksi manual) -->
+  <div id="vendor-detail-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-2 border-brand-200 w-full max-w-2xl max-h-[92vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
-        <h3 class="text-sm font-bold text-brand-900">Upload Berkas PDF Legalitas Vendor</h3>
-        <button onclick="closeVendorOnboardingModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <h3 id="vendor-detail-title" class="text-sm font-bold text-brand-900">Detail Vendor</h3>
+        <button onclick="closeModal('vendor-detail-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-
-      <div class="p-6 space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Brand Terkait</label>
-          <select id="onboard-brand-select" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-brand-600"></select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Unggah PDF Legalitas Gabungan (Maks 10 MB)</label>
-          <input type="file" id="onboard-pdf-file" accept="application/pdf" class="w-full text-xs text-slate-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-brand file:text-white file:font-bold hover:file:bg-brand-600 cursor-pointer border border-brand-200 rounded-lg">
-          <p class="text-[10px] text-slate-400 mt-1">AI akan memindai KTP, NPWP, Akta, NIB & Izin Usaha sekaligus dari berkas ini.</p>
-        </div>
-      </div>
-
-      <div class="px-6 py-3 border-t border-brand-200 bg-brand-50 flex justify-end gap-3">
-        <button onclick="closeVendorOnboardingModal()" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold transition">Batal</button>
-        <button id="btn-submit-vendor" onclick="submitVendorOnboardingDirect()" class="bg-brand hover:bg-brand-600 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md shadow-brand/30">
-          <i data-lucide="scan-line" class="w-4 h-4"></i> SCAN & ANALISIS AI
-        </button>
-      </div>
+      <div id="vendor-detail-body" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs"></div>
+      <div id="vendor-detail-footer" class="px-6 py-3 border-t border-brand-200 flex flex-wrap justify-end gap-2"></div>
     </div>
   </div>
 
@@ -721,7 +723,6 @@
           masterBrands = brands;
           const optionsHtml = brands.map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('');
           document.getElementById('header-brand-filter').innerHTML = `<option value="ALL">Semua Brand</option>` + optionsHtml;
-          document.getElementById('onboard-brand-select').innerHTML = optionsHtml;
           document.getElementById('artwork-brand-select').innerHTML = optionsHtml;
           document.getElementById('npd-brand-select').innerHTML = optionsHtml;
         }
@@ -795,8 +796,6 @@
     function openModal(id) { document.getElementById(id)?.classList.remove('hidden'); lucide.createIcons(); }
     function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
     
-    function openVendorOnboardingModal() { openModal('vendor-onboarding-modal'); }
-    function closeVendorOnboardingModal() { closeModal('vendor-onboarding-modal'); }
     function openArtworkModal() { openModal('artwork-modal'); }
     function openNpdModal() { openModal('npd-modal'); }
     function openCreateTicketModal() { openModal('ticket-modal'); }
@@ -927,7 +926,7 @@
     const inTab = (c, tab) => tab === 'all' || (Array.isArray(c.agreement_categories) && c.agreement_categories.includes(tab));
 
     // Dipanggil oleh dropdown brand di header (saat ini memfilter tabel Agreement Matrix)
-    function handleBrandFilterChange() { renderContracts(); }
+    function handleBrandFilterChange() { renderContracts(); renderVendorOnboardings(); }
     function setAgrTab(code) { activeAgrTab = code; renderContracts(); }
 
     function renderContracts() {
@@ -1420,53 +1419,282 @@
       }
     }
 
+    // =====================================================================
+    // PENDAFTARAN VENDOR: scan folder Google Drive (Brand > Kategori Vendor > Nama Vendor)
+    // =====================================================================
+    const VENDOR_SCAN_URL = `${SUPABASE_URL}/functions/v1/scan-vendor-folders`;
+    const VENDOR_DOCS = [
+      { key: 'ktp_direktur',   col: 'ktp_direktur_exists',   label: 'KTP Direktur',   required: true },
+      { key: 'npwp',           col: 'npwp_exists',           label: 'NPWP',           required: true },
+      { key: 'akta_pendirian', col: 'akta_pendirian_exists', label: 'Akta Pendirian', required: true },
+      { key: 'akta_perubahan', col: 'akta_perubahan_exists', label: 'Akta Perubahan', required: false },
+      { key: 'nib',            col: 'nib_exists',            label: 'NIB',            required: true },
+      { key: 'izin_usaha',     col: 'izin_usaha_exists',     label: 'Izin Usaha',     required: true }
+    ];
+    let vendorsData = [];
+    let vendorFilesCache = [];
+    let vendorScanRunning = false;
+    let vendorScanCancelled = false;
+
+    // Aturan status (harus sama dengan Edge Function scan-vendor-folders)
+    function vendorStatusOf(typeSet, fileCount) {
+      if (!fileCount) return { status: 'Folder Kosong', flags: ['Folder vendor kosong, belum ada file'] };
+      const missing = VENDOR_DOCS.filter(d => d.required && !typeSet.has(d.key));
+      if (missing.length) return { status: 'Dokumen Belum Lengkap', flags: missing.map(d => 'Belum ada: ' + d.label) };
+      return { status: 'Ready for Agreement', flags: [] };
+    }
+
+    function vendorStatusBadge(s) {
+      const cls = s === 'Ready for Agreement' ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
+        : (s === 'Folder Tidak Ditemukan' || s === 'Folder Kosong') ? 'bg-rose-100 text-rose-700 border-rose-300'
+        : 'bg-amber-100 text-amber-700 border-amber-300';
+      return `<span class="inline-block px-2 py-0.5 rounded border text-[10px] font-bold ${cls}">${esc(s || '-')}</span>`;
+    }
+
     async function loadVendorOnboardings() {
       const tbody = document.getElementById('table-vendor-onboarding-body');
       tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400">Memuat data vendor...</td></tr>`;
-
       try {
-        const { data: list, error } = await supabaseClient.from('vendor_onboardings').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabaseClient.from('vendor_onboardings').select('*').order('vendor_name', { ascending: true });
         if (error) throw error;
-
-        if (!list || list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400">Belum ada vendor terdaftar.</td></tr>`;
-          return;
-        }
-
-        const checkIcon = (v) => v ? `<span class="text-emerald-600 font-bold">🟢 Ada</span>` : `<span class="text-rose-500 font-bold">🔴 Tidak</span>`;
-
-        tbody.innerHTML = list.map(v => {
-          const isReady = v.status === 'Ready for Agreement';
-
-          return `
-            <tr class="hover:bg-brand-50/50 transition border-b border-brand-100 text-xs">
-              <td class="px-3 py-3 font-semibold text-slate-800">${esc(v.vendor_name)}</td>
-              <td class="px-3 py-3 text-slate-600">${esc(v.vendor_category)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.ktp_direktur_exists)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.npwp_exists)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.akta_pendirian_exists)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.akta_perubahan_exists)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.nib_exists)}</td>
-              <td class="px-2 py-3 text-center">${checkIcon(v.izin_usaha_exists)}</td>
-              <td class="px-3 py-3 text-center font-bold ${isReady ? 'text-emerald-600' : 'text-amber-600'}">
-                ${esc(v.status)}
-              </td>
-              <td class="px-3 py-3 text-center">
-                ${isReady ? `
-                  <button onclick="alert('Lanjut pembuatan agreement')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px] shadow-sm">
-                    Buat Agreement
-                  </button>
-                ` : `
-                  <button onclick="alert('Dokumen belum lengkap! Flag AI: ${esc(Array.isArray(v.ai_missing_flags) ? v.ai_missing_flags.join(', ') : '-')}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 rounded border border-brand-300 font-semibold text-[10px]">
-                    Cek Kekurangan
-                  </button>
-                `}
-              </td>
-            </tr>
-          `;
-        }).join('');
+        vendorsData = data || [];
+        renderVendorOnboardings();
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    function renderVendorOnboardings() {
+      const tbody = document.getElementById('table-vendor-onboarding-body');
+      if (!tbody) return;
+      const sel = selectedBrandId();
+      const list = sel ? vendorsData.filter(v => String(v.brand_id) === String(sel)) : vendorsData;
+      if (!list.length) {
+        const msg = vendorsData.length ? 'Tidak ada vendor untuk brand ini.' : 'Belum ada vendor. Tekan "Scan Folder Vendor".';
+        tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400">${msg}</td></tr>`;
+        return;
+      }
+      const cell = (v, d) => v[d.col]
+        ? '<span class="text-emerald-600 font-bold">🟢 Ada</span>'
+        : (d.required ? '<span class="text-rose-500 font-bold">🔴 Tidak</span>' : '<span class="text-slate-400 font-semibold">⚪ Opsional</span>');
+
+      tbody.innerHTML = list.map(v => {
+        const isReady = v.status === 'Ready for Agreement';
+        const eid = esc(v.id);
+        const flags = Array.isArray(v.ai_missing_flags) ? v.ai_missing_flags : [];
+        return `
+          <tr class="hover:bg-brand-50/50 transition border-b border-brand-100 text-xs">
+            <td class="px-3 py-3 align-top">
+              <div class="font-semibold text-slate-800">${esc(v.vendor_name)}</div>
+              <div class="text-[10px] text-slate-400">${esc(v.brand_name || '')}</div>
+              ${v.gdrive_folder_link ? `<a href="${esc(safeUrl(v.gdrive_folder_link))}" target="_blank" rel="noopener" class="text-[10px] text-brand-700 font-bold hover:underline">Buka folder</a>` : ''}
+            </td>
+            <td class="px-3 py-3 align-top text-slate-600">${esc(v.vendor_category)}</td>
+            ${VENDOR_DOCS.map(d => `<td class="px-2 py-3 align-top text-center">${cell(v, d)}</td>`).join('')}
+            <td class="px-3 py-3 align-top text-center">
+              ${vendorStatusBadge(v.status)}
+              ${!isReady && flags.length ? `<div class="mt-1 text-[10px] text-rose-600 text-left space-y-0.5">${flags.map(f => '<div>&bull; ' + esc(f) + '</div>').join('')}</div>` : ''}
+            </td>
+            <td class="px-3 py-3 align-top text-center space-y-1">
+              ${isReady ? `<button onclick="createAgreementFromVendor('${eid}')" class="block w-full px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px] shadow-sm">Buat Agreement</button>` : ''}
+              <button onclick="openVendorDetail('${eid}')" class="block w-full px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 rounded border border-brand-300 font-semibold text-[10px]">Detail</button>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    function createAgreementFromVendor(id) {
+      const v = vendorsData.find(x => x.id === id);
+      if (!v) return;
+      alert('Lanjut pembuatan agreement untuk ' + v.vendor_name);
+    }
+
+    // ---------- Scan folder vendor (satu vendor per putaran, file baru dibaca AI) ----------
+    function vendorScanUi({ title, pct, text, detail = '', finished = false }) {
+      document.getElementById('vscan-panel').classList.remove('hidden');
+      document.getElementById('vscan-title').innerText = title;
+      document.getElementById('vscan-bar').style.width = Math.max(0, Math.min(100, pct)) + '%';
+      document.getElementById('vscan-text').innerText = text;
+      document.getElementById('vscan-detail').innerHTML = detail;
+      document.getElementById('vscan-cancel').classList.toggle('hidden', finished);
+      document.getElementById('vscan-close').classList.toggle('hidden', !finished);
+    }
+    function setVendorScanButtons(disabled) {
+      ['btn-vendor-scan', 'btn-vendor-rescan'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = disabled; });
+    }
+    function cancelVendorScan() {
+      vendorScanCancelled = true;
+      document.getElementById('vscan-text').innerText = 'Menghentikan setelah proses yang sedang berjalan selesai...';
+    }
+    function closeVendorScanPanel() { document.getElementById('vscan-panel').classList.add('hidden'); }
+
+    async function startVendorScan({ rescanAll = false, vendorFolderId = null } = {}) {
+      if (vendorScanRunning) return;
+      if (rescanAll && !vendorFolderId && !confirm('Scan ulang semua vendor?\n\nSemua file dibaca ulang oleh AI dan memakai kredit AI. Koreksi manual Legal TIDAK akan ditimpa.')) return;
+
+      vendorScanRunning = true;
+      vendorScanCancelled = false;
+      setVendorScanButtons(true);
+
+      const brandId = selectedBrandId();
+      const brandName = brandId ? ((masterBrands.find(b => String(b.id) === String(brandId)) || {}).name || '') : '';
+      const rescanBefore = rescanAll ? new Date().toISOString() : undefined;
+      const title = (rescanAll ? 'Scan Ulang Vendor' : 'Scan Folder Vendor') + (brandName && !vendorFolderId ? ' (brand ' + brandName + ')' : '');
+      const skip = [];
+      const errors = [];
+      let total = 0, fatal = null, unmatched = [], missing = 0, guard = 0;
+
+      vendorScanUi({ title, pct: 3, text: 'Menelusuri folder Google Drive...' });
+      try {
+        for (let i = 0; i < 5000 && !vendorScanCancelled; i++) {
+          const res = await fetch(VENDOR_SCAN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+            body: JSON.stringify({
+              skip,
+              brand_id: brandId || undefined,
+              vendor_folder_id: vendorFolderId || undefined,
+              rescan_all: rescanAll || undefined,
+              rescan_before: rescanBefore
+            })
+          });
+          const r = await res.json().catch(() => ({}));
+          if (!res.ok || r.error) throw new Error(r.error || ('Edge Function gagal (HTTP ' + res.status + ')'));
+
+          unmatched = r.unmatched_folders || unmatched;
+          if (typeof r.total_vendors === 'number') total = r.total_vendors;
+          (r.errors || []).forEach(m => errors.push(m));
+
+          if (r.finished_all) { missing = (r.missing_folders || []).length; break; }
+
+          if (!r.pending) { skip.push(r.vendor_folder_id); guard = 0; }
+          else if (++guard > 60) throw new Error('Satu folder vendor tidak kunjung selesai diproses.');
+
+          vendorScanUi({
+            title,
+            pct: total ? Math.round((skip.length / total) * 100) : 100,
+            text: `Memeriksa vendor ${Math.min(skip.length + (r.pending ? 1 : 0), total)} dari ${total}: ${r.vendor_name || ''}...`
+          });
+        }
+      } catch (e) {
+        fatal = e.message;
+      }
+
+      vendorScanRunning = false;
+      setVendorScanButtons(false);
+
+      const lines = [];
+      errors.forEach(m => lines.push(`<p class="text-rose-600">&bull; ${esc(m)}</p>`));
+      if (unmatched.length) lines.push(`<p class="text-amber-700">Folder tidak cocok dengan brand mana pun (nama folder harus sama dengan nama/kode brand): <b>${esc(unmatched.join(', '))}</b></p>`);
+      if (missing) lines.push(`<p class="text-amber-700">${missing} vendor ditandai "Folder Tidak Ditemukan" karena foldernya sudah tidak ada di Drive.</p>`);
+      if (fatal) lines.push(`<p class="text-rose-600 font-semibold">Berhenti karena error: ${esc(fatal)}</p>`);
+
+      const state = fatal ? 'Berhenti karena error' : vendorScanCancelled ? 'Dihentikan' : 'Selesai';
+      vendorScanUi({
+        title,
+        pct: total && !fatal && !vendorScanCancelled ? 100 : (total ? Math.round((skip.length / total) * 100) : 0),
+        text: total || skip.length ? `${state}: ${skip.length} dari ${total} vendor diperiksa.` : `${state}: tidak ada folder vendor yang ditemukan.`,
+        detail: lines.join(''),
+        finished: true
+      });
+      await loadVendorOnboardings();
+      logAudit(rescanAll ? 'Scan Ulang Folder Vendor' : 'Scan Folder Vendor', 'vendor_onboardings', null,
+        { summary: `${skip.length} vendor diperiksa` + (brandName && !vendorFolderId ? ', brand ' + brandName : '') });
+    }
+
+    // ---------- Detail vendor + koreksi jenis dokumen manual ----------
+    async function openVendorDetail(id) {
+      const v = vendorsData.find(x => x.id === id);
+      if (!v) return;
+      const { data: files, error } = await supabaseClient.from('vendor_onboarding_files').select('*').eq('vendor_onboarding_id', id).order('file_name', { ascending: true });
+      if (error) { alert('Gagal memuat file: ' + error.message); return; }
+      vendorFilesCache = files || [];
+      const eid = esc(v.id);
+      const flags = Array.isArray(v.ai_missing_flags) ? v.ai_missing_flags : [];
+      const scanned = v.last_scanned_at ? new Date(v.last_scanned_at).toLocaleString('id-ID') : null;
+
+      document.getElementById('vendor-detail-title').innerText = 'Detail Vendor: ' + (v.vendor_name || '-');
+      document.getElementById('vendor-detail-body').innerHTML = `
+        <div class="space-y-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="font-semibold text-slate-800">${esc(v.brand_name || 'General')}</span>
+            <span class="text-slate-500">&middot; ${esc(v.vendor_category || '-')}</span>
+            ${vendorStatusBadge(v.status)}
+          </div>
+          ${v.gdrive_folder_path ? `<p class="text-[10px] text-slate-400 font-mono">${esc(v.gdrive_folder_path)}</p>` : ''}
+        </div>
+        ${flags.length ? `<div class="bg-rose-50 border border-rose-200 rounded-lg p-3 space-y-1"><p class="text-[10px] uppercase font-bold text-rose-700">Yang belum terpenuhi</p>${flags.map(f => '<p class="text-rose-700">&bull; ' + esc(f) + '</p>').join('')}</div>` : ''}
+        <div>
+          <p class="text-[11px] uppercase font-extrabold tracking-wider text-brand-800 mb-2">File di folder (${vendorFilesCache.length})</p>
+          <p class="text-slate-500 mb-2">Jika AI salah mengenali jenis dokumen, centang jenis yang benar lalu simpan. Koreksi manual tidak ditimpa saat scan ulang.</p>
+          <div class="space-y-2">
+            ${vendorFilesCache.length ? vendorFilesCache.map(f => {
+              const types = Array.isArray(f.doc_types) ? f.doc_types : [];
+              return `
+              <div class="border border-brand-200 rounded-lg p-3 space-y-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <a href="${esc(safeUrl(f.web_link))}" target="_blank" rel="noopener" class="font-semibold text-brand-800 hover:underline break-all">${esc(f.file_name)}</a>
+                  ${f.manually_set ? '<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-300 text-[10px] font-bold">&#9998; koreksi manual</span>' : ''}
+                </div>
+                <div class="flex flex-wrap gap-x-4 gap-y-1">
+                  ${VENDOR_DOCS.map(d => `<label class="flex items-center gap-1.5 cursor-pointer text-slate-700 font-medium"><input type="checkbox" data-file="${esc(f.id)}" data-type="${d.key}" ${types.includes(d.key) ? 'checked' : ''} class="rounded text-brand-600"> ${esc(d.label)}</label>`).join('')}
+                </div>
+                ${f.error ? `<p class="text-rose-600">${esc(f.error)}</p>` : (f.ai_note ? `<p class="text-slate-400">${esc(f.ai_note)}</p>` : '')}
+              </div>`;
+            }).join('') : '<p class="text-slate-400">Tidak ada file.</p>'}
+          </div>
+        </div>
+        <p class="text-[10px] text-slate-400">${scanned ? 'Terakhir di-scan: ' + esc(scanned) + '. ' : ''}Pengenalan dokumen oleh AI belum divalidasi Legal.</p>
+      `;
+      document.getElementById('vendor-detail-footer').innerHTML = `
+        <button onclick="closeModal('vendor-detail-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Tutup</button>
+        ${v.gdrive_folder_link ? `<a href="${esc(safeUrl(v.gdrive_folder_link))}" target="_blank" rel="noopener" class="bg-white hover:bg-brand-50 text-brand-800 border border-brand-300 px-4 py-2 rounded-lg text-xs font-bold">Buka Folder</a>` : ''}
+        ${v.gdrive_folder_id ? `<button onclick="closeModal('vendor-detail-modal'); startVendorScan({ rescanAll: true, vendorFolderId: '${esc(v.gdrive_folder_id)}' })" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold">Scan Ulang Vendor Ini</button>` : ''}
+        ${vendorFilesCache.length ? `<button id="btn-save-vendor-files" onclick="saveVendorFileTypes('${eid}')" class="bg-brand hover:bg-brand-600 disabled:opacity-60 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-md shadow-brand/30">Simpan Koreksi</button>` : ''}
+      `;
+      openModal('vendor-detail-modal');
+    }
+
+    async function saveVendorFileTypes(vendorId) {
+      const v = vendorsData.find(x => x.id === vendorId);
+      if (!v) return;
+      const btn = document.getElementById('btn-save-vendor-files');
+      btn.disabled = true;
+      try {
+        const picked = {};
+        document.querySelectorAll('#vendor-detail-body input[data-file]').forEach(el => {
+          (picked[el.dataset.file] = picked[el.dataset.file] || []);
+          if (el.checked) picked[el.dataset.file].push(el.dataset.type);
+        });
+
+        const union = new Set();
+        let changed = 0;
+        for (const f of vendorFilesCache) {
+          const sel = picked[f.id] || [];
+          sel.forEach(t => union.add(t));
+          const old = Array.isArray(f.doc_types) ? f.doc_types : [];
+          if ([...sel].sort().join() !== [...old].sort().join()) {
+            const { error } = await supabaseClient.from('vendor_onboarding_files')
+              .update({ doc_types: sel, manually_set: true, updated_at: new Date().toISOString() }).eq('id', f.id);
+            if (error) throw error;
+            changed++;
+          }
+        }
+        if (!changed) { openVendorDetail(vendorId); return; }
+
+        const { status, flags } = vendorStatusOf(union, vendorFilesCache.length);
+        const upd = { status, ai_missing_flags: flags, updated_at: new Date().toISOString() };
+        VENDOR_DOCS.forEach(d => { upd[d.col] = union.has(d.key); });
+        const { error } = await supabaseClient.from('vendor_onboardings').update(upd).eq('id', vendorId);
+        if (error) throw error;
+
+        Object.assign(v, upd);
+        renderVendorOnboardings();
+        openVendorDetail(vendorId);
+        logAudit('Koreksi Dokumen Vendor', 'vendor_onboardings', vendorId, { summary: v.vendor_name, status, file_dikoreksi: changed });
+      } catch (err) {
+        alert('Gagal menyimpan: ' + err.message);
+        btn.disabled = false;
       }
     }
 
@@ -1957,60 +2185,6 @@
           </div>
         `).join('');
         openModal('detail-modal');
-      }
-    }
-
-    async function submitVendorOnboardingDirect() {
-      const fileInput = document.getElementById('onboard-pdf-file');
-      const file = fileInput.files[0];
-
-      if (!file) { alert("Pilih file PDF legalitas vendor terlebih dahulu!"); return; }
-      if (file.size > 10 * 1024 * 1024) { alert("Ukuran file melebihi batas maksimal 10 MB!"); return; }
-
-      const brand_id = document.getElementById('onboard-brand-select').value;
-      const selectedBrand = masterBrands.find(b => b.id === brand_id);
-      const btn = document.getElementById('btn-submit-vendor');
-
-      btn.disabled = true;
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memindai via AI...`;
-      lucide.createIcons();
-
-      try {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = async () => {
-          const pdf_base64 = String(reader.result).split(',')[1];
-
-          const response = await fetch(`${SUPABASE_URL}/functions/v1/scan-vendor-onboarding`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": SUPABASE_ANON_KEY,
-              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({
-              brand_id,
-              brand_name: selectedBrand ? selectedBrand.name : 'General',
-              pdf_base64,
-              file_name: file.name,
-              created_by: currentUserSession ? currentUserSession.username : 'system'
-            })
-          });
-
-          const result = await response.json();
-          if (!response.ok || result.error) throw new Error(result.error || "Gagal memindai AI.");
-
-          closeVendorOnboardingModal();
-          loadVendorOnboardings();
-          logAudit('Unggah Dokumen Vendor', 'vendor_onboardings', result.data.id, { summary: result.data.vendor_name, status: result.data.status });
-          alert(`Analisis AI Selesai!\nVendor: ${result.data.vendor_name}\nStatus: ${result.data.status}`);
-        };
-      } catch (err) {
-        alert("Error: " + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="scan-line" class="w-4 h-4"></i> SCAN & ANALISIS AI`;
-        lucide.createIcons();
       }
     }
 
