@@ -494,6 +494,19 @@
           <input type="text" id="npd-target-age" required placeholder="Contoh: Dewasa 25-40 tahun / Anak 6-12 tahun" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
           <p class="text-[10px] text-slate-400 mt-1">Kategori produk (pangan/suplemen/obat bahan alam/kosmetik) ditentukan otomatis oleh AI.</p>
         </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Skema Produksi</label>
+          <select id="npd-production-scheme" required onchange="toggleNpdCountry()" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
+            <option value="" disabled selected>Pilih skema produksi</option>
+            <option value="Produksi Sendiri">Produksi Sendiri</option>
+            <option value="Maklon">Maklon</option>
+            <option value="Impor">Impor</option>
+          </select>
+        </div>
+        <div id="npd-country-wrap" class="hidden">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Negara Asal Produk Impor</label>
+          <input type="text" id="npd-country-origin" placeholder="Contoh: Korea Selatan" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
+        </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1.5">Checklist Kanal Penjualan yang Direncanakan</label>
@@ -917,12 +930,23 @@
       }
     }
 
+    function toggleNpdCountry() {
+      const isImport = document.getElementById('npd-production-scheme').value === 'Impor';
+      const wrap = document.getElementById('npd-country-wrap');
+      const input = document.getElementById('npd-country-origin');
+      wrap.classList.toggle('hidden', !isImport);
+      input.required = isImport;
+      if (!isImport) input.value = '';
+    }
+
     let currentNpdResult = null;
 
     function showNpdResult(d, productName, rec = {}) {
       currentNpdResult = {
         d, name: productName, id: rec.id || null,
         brand_id: rec.brand_id || null, brand_name: rec.brand_name || null, target_age: rec.target_age || null,
+        production_scheme: rec.production_scheme || null,
+        country_of_origin: rec.country_of_origin || null,
         created_at: rec.created_at || new Date().toISOString()
       };
       const tb = document.getElementById('btn-npd-ticket');
@@ -937,7 +961,7 @@
           <p class="font-bold text-slate-800 mt-1 ${extra}">${value}</p>
         </div>`;
       document.getElementById('npd-result-body').innerHTML = `
-        <p class="text-slate-500">Produk: <span class="font-semibold text-slate-800">${esc(productName)}</span>${rec.brand_name ? ' &middot; Brand: <span class="font-semibold text-slate-800">' + esc(rec.brand_name) + '</span>' : ''}${rec.target_age ? ' &middot; Usia target: <span class="font-semibold text-slate-800">' + esc(rec.target_age) + '</span>' : ''}</p>
+        <p class="text-slate-500">Produk: <span class="font-semibold text-slate-800">${esc(productName)}</span>${rec.brand_name ? ' &middot; Brand: <span class="font-semibold text-slate-800">' + esc(rec.brand_name) + '</span>' : ''}${rec.target_age ? ' &middot; Usia target: <span class="font-semibold text-slate-800">' + esc(rec.target_age) + '</span>' : ''}${rec.production_scheme ? ' &middot; Produksi: <span class="font-semibold text-slate-800">' + esc(rec.production_scheme) + '</span>' : ''}${rec.country_of_origin ? ' &middot; Negara asal: <span class="font-semibold text-slate-800">' + esc(rec.country_of_origin) + '</span>' : ''}</p>
         <div class="grid grid-cols-2 gap-3">
           ${box('Kategori Produk', esc(d.product_category))}
           ${box('Kecocokan Izin BPOM', esc(d.primary_permit_code))}
@@ -994,6 +1018,8 @@
           'Produk: ' + c.name,
           c.brand_name ? 'Brand: ' + c.brand_name : null,
           c.target_age ? 'Usia target: ' + c.target_age : null,
+          c.production_scheme ? 'Skema produksi: ' + c.production_scheme : null,
+          c.country_of_origin ? 'Negara asal: ' + c.country_of_origin : null,
           'Kategori: ' + d.product_category,
           'Kecocokan izin BPOM: ' + d.primary_permit_code,
           'Feasibility skor: ' + score + '/100' + (d.feasibility_status ? ' (' + d.feasibility_status + ')' : ''),
@@ -1057,6 +1083,8 @@
       write('Produk: ' + c.name, 10, true);
       if (c.brand_name) write('Brand: ' + c.brand_name);
       if (c.target_age) write('Usia target pasar: ' + c.target_age);
+      if (c.production_scheme) write('Skema produksi: ' + c.production_scheme);
+      if (c.country_of_origin) write('Negara asal: ' + c.country_of_origin);
       write('Tanggal: ' + new Date(c.created_at).toLocaleDateString('id-ID'));
 
       section('Ringkasan');
@@ -1300,6 +1328,8 @@
       // Ambil data input form lainnya
       const product_idea_name = document.getElementById('npd-product-name').value;
       const target_age = document.getElementById('npd-target-age').value.trim();
+      const production_scheme = document.getElementById('npd-production-scheme').value;
+      const country_origin = production_scheme === 'Impor' ? document.getElementById('npd-country-origin').value.trim() : '';
       const claims = document.getElementById('npd-claim').value;
       const ingredients = document.getElementById('npd-ingredients').value;
 
@@ -1325,6 +1355,8 @@
           body: JSON.stringify({
             productName: product_idea_name,
             targetAge: target_age,
+            productionScheme: production_scheme,
+            countryOrigin: country_origin || undefined,
             claims: claimList,
             mainIngredients: ingredients,
             salesChannels: selectedChannels,
@@ -1342,9 +1374,10 @@
         }
 
         e.target.reset();
+        toggleNpdCountry();
         closeModal('npd-modal');
         loadNpdProductsTable();
-        showNpdResult(resData.data, product_idea_name, { id: resData.saved_id, brand_id, brand_name, target_age, created_at: new Date().toISOString() });
+        showNpdResult(resData.data, product_idea_name, { id: resData.saved_id, brand_id, brand_name, target_age, production_scheme, country_of_origin: country_origin, created_at: new Date().toISOString() });
 
       } catch (err) {
         alert('Error: ' + err.message);
