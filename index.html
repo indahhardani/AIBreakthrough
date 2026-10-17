@@ -1542,7 +1542,7 @@
       const title = (rescanAll ? 'Scan Ulang Vendor' : 'Scan Folder Vendor') + (brandName && !vendorFolderId ? ' (brand ' + brandName + ')' : '');
       const skip = [];
       const errors = [];
-      let total = 0, fatal = null, unmatched = [], missing = 0, guard = 0;
+      let total = 0, fatal = null, unmatched = [], missing = 0, guard = 0, trace = [];
 
       vendorScanUi({ title, pct: 3, text: 'Menelusuri folder Google Drive...' });
       try {
@@ -1562,6 +1562,7 @@
           if (!res.ok || r.error) throw new Error(r.error || ('Edge Function gagal (HTTP ' + res.status + ')'));
 
           unmatched = r.unmatched_folders || unmatched;
+          if (r.trace) trace = r.trace;
           if (typeof r.total_vendors === 'number') total = r.total_vendors;
           (r.errors || []).forEach(m => errors.push(m));
 
@@ -1586,6 +1587,7 @@
       const lines = [];
       errors.forEach(m => lines.push(`<p class="text-rose-600">&bull; ${esc(m)}</p>`));
       if (unmatched.length) lines.push(`<p class="text-amber-700">Folder tidak cocok dengan brand mana pun (nama folder harus sama dengan nama/kode brand): <b>${esc(unmatched.join(', '))}</b></p>`);
+      if (!total && trace.length) lines.push(`<div class="mt-1 p-2 rounded-lg bg-brand-50 border border-brand-200 text-slate-600 space-y-0.5"><p class="font-bold text-brand-800">Hasil penelusuran folder:</p>${trace.map(t => '<p class="whitespace-pre">' + esc(t) + '</p>').join('')}<p class="text-slate-400 pt-1">Struktur yang dibaca: Folder induk &gt; Brand &gt; Kategori Vendor &gt; Nama Vendor.</p></div>`);
       if (missing) lines.push(`<p class="text-amber-700">${missing} vendor ditandai "Folder Tidak Ditemukan" karena foldernya sudah tidak ada di Drive.</p>`);
       if (fatal) lines.push(`<p class="text-rose-600 font-semibold">Berhenti karena error: ${esc(fatal)}</p>`);
 
