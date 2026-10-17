@@ -880,11 +880,11 @@
         }
         tbody.innerHTML = data.map(r => `
           <tr class="hover:bg-brand-50/50 border-b border-brand-100 text-xs">
-            <td class="px-4 py-3 font-mono text-amber-700 font-bold">${esc(r.ticket_no || ('TKT-' + String(r.id).slice(0, 6)))}</td>
+            <td class="px-4 py-3 font-mono text-amber-700 font-bold">${esc(r.ticket_number || ('TKT-' + String(r.id).slice(0, 6)))}</td>
             <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.title)}</td>
             <td class="px-4 py-3">${esc(r.category)}</td>
             <td class="px-4 py-3">${esc(r.priority)}</td>
-            <td class="px-4 py-3">${esc(r.created_by)}</td>
+            <td class="px-4 py-3">${esc(r.requested_by)}</td>
             <td class="px-4 py-3 font-bold text-amber-600">${esc(r.status)}</td>
             <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
             <td class="px-4 py-3 text-center"><button onclick="showDetail('tickets', '${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button></td>
@@ -922,7 +922,7 @@
     function showNpdResult(d, productName, rec = {}) {
       currentNpdResult = {
         d, name: productName, id: rec.id || null,
-        brand_name: rec.brand_name || null, target_age: rec.target_age || null,
+        brand_id: rec.brand_id || null, brand_name: rec.brand_name || null, target_age: rec.target_age || null,
         created_at: rec.created_at || new Date().toISOString()
       };
       const tb = document.getElementById('btn-npd-ticket');
@@ -977,9 +977,9 @@
       btn.disabled = true;
       try {
         if (c.id) {
-          const { data: ex } = await supabaseClient.from('tickets').select('ticket_no').eq('source_id', c.id).limit(1);
+          const { data: ex } = await supabaseClient.from('tickets').select('ticket_number').eq('npd_product_id', c.id).limit(1);
           if (ex && ex.length) {
-            alert('Tiket untuk skrining ini sudah ada: ' + ex[0].ticket_no);
+            alert('Tiket untuk skrining ini sudah ada: ' + ex[0].ticket_number);
             btn.innerHTML = 'Tiket Sudah Ada';
             return;
           }
@@ -1003,16 +1003,23 @@
           permits || '-'
         ].filter(x => x !== null).join('\n');
 
-        const { error } = await supabaseClient.from('tickets').insert([{
-          ticket_no: 'TKT-' + Math.floor(1000 + Math.random() * 9000),
+        const row = {
+          ticket_number: 'TKT-' + Math.floor(1000 + Math.random() * 9000),
           title: 'Review Skrining NPD: ' + c.name,
           category: 'BPOM Consultation',
           priority: score < 50 ? 'High' : 'Medium',
           description,
           status: 'Open',
-          source_id: c.id,
-          created_by: currentUserSession ? currentUserSession.username : 'system'
-        }]);
+          npd_product_id: c.id,
+          brand_id: c.brand_id || null,
+          brand_name: c.brand_name || null,
+          requested_by: currentUserSession ? currentUserSession.username : 'system'
+        };
+        let { error } = await supabaseClient.from('tickets').insert([row]);
+        if (error && /foreign key|npd_product_id/i.test(error.message)) {
+          delete row.npd_product_id; // kolom terhubung ke tabel lain: simpan tiket tanpa tautan
+          ({ error } = await supabaseClient.from('tickets').insert([row]));
+        }
         if (error) throw error;
         btn.innerHTML = 'Tiket Terkirim';
         loadTicketsTable();
@@ -1337,7 +1344,7 @@
         e.target.reset();
         closeModal('npd-modal');
         loadNpdProductsTable();
-        showNpdResult(resData.data, product_idea_name, { id: resData.saved_id, brand_name, target_age, created_at: new Date().toISOString() });
+        showNpdResult(resData.data, product_idea_name, { id: resData.saved_id, brand_id, brand_name, target_age, created_at: new Date().toISOString() });
 
       } catch (err) {
         alert('Error: ' + err.message);
@@ -1361,13 +1368,13 @@
 
       try {
         const { error } = await supabaseClient.from('tickets').insert([{
-          ticket_no: 'TKT-' + Math.floor(1000 + Math.random() * 9000),
+          ticket_number: 'TKT-' + Math.floor(1000 + Math.random() * 9000),
           title,
           category,
           priority,
           description,
           status: 'Open',
-          created_by: currentUserSession ? currentUserSession.username : 'system'
+          requested_by: currentUserSession ? currentUserSession.username : 'system'
         }]);
 
         if (error) throw error;
