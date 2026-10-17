@@ -1003,21 +1003,33 @@
       }
     }
 
-           async function handleCreateNpd(e) {
+    async function handleCreateNpd(e) {
       e.preventDefault();
       
-      // 1. Ambil nilai input dari form
+      // 1. Ambil nilai elemen select brand
+      const brandSelectEl = document.getElementById('npd-brand-select');
+      const brand_id = brandSelectEl ? brandSelectEl.value : null;
+
+      // Validasi jika user belum memilih brand
+      if (!brand_id) {
+        alert("Silakan pilih Brand terlebih dahulu!");
+        return;
+      }
+
+      // Ambil nama brand dari teks option yang sedang dipilih
+      const selectedOptionText = brandSelectEl.options[brandSelectEl.selectedIndex]?.text;
+      
+      // Cari juga dari masterBrands sebagai pembanding
+      const selectedBrandObj = masterBrands.find(b => String(b.id) === String(brand_id));
+      const brand_name = selectedBrandObj ? selectedBrandObj.name : (selectedOptionText || 'General');
+
+      // Ambil data input form lainnya
       const product_idea_name = document.getElementById('npd-product-name').value;
       const category = document.getElementById('npd-category').value;
       const claims = document.getElementById('npd-claim').value;
       const ingredients = document.getElementById('npd-ingredients').value;
 
-      // Ambil brand_id dan cari brand_name yang sesuai dari masterBrands
-      const brand_id = document.getElementById('npd-brand-select').value;
-      const selectedBrand = masterBrands.find(b => b.id === brand_id);
-      const brand_name = selectedBrand ? selectedBrand.name : 'General';
-
-      // Kumpulkan checklist kanal penjualan yang dipilih
+      // Kumpulkan checklist kanal penjualan
       const selectedChannels = Array.from(document.querySelectorAll('.npd-channel-cb:checked')).map(cb => cb.value);
 
       const btn = document.getElementById('btn-submit-npd');
@@ -1026,7 +1038,7 @@
       lucide.createIcons();
 
       try {
-        // 2. Analisis Regulasi AI BPOM (dengan fallback data jika Edge Function offline)
+        // 2. Analisis Regulasi AI BPOM
         let aiResult = {
           feasibility_score: 85,
           matched_permit_code: 'BPOM NA-' + Math.floor(10000000 + Math.random() * 90000000),
@@ -1066,14 +1078,14 @@
           console.warn("Edge Function offline/fallback to default AI logic:", edgeErr);
         }
 
-        // 3. Simpan Data Input + Relasi Brand + Hasil AI ke Supabase Database
+        // 3. Simpan ke Supabase Database dengan jaminan brand_id dan brand_name terisi
         const { error } = await supabaseClient.from('npd_permit_screenings').insert([{
           product_idea_name,
           category,
           claims,
           ingredients,
-          brand_id,            // Relasi UUID ke tabel brands
-          brand_name,          // Nama Brand (Teks)
+          brand_id: brand_id,       // Mengirimkan ID brand yang dipilih
+          brand_name: brand_name,   // Mengirimkan Nama brand
           sales_channels: selectedChannels,
           feasibility_score: aiResult.feasibility_score || 85,
           matched_permit_code: aiResult.matched_permit_code || 'BPOM NA-PENDING',
@@ -1086,7 +1098,7 @@
 
         closeModal('npd-modal');
         loadNpdProductsTable();
-        alert('Skrining AI BPOM Selesai! Data Brand, Regulasi, dan Izin Edar berhasil tersimpan.');
+        alert(`Skrining AI BPOM Selesai!\nBrand: ${brand_name}\nData berhasil tersimpan.`);
 
       } catch (err) {
         alert('Error: ' + err.message);
