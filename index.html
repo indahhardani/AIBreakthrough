@@ -188,30 +188,47 @@
         
         <!-- 1. AGREEMENT MATRIX TAB -->
         <section id="view-vendor-contracts" class="space-y-4">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border-2 border-brand-200 shadow-sm">
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-xl border-2 border-brand-200 shadow-sm">
             <div>
               <h2 class="text-base font-bold text-brand-900">Agreement Matrix</h2>
-              <p class="text-xs text-brand-700">Arsip perjanjian vendor yang terintegrasi Google Drive sub-folder Brand.</p>
+              <p class="text-xs text-brand-700">Ringkasan perjanjian per jenis, dibaca AI dari Google Drive (folder per Brand). Ringkasan AI belum divalidasi Legal kecuali bertanda Divalidasi.</p>
             </div>
-            <button onclick="alert('Pindai Drive Edge Function')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-sm">
-              <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive (Edge)
-            </button>
+            <div class="flex flex-wrap gap-2">
+              <button id="btn-field-settings" onclick="openFieldSettings()" class="bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
+                <i data-lucide="settings-2" class="w-4 h-4"></i> Pengaturan Field
+              </button>
+              <button id="btn-rescan-all" onclick="startRescanAll()" class="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Scan Ulang Semua
+              </button>
+              <button id="btn-scan-drive" onclick="startDriveScan()" class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-sm">
+                <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive
+              </button>
+            </div>
           </div>
+
+          <!-- Panel progres scan -->
+          <div id="scan-panel" class="hidden bg-white border-2 border-emerald-300 rounded-xl p-4 shadow-sm space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <p id="scan-title" class="text-sm font-bold text-brand-900">Scan Google Drive</p>
+              <div class="flex gap-2">
+                <button id="btn-scan-cancel" onclick="cancelScan()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3 py-1 rounded-lg text-[11px] font-bold">Hentikan</button>
+                <button id="btn-scan-close" onclick="closeScanPanel()" class="hidden bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 px-3 py-1 rounded-lg text-[11px] font-bold">Tutup</button>
+              </div>
+            </div>
+            <div class="w-full bg-brand-100 rounded-full h-2.5 overflow-hidden">
+              <div id="scan-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all" style="width:0%"></div>
+            </div>
+            <p id="scan-text" class="text-xs text-slate-600"></p>
+            <div id="scan-detail" class="text-[11px] space-y-1"></div>
+          </div>
+
+          <!-- Tab per jenis perjanjian -->
+          <div id="contracts-tabs" class="flex flex-wrap gap-2"></div>
 
           <div class="bg-white border-2 border-brand-200 rounded-xl overflow-hidden shadow-sm">
             <div class="overflow-x-auto max-h-[70vh]">
               <table class="w-full text-left text-xs text-slate-700 border-collapse">
-                <thead class="bg-brand-100 text-brand-900 uppercase tracking-wider border-b border-brand-200 text-[10px] sticky top-0 z-10 font-bold">
-                  <tr>
-                    <th class="px-4 py-3.5 font-bold">Vendor</th>
-                    <th class="px-3.5 py-3.5 font-bold">Brand</th>
-                    <th class="px-3.5 py-3.5 font-bold">Jenis Perjanjian</th>
-                    <th class="px-3.5 py-3.5 font-bold">Jangka Waktu Perjanjian</th>
-                    <th class="px-3.5 py-3.5 font-bold">Payment Terms</th>
-                    <th class="px-3.5 py-3.5 font-bold">Status</th>
-                    <th class="px-4 py-3.5 font-bold text-center">Aksi</th>
-                  </tr>
-                </thead>
+                <thead id="table-contracts-head" class="bg-brand-100 text-brand-900 uppercase tracking-wider border-b border-brand-200 text-[10px] sticky top-0 z-10 font-bold"></thead>
                 <tbody id="table-contracts-body" class="divide-y divide-brand-100"></tbody>
               </table>
             </div>
@@ -650,6 +667,38 @@
     </div>
   </div>
 
+  <!-- MODAL: DETAIL / EDIT KONTRAK -->
+  <div id="contract-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-2 border-brand-200 w-full max-w-3xl max-h-[92vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
+        <h3 id="contract-modal-title" class="text-sm font-bold text-brand-900">Detail Perjanjian</h3>
+        <button onclick="closeModal('contract-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="contract-body" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs"></div>
+      <div id="contract-footer" class="px-6 py-3 border-t border-brand-200 flex flex-wrap justify-end gap-2"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: PENGATURAN FIELD AGREEMENT -->
+  <div id="fields-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-2 border-brand-200 w-full max-w-4xl max-h-[92vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
+        <h3 class="text-sm font-bold text-brand-900">Pengaturan Field Agreement</h3>
+        <button onclick="closeModal('fields-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="px-6 pt-4 text-[11px] text-slate-500 space-y-1">
+        <p>Judul field bisa diganti, ditambah, diurutkan, atau dinonaktifkan. <b>Petunjuk untuk AI</b> menjelaskan apa yang harus dicari di dokumen.</p>
+        <p>Perubahan baru berlaku pada scan berikutnya. Untuk mengisi kontrak yang sudah ada dengan field baru, jalankan <b>Scan Ulang</b>. Data field yang dihapus tetap tersimpan sampai kontrak di-scan ulang.</p>
+      </div>
+      <div id="fields-body" class="p-6 space-y-5 overflow-y-auto flex-1 text-xs"></div>
+      <div class="px-6 py-3 border-t border-brand-200 flex justify-end gap-2">
+        <button onclick="closeModal('fields-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Batal</button>
+        <button id="btn-save-fields" onclick="saveFieldDefs()" class="bg-brand hover:bg-brand-600 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md shadow-brand/30">
+          <i data-lucide="save" class="w-4 h-4"></i> Simpan Pengaturan
+        </button>
+      </div>
+    </div>
+  </div>
   <!-- SCRIPT ENGINE UTUH -->
   <script>
     const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
@@ -798,28 +847,576 @@
       lucide.createIcons();
     }
 
+    // =====================================================================
+    // AGREEMENT MATRIX: ringkasan perjanjian per jenis (vendor / distributor / GT-MT / sewa)
+    // =====================================================================
+    const AGR_TYPES = [
+      { code: 'vendor', label: 'Vendor' },
+      { code: 'distributor', label: 'Distributor' },
+      { code: 'gt_mt', label: 'GT/MT' },
+      { code: 'sewa', label: 'Sewa' }
+    ];
+    const AGR_GROUPS = [{ code: 'umum', label: 'Umum (semua perjanjian)' }, ...AGR_TYPES];
+    // field "umum" bawaan yang tersimpan di kolom vendor_contracts (bukan di custom_fields)
+    const COLUMN_FIELD_KEYS = ['jangka_waktu_perjanjian', 'payment_terms', 'late_penalty'];
+    const EXPIRY_WARN_DAYS = 60;
+    const SCAN_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/Scan-gdrive`;
+
+    let agreementDefs = [];
+    let contractsData = [];
+    let activeAgrTab = 'all';
+
+    const agrTypeLabel = (code) => (AGR_TYPES.find(t => t.code === code) || {}).label || code;
+    const safeUrl = (u) => /^https:\/\//i.test(String(u || '')) ? u : '#';
+    const defsOf = (type) => agreementDefs.filter(d => d.agreement_type === type && d.is_active !== false);
+    const isColumnField = (d) => d.agreement_type === 'umum' && d.is_system && COLUMN_FIELD_KEYS.includes(d.field_key);
+    const editedKeyOf = (d) => isColumnField(d) ? d.field_key : (d.agreement_type + '.' + d.field_key);
+    const isEdited = (c, key) => Array.isArray(c.edited_fields) && c.edited_fields.includes(key);
+
+    function fieldValue(c, d) {
+      if (isColumnField(d)) return c[d.field_key];
+      const grp = c.custom_fields && c.custom_fields[d.agreement_type];
+      return grp ? grp[d.field_key] : null;
+    }
+
+    const isEmptyVal = (v) => v === null || v === undefined || String(v).trim() === '';
+    // Sel kosong: kontrak yang belum pernah di-scan dengan daftar field baru diberi petunjuk khusus
+    function textCell(v, c) {
+      if (!isEmptyVal(v)) return esc(v);
+      if (c && !c.last_scanned_at) return '<span class="text-amber-500 italic">Belum di-scan ulang</span>';
+      return '<span class="text-slate-400 italic">Tidak disebutkan</span>';
+    }
+
+    function parseYmd(dateStr) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(dateStr || ''));
+      return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+    }
+    function fmtDateId(dateStr) {
+      const d = parseYmd(dateStr);
+      return d ? d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+    }
+    function daysUntil(dateStr) {
+      const end = parseYmd(dateStr);
+      if (!end) return null;
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return Math.round((end - today) / 86400000);
+    }
+    function expiryBadge(dateStr) {
+      const d = daysUntil(dateStr);
+      if (d === null) return '<span class="text-slate-400">-</span>';
+      const date = `<div class="font-semibold text-slate-800">${esc(fmtDateId(dateStr))}</div>`;
+      const pill = (cls, t) => `<span class="inline-block mt-0.5 px-1.5 py-0.5 rounded border text-[10px] font-bold ${cls}">${t}</span>`;
+      if (d < 0) return date + pill('bg-rose-100 text-rose-700 border-rose-300', 'Lewat ' + (-d) + ' hari');
+      if (d === 0) return date + pill('bg-amber-100 text-amber-700 border-amber-300', 'Berakhir hari ini');
+      if (d <= EXPIRY_WARN_DAYS) return date + pill('bg-amber-100 text-amber-700 border-amber-300', 'Sisa ' + d + ' hari');
+      return date;
+    }
+    const verifiedBadge = (c) => c.is_verified_by_legal
+      ? '<span class="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-300 text-[10px] font-bold">Divalidasi Legal</span>'
+      : '<span class="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-300 text-[10px] font-semibold">Ringkasan AI, belum divalidasi</span>';
+
+    const selectedBrandId = () => {
+      const v = document.getElementById('header-brand-filter')?.value;
+      return v && v !== 'ALL' ? v : null;
+    };
+    function filteredContracts() {
+      const sel = selectedBrandId();
+      return sel ? contractsData.filter(c => String(c.brand_id) === String(sel)) : contractsData;
+    }
+    const inTab = (c, tab) => tab === 'all' || (Array.isArray(c.agreement_categories) && c.agreement_categories.includes(tab));
+
+    // Dipanggil oleh dropdown brand di header (saat ini memfilter tabel Agreement Matrix)
+    function handleBrandFilterChange() { renderContracts(); }
+    function setAgrTab(code) { activeAgrTab = code; renderContracts(); }
+
+    function renderContracts() {
+      const head = document.getElementById('table-contracts-head');
+      const body = document.getElementById('table-contracts-body');
+      const tabsEl = document.getElementById('contracts-tabs');
+      const list = filteredContracts();
+
+      tabsEl.innerHTML = [{ code: 'all', label: 'Semua' }, ...AGR_TYPES].map(t => {
+        const n = list.filter(c => inTab(c, t.code)).length;
+        const on = t.code === activeAgrTab;
+        return `<button onclick="setAgrTab('${t.code}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold border transition ${on ? 'bg-brand-800 text-white border-brand-800' : 'bg-white text-brand-900 border-brand-300 hover:bg-brand-100'}">${esc(t.label)} <span class="${on ? 'text-brand-200' : 'text-brand-600'} font-semibold">${n}</span></button>`;
+      }).join('');
+
+      const umum = defsOf('umum');
+      const spec = activeAgrTab === 'all' ? [] : defsOf(activeAgrTab);
+      const colCount = 6 + umum.length + spec.length;
+      const th = (t, extra = '') => `<th class="px-3.5 py-3.5 font-bold ${extra}">${esc(t)}</th>`;
+      head.innerHTML = '<tr>' +
+        th('Pihak', 'min-w-[160px]') + th('Brand') + th('Jenis', 'min-w-[110px]') +
+        umum.map(d => th(d.label, 'min-w-[170px]')).join('') +
+        spec.map(d => th(d.label, 'min-w-[170px] bg-brand-200/60')).join('') +
+        th('Berakhir', 'min-w-[120px]') + th('Status', 'min-w-[120px]') +
+        '<th class="px-4 py-3.5 font-bold text-center min-w-[110px]">Aksi</th></tr>';
+
+      const rows = list.filter(c => inTab(c, activeAgrTab));
+      if (!rows.length) {
+        const msg = contractsData.length ? 'Tidak ada perjanjian untuk tab / brand ini.' : 'Belum ada kontrak. Tekan "Scan Google Drive".';
+        body.innerHTML = `<tr><td colspan="${colCount}" class="px-4 py-8 text-center text-slate-400">${msg}</td></tr>`;
+        return;
+      }
+      body.innerHTML = rows.map(c => {
+        const cats = Array.isArray(c.agreement_categories) ? c.agreement_categories : [];
+        const catTags = cats.length
+          ? cats.map(k => `<span class="inline-block px-1.5 py-0.5 rounded bg-brand-100 text-brand-800 border border-brand-300 text-[10px] font-semibold mr-1 mb-0.5">${esc(agrTypeLabel(k))}</span>`).join('')
+          : '<span class="text-slate-400 italic text-[10px]">Belum terklasifikasi</span>';
+        const cell = (d) => `<td class="px-3.5 py-3 align-top"><div class="line-clamp-4 whitespace-pre-line">${textCell(fieldValue(c, d), c)}</div></td>`;
+        const no = c.contract_number && c.contract_number !== '-' ? c.contract_number : '';
+        return `
+          <tr class="hover:bg-brand-50/50 text-xs">
+            <td class="px-4 py-3 align-top"><div class="font-bold text-slate-800">${esc(c.vendor_name)}</div><div class="text-[10px] text-slate-400 font-mono">${esc(no)}</div></td>
+            <td class="px-3.5 py-3 align-top">${esc(c.brand_name || 'General')}</td>
+            <td class="px-3.5 py-3 align-top">${catTags}</td>
+            ${umum.map(cell).join('')}${spec.map(cell).join('')}
+            <td class="px-3.5 py-3 align-top">${expiryBadge(c.expiration_date)}</td>
+            <td class="px-3.5 py-3 align-top"><div class="font-bold ${c.status === 'Kadaluwarsa' ? 'text-rose-600' : 'text-emerald-600'}">${esc(c.status || 'Aktif')}</div>${verifiedBadge(c)}</td>
+            <td class="px-4 py-3 text-center align-top space-y-1">
+              <button onclick="openContractModal('${esc(c.id)}')" class="block w-full px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px] font-semibold">Detail</button>
+              <a href="${esc(safeUrl(c.gdrive_web_link))}" target="_blank" rel="noopener" class="block text-brand-700 font-bold hover:underline text-[10px]">Buka PDF</a>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
     async function loadContracts() {
       const tbody = document.getElementById('table-contracts-body');
-      tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Memuat data kontrak...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-8 text-center text-slate-400">Memuat data kontrak...</td></tr>`;
       try {
-        const { data } = await supabaseClient.from('vendor_contracts').select('*').order('created_at', { ascending: false });
-        if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Belum ada kontrak.</td></tr>`;
-          return;
-        }
-        tbody.innerHTML = data.map(c => `
-          <tr class="border-b border-brand-100 text-xs hover:bg-brand-50/50">
-            <td class="px-4 py-3 font-bold text-slate-800">${esc(c.vendor_name)}</td>
-            <td class="px-3.5 py-3">${esc(c.brand_name || 'General')}</td>
-            <td class="px-3.5 py-3">${esc(c.agreement_type || '-')}</td>
-            <td class="px-3.5 py-3">${esc(c.jangka_waktu_perjanjian || '-')}</td>
-            <td class="px-3.5 py-3">${esc(c.payment_terms || '-')}</td>
-            <td class="px-3.5 py-3 font-bold text-emerald-600">${esc(c.status || 'Aktif')}</td>
-            <td class="px-4 py-3 text-center"><a href="${esc(c.gdrive_web_link)}" target="_blank" class="text-brand-700 font-bold hover:underline">Buka Drive</a></td>
-          </tr>
-        `).join('');
+        const [defsRes, conRes] = await Promise.all([
+          supabaseClient.from('agreement_field_defs').select('*').order('sort_order', { ascending: true }),
+          supabaseClient.from('vendor_contracts').select('*').order('created_at', { ascending: false })
+        ]);
+        if (defsRes.error) throw new Error('Tabel agreement_field_defs belum siap (' + defsRes.error.message + '). Jalankan SQL tahap 1.');
+        if (conRes.error) throw conRes.error;
+        agreementDefs = defsRes.data || [];
+        contractsData = conRes.data || [];
+        renderContracts();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-rose-500">Gagal memuat: ${esc(err.message)}</td></tr>`;
+        document.getElementById('table-contracts-head').innerHTML = '';
+        tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-6 text-center text-rose-500">Gagal memuat: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    // ---------- Detail & edit satu perjanjian ----------
+    function openContractModal(id, edit = false) {
+      const c = contractsData.find(x => x.id === id);
+      if (!c) return;
+      const eid = esc(c.id);
+      document.getElementById('contract-modal-title').innerText = (edit ? 'Edit Perjanjian: ' : 'Detail Perjanjian: ') + (c.vendor_name || '-');
+      document.getElementById('contract-body').innerHTML = edit ? contractFormHtml(c) : contractViewHtml(c);
+      document.getElementById('contract-footer').innerHTML = edit
+        ? `<button onclick="openContractModal('${eid}')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Batal</button>
+           <button id="btn-save-contract" onclick="saveContract('${eid}')" class="bg-brand hover:bg-brand-600 disabled:opacity-60 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-md shadow-brand/30">Simpan Perubahan</button>`
+        : `<button onclick="closeModal('contract-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Tutup</button>
+           <a href="${esc(safeUrl(c.gdrive_web_link))}" target="_blank" rel="noopener" class="bg-white hover:bg-brand-50 text-brand-800 border border-brand-300 px-4 py-2 rounded-lg text-xs font-bold">Buka PDF</a>
+           <button onclick="rescanOne('${eid}')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold">Scan Ulang</button>
+           <button onclick="openContractModal('${eid}', true)" class="bg-brand hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Edit</button>`;
+      openModal('contract-modal');
+    }
+
+    function contractViewHtml(c) {
+      const cats = Array.isArray(c.agreement_categories) ? c.agreement_categories : [];
+      const row = (label, valueHtml, edited) => `
+        <div class="border border-brand-200 rounded-lg p-3 bg-white">
+          <p class="text-[10px] uppercase font-bold text-brand-700">${esc(label)}${edited ? ' <span class="normal-case text-amber-600" title="Diedit manual oleh Legal">&#9998; diedit</span>' : ''}</p>
+          <div class="mt-1 text-slate-800 whitespace-pre-line">${valueHtml}</div>
+        </div>`;
+      const fieldRows = (type) => defsOf(type).map(d => row(d.label, textCell(fieldValue(c, d), c), isEdited(c, editedKeyOf(d)))).join('')
+        || '<p class="text-slate-400">Belum ada field di pengaturan.</p>';
+      const section = (title, inner) => `<div><p class="text-[11px] uppercase font-extrabold tracking-wider text-brand-800 mb-2">${esc(title)}</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${inner}</div></div>`;
+      const catTags = cats.length ? cats.map(k => esc(agrTypeLabel(k))).join(', ') : '<span class="text-slate-400 italic">Belum terklasifikasi</span>';
+      const scanned = c.last_scanned_at ? new Date(c.last_scanned_at).toLocaleString('id-ID') : null;
+
+      return `
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="font-semibold text-slate-800">${esc(c.brand_name || 'General')}</span>
+          ${c.contract_number && c.contract_number !== '-' ? '<span class="font-mono text-slate-500">&middot; ' + esc(c.contract_number) + '</span>' : ''}
+          ${verifiedBadge(c)}
+        </div>
+        ${scanned ? '' : '<p class="text-amber-600">Kontrak ini belum di-scan dengan daftar field terbaru. Tekan <b>Scan Ulang</b> agar field khusus terisi.</p>'}
+        ${section('Informasi Perjanjian',
+          row('Judul Dokumen', textCell(c.agreement_type, c), isEdited(c, 'agreement_type')) +
+          row('Jenis', catTags, isEdited(c, 'agreement_categories')) +
+          row('Tanggal Mulai', esc(fmtDateId(c.effective_date)), isEdited(c, 'effective_date')) +
+          row('Tanggal Berakhir', expiryBadge(c.expiration_date), isEdited(c, 'expiration_date')) +
+          row('Status', esc(c.status || 'Aktif'), false))}
+        ${section('Ketentuan Umum', fieldRows('umum'))}
+        ${AGR_TYPES.filter(t => cats.includes(t.code)).map(t => section('Ketentuan ' + t.label, fieldRows(t.code))).join('')}
+        ${section('Klausul Lainnya',
+          row('Pengakhiran Perjanjian', textCell(c.termination_clause, c), isEdited(c, 'termination_clause')) +
+          row('Kerahasiaan', textCell(c.confidentiality_clause, c), isEdited(c, 'confidentiality_clause')) +
+          row('Hukum yang Berlaku', textCell(c.governing_law, c), isEdited(c, 'governing_law')))}
+        <p class="text-[10px] text-slate-400">${scanned ? 'Terakhir di-scan AI: ' + esc(scanned) + '. ' : ''}Ringkasan AI, belum divalidasi Legal kecuali bertanda Divalidasi. Rujuk PDF asli untuk keputusan hukum.</p>
+      `;
+    }
+
+    function contractFormHtml(c) {
+      const cats = Array.isArray(c.agreement_categories) ? c.agreement_categories : [];
+      const cls = 'w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-brand-600';
+      const lbl = (t) => `<label class="block text-[10px] uppercase font-bold text-brand-700 mb-1">${esc(t)}</label>`;
+      const input = (label, attr, value, type = 'text') => `<div>${lbl(label)}<input type="${type}" ${attr} value="${esc(value ?? '')}" class="${cls}"></div>`;
+      const area = (label, attr, value) => `<div>${lbl(label)}<textarea rows="2" ${attr} class="${cls}">${esc(value ?? '')}</textarea></div>`;
+      const fieldArea = (d) => area(d.label, isColumnField(d) ? `data-col="${esc(d.field_key)}"` : `data-cf="${esc(d.agreement_type)}.${esc(d.field_key)}"`, fieldValue(c, d));
+      const title = (t) => `<p class="text-[11px] uppercase font-extrabold tracking-wider text-brand-800 mb-2">${esc(t)}</p>`;
+
+      return `
+        <p class="text-slate-500">Perubahan yang Anda simpan ditandai sebagai diedit manual dan <b>tidak ditimpa</b> saat scan ulang.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          ${input('Pihak', 'data-col="vendor_name"', c.vendor_name)}
+          ${input('Judul Dokumen', 'data-col="agreement_type"', c.agreement_type)}
+          ${input('No. Kontrak', 'data-col="contract_number"', c.contract_number)}
+          <div></div>
+          ${input('Tanggal Mulai', 'data-col="effective_date"', c.effective_date, 'date')}
+          ${input('Tanggal Berakhir', 'data-col="expiration_date"', c.expiration_date, 'date')}
+        </div>
+        <div>
+          ${title('Jenis Perjanjian')}
+          <div class="flex flex-wrap gap-4">
+            ${AGR_TYPES.map(t => `<label class="flex items-center gap-2 cursor-pointer font-medium text-slate-700"><input type="checkbox" id="ef-cat-${t.code}" ${cats.includes(t.code) ? 'checked' : ''} onchange="toggleFormType('${t.code}')" class="rounded text-brand-600"> ${esc(t.label)}</label>`).join('')}
+          </div>
+        </div>
+        <div>${title('Ketentuan Umum')}<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${defsOf('umum').map(fieldArea).join('')}</div></div>
+        ${AGR_TYPES.map(t => `
+          <div id="ef-sec-${t.code}" class="${cats.includes(t.code) ? '' : 'hidden'}">
+            ${title('Ketentuan ' + t.label)}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${defsOf(t.code).map(fieldArea).join('') || '<p class="text-slate-400">Belum ada field.</p>'}</div>
+          </div>`).join('')}
+        <div>${title('Klausul Lainnya')}<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          ${area('Pengakhiran Perjanjian', 'data-col="termination_clause"', c.termination_clause)}
+          ${area('Kerahasiaan', 'data-col="confidentiality_clause"', c.confidentiality_clause)}
+          ${area('Hukum yang Berlaku', 'data-col="governing_law"', c.governing_law)}
+        </div></div>
+        <label class="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+          <input type="checkbox" id="ef-verified" checked class="rounded text-emerald-600"> Tandai sudah divalidasi Legal
+        </label>
+      `;
+    }
+
+    function toggleFormType(code) {
+      const on = document.getElementById('ef-cat-' + code).checked;
+      document.getElementById('ef-sec-' + code)?.classList.toggle('hidden', !on);
+    }
+
+    async function saveContract(id) {
+      const c = contractsData.find(x => x.id === id);
+      if (!c) return;
+      const body = document.getElementById('contract-body');
+      const vendorEl = body.querySelector('[data-col="vendor_name"]');
+      if (!vendorEl.value.trim()) { alert('Nama pihak wajib diisi.'); return; }
+
+      const btn = document.getElementById('btn-save-contract');
+      btn.disabled = true;
+      try {
+        const upd = {};
+        const changed = [];
+
+        body.querySelectorAll('[data-col]').forEach(el => {
+          const k = el.dataset.col;
+          let nv = el.value.trim() === '' ? null : el.value.trim();
+          if (k === 'contract_number' && nv === null) nv = '-';
+          const ov = isEmptyVal(c[k]) ? null : c[k];
+          if (nv !== ov) { upd[k] = nv; changed.push(k); }
+        });
+
+        const newCats = AGR_TYPES.map(t => t.code).filter(code => document.getElementById('ef-cat-' + code).checked);
+        const oldCats = Array.isArray(c.agreement_categories) ? c.agreement_categories : [];
+        if ([...newCats].sort().join() !== [...oldCats].sort().join()) {
+          upd.agreement_categories = newCats;
+          changed.push('agreement_categories');
+        }
+
+        const custom = JSON.parse(JSON.stringify(c.custom_fields || {}));
+        let customTouched = false;
+        body.querySelectorAll('[data-cf]').forEach(el => {
+          const [t, ...rest] = el.dataset.cf.split('.');
+          const key = rest.join('.');
+          if (t !== 'umum' && !newCats.includes(t)) return; // jenis tidak dipilih: data lama dibiarkan
+          const nv = el.value.trim();
+          const ov = (custom[t] && custom[t][key]) || '';
+          if (nv === ov) return;
+          customTouched = true;
+          changed.push(t + '.' + key);
+          if (nv === '') { if (custom[t]) delete custom[t][key]; }
+          else { (custom[t] = custom[t] || {})[key] = nv; }
+        });
+        if (customTouched) upd.custom_fields = custom;
+
+        if (upd.expiration_date) upd.status = daysUntil(upd.expiration_date) < 0 ? 'Kadaluwarsa' : 'Aktif';
+
+        const verified = document.getElementById('ef-verified').checked;
+        if (verified !== !!c.is_verified_by_legal) upd.is_verified_by_legal = verified;
+
+        if (changed.length) upd.edited_fields = [...new Set([...(c.edited_fields || []), ...changed])];
+
+        if (Object.keys(upd).length === 0) { openContractModal(id); return; }
+        upd.updated_at = new Date().toISOString();
+
+        const { error } = await supabaseClient.from('vendor_contracts').update(upd).eq('id', id);
+        if (error) throw error;
+        Object.assign(c, upd);
+        renderContracts();
+        openContractModal(id);
+        logAudit('Edit Kontrak', 'vendor_contracts', id, { summary: c.vendor_name, bidang: changed.join(', ') || 'status validasi' });
+      } catch (err) {
+        alert('Gagal menyimpan: ' + err.message);
+        btn.disabled = false;
+      }
+    }
+
+    // ---------- Scan Google Drive (loop satu file per panggilan) ----------
+    let scanRunning = false;
+    let scanCancelled = false;
+
+    function setScanButtons(disabled) {
+      ['btn-scan-drive', 'btn-rescan-all'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = disabled; });
+    }
+    function scanUi({ title, pct, text, detail = '', finished = false }) {
+      document.getElementById('scan-panel').classList.remove('hidden');
+      document.getElementById('scan-title').innerText = title;
+      document.getElementById('scan-bar').style.width = Math.max(0, Math.min(100, pct)) + '%';
+      document.getElementById('scan-text').innerText = text;
+      document.getElementById('scan-detail').innerHTML = detail;
+      document.getElementById('btn-scan-cancel').classList.toggle('hidden', finished);
+      document.getElementById('btn-scan-close').classList.toggle('hidden', !finished);
+    }
+    function cancelScan() {
+      scanCancelled = true;
+      document.getElementById('scan-text').innerText = 'Menghentikan setelah file yang sedang diproses selesai...';
+    }
+    function closeScanPanel() { document.getElementById('scan-panel').classList.add('hidden'); }
+
+    function startDriveScan() { runScan({ brandId: selectedBrandId() }); }
+
+    function startRescanAll() {
+      const n = filteredContracts().length;
+      if (!n) { alert('Belum ada kontrak untuk di-scan ulang.'); return; }
+      const brandId = selectedBrandId();
+      const brand = brandId ? ((masterBrands.find(b => String(b.id) === String(brandId)) || {}).name || '') : '';
+      if (!confirm(`Scan ulang ${n} kontrak${brand ? ' (brand ' + brand + ')' : ''}?\n\nProses ini memakai kredit AI satu kali per kontrak dan bisa memakan waktu beberapa menit.\nSel yang sudah diedit manual TIDAK akan ditimpa.`)) return;
+      runScan({ rescanAll: true, brandId });
+    }
+
+    function rescanOne(id) {
+      const c = contractsData.find(x => x.id === id);
+      if (!c || !c.gdrive_file_id) { alert('Kontrak ini tidak punya ID file Drive.'); return; }
+      if (!confirm('Scan ulang kontrak "' + c.vendor_name + '"?\nSel yang sudah diedit manual tidak akan ditimpa.')) return;
+      closeModal('contract-modal');
+      runScan({ rescanIds: [c.gdrive_file_id], brandId: c.brand_id || null, label: c.vendor_name });
+    }
+
+    async function runScan({ rescanAll = false, rescanIds = [], brandId = null, label = '' } = {}) {
+      if (scanRunning) return;
+      scanRunning = true;
+      scanCancelled = false;
+      setScanButtons(true);
+
+      const isRescan = rescanAll || rescanIds.length > 0;
+      const rescanBefore = isRescan ? new Date().toISOString() : undefined; // sama di setiap putaran
+      const brandName = brandId ? ((masterBrands.find(b => String(b.id) === String(brandId)) || {}).name || '') : '';
+      const title = (isRescan ? 'Scan Ulang' : 'Scan Google Drive') + (label ? ': ' + label : brandName ? ' (brand ' + brandName + ')' : '');
+      const skip = [];
+      const errors = [];
+      let unmatched = [];
+      let done = 0, failed = 0, total = 0, fatal = null;
+
+      scanUi({ title, pct: 5, text: 'Menghubungi Google Drive dan memproses file pertama...' });
+      try {
+        for (let i = 0; i < 2000 && !scanCancelled; i++) {
+          const res = await fetch(SCAN_FUNCTION_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+            body: JSON.stringify({
+              skip,
+              brand_id: brandId || undefined,
+              rescan_all: rescanAll || undefined,
+              rescan_file_ids: rescanIds.length ? rescanIds : undefined,
+              rescan_before: rescanBefore
+            })
+          });
+          const r = await res.json().catch(() => ({}));
+          if (!res.ok || r.error) throw new Error(r.error || ('Edge Function gagal (HTTP ' + res.status + ')'));
+
+          unmatched = r.unmatched_folders || unmatched;
+          done += r.count || 0;
+          const fids = r.failed_ids || [];
+          if (fids.length) { skip.push(...fids); failed += fids.length; errors.push(...(r.errors || [])); }
+          total = done + failed + (r.remaining || 0);
+
+          scanUi({
+            title,
+            pct: total ? Math.round(((done + failed) / total) * 100) : 100,
+            text: total ? `Memproses ${done + failed} dari ${total} file (${failed} gagal)...` : 'Tidak ada file yang perlu diproses.'
+          });
+          if (!r.remaining) break;
+          if (!(r.count || 0) && !fids.length) break; // tidak ada kemajuan: hindari loop tak berujung
+        }
+      } catch (e) {
+        fatal = e.message;
+      }
+
+      scanRunning = false;
+      setScanButtons(false);
+
+      const lines = [];
+      errors.forEach(m => lines.push(`<p class="text-rose-600">&bull; ${esc(m)}</p>`));
+      if (unmatched.length) {
+        lines.push(`<p class="text-amber-700">Folder tidak cocok dengan brand mana pun (nama folder harus sama dengan nama/kode brand): <b>${esc(unmatched.join(', '))}</b></p>`);
+      }
+      if (fatal) lines.push(`<p class="text-rose-600 font-semibold">Berhenti karena error: ${esc(fatal)}</p>`);
+      const state = fatal ? 'Berhenti karena error' : scanCancelled ? 'Dihentikan' : 'Selesai';
+      scanUi({
+        title,
+        pct: total && !fatal && !scanCancelled ? 100 : (total ? Math.round(((done + failed) / total) * 100) : 0),
+        text: `${state}: ${done} berhasil, ${failed} gagal${total ? ' dari ' + total + ' file' : ''}.`,
+        detail: lines.join(''),
+        finished: true
+      });
+      await loadContracts();
+      logAudit(isRescan ? 'Scan Ulang Kontrak' : 'Scan Drive Kontrak', 'vendor_contracts', null,
+        { summary: `${done} berhasil, ${failed} gagal` + (brandName ? ', brand ' + brandName : '') });
+    }
+
+    // ---------- Pengaturan field ----------
+    let fieldDraft = [];
+
+    function slugKey(label) {
+      return String(label).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'field';
+    }
+
+    function openFieldSettings() {
+      fieldDraft = agreementDefs.map(d => ({ ...d }));
+      renderFieldSettings();
+      openModal('fields-modal');
+    }
+
+    function renderFieldSettings() {
+      const cls = 'w-full bg-white border border-brand-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-brand-600';
+      document.getElementById('fields-body').innerHTML = AGR_GROUPS.map(g => {
+        const items = fieldDraft.map((d, i) => ({ d, i })).filter(x => x.d.agreement_type === g.code && !x.d._deleted);
+        const rows = items.map(({ d, i }, pos) => `
+          <div class="grid grid-cols-12 gap-2 items-start bg-brand-50/50 border border-brand-200 rounded-lg p-2.5">
+            <div class="col-span-12 sm:col-span-1 flex sm:flex-col gap-1 items-center justify-center">
+              <button type="button" ${pos === 0 ? 'disabled' : ''} onclick="fdMove(${i}, -1)" class="px-2 py-0.5 rounded bg-white border border-brand-300 text-brand-800 disabled:opacity-30" title="Naik">&#9650;</button>
+              <button type="button" ${pos === items.length - 1 ? 'disabled' : ''} onclick="fdMove(${i}, 1)" class="px-2 py-0.5 rounded bg-white border border-brand-300 text-brand-800 disabled:opacity-30" title="Turun">&#9660;</button>
+            </div>
+            <div class="col-span-12 sm:col-span-3">
+              <label class="block text-[10px] uppercase font-bold text-brand-700 mb-1">Judul</label>
+              <input type="text" value="${esc(d.label)}" placeholder="Judul kolom" oninput="fdSet(${i}, 'label', this.value)" class="${cls}">
+            </div>
+            <div class="col-span-12 sm:col-span-5">
+              <label class="block text-[10px] uppercase font-bold text-brand-700 mb-1">Petunjuk untuk AI</label>
+              <input type="text" value="${esc(d.ai_hint || '')}" placeholder="Apa yang harus dicari AI di dokumen" oninput="fdSet(${i}, 'ai_hint', this.value)" class="${cls}">
+            </div>
+            <div class="col-span-8 sm:col-span-2 pt-4">
+              <label class="flex items-center gap-1.5 text-slate-700 font-medium ${d.is_system ? 'opacity-60' : 'cursor-pointer'}">
+                <input type="checkbox" ${d.is_active !== false ? 'checked' : ''} ${d.is_system ? 'disabled' : ''} onchange="fdSet(${i}, 'is_active', this.checked)" class="rounded text-brand-600"> Aktif
+              </label>
+              <p class="text-[10px] text-slate-400 font-mono mt-0.5">${d.field_key ? esc(d.field_key) : 'kunci otomatis'}</p>
+            </div>
+            <div class="col-span-4 sm:col-span-1 pt-4 text-right">
+              ${d.is_system
+                ? '<span class="text-[10px] text-slate-400">bawaan</span>'
+                : `<button type="button" onclick="fdDelete(${i})" class="px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-[10px] font-bold">Hapus</button>`}
+            </div>
+          </div>`).join('');
+        return `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-xs font-extrabold uppercase tracking-wider text-brand-800">${esc(g.label)}</h4>
+              <button type="button" onclick="fdAdd('${g.code}')" class="px-3 py-1 rounded-lg bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 text-[11px] font-bold">+ Tambah field</button>
+            </div>
+            <div class="space-y-2">${rows || '<p class="text-slate-400">Belum ada field.</p>'}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function fdSet(i, prop, value) { if (fieldDraft[i]) fieldDraft[i][prop] = value; }
+    function fdAdd(type) {
+      fieldDraft.push({ agreement_type: type, field_key: null, label: '', ai_hint: '', is_active: true, is_system: false, _new: true });
+      renderFieldSettings();
+    }
+    function fdDelete(i) {
+      if (fieldDraft[i]._new) fieldDraft.splice(i, 1);
+      else fieldDraft[i]._deleted = true;
+      renderFieldSettings();
+    }
+    function fdMove(i, dir) {
+      const t = fieldDraft[i].agreement_type;
+      let j = i + dir;
+      while (j >= 0 && j < fieldDraft.length && (fieldDraft[j].agreement_type !== t || fieldDraft[j]._deleted)) j += dir;
+      if (j < 0 || j >= fieldDraft.length) return;
+      [fieldDraft[i], fieldDraft[j]] = [fieldDraft[j], fieldDraft[i]];
+      renderFieldSettings();
+    }
+
+    async function saveFieldDefs() {
+      const live = fieldDraft.filter(d => !d._deleted);
+      if (live.some(d => !String(d.label || '').trim())) { alert('Ada field tanpa judul. Isi judulnya atau hapus field tersebut.'); return; }
+
+      const btn = document.getElementById('btn-save-fields');
+      btn.disabled = true;
+      try {
+        const tbl = () => supabaseClient.from('agreement_field_defs');
+
+        // 1) Hapus dulu (supaya kunci yang sama bisa dipakai lagi)
+        const delIds = fieldDraft.filter(d => d._deleted && d.id).map(d => d.id);
+        if (delIds.length) {
+          const { error } = await tbl().delete().in('id', delIds);
+          if (error) throw error;
+        }
+
+        // 2) Susun urutan per grup, kunci untuk field baru, dan daftar perubahan
+        const usedKeys = {};
+        live.filter(d => !d._new).forEach(d => { (usedKeys[d.agreement_type] = usedKeys[d.agreement_type] || new Set()).add(d.field_key); });
+        const counter = {};
+        const inserts = [];
+        const updates = [];
+        for (const d of live) {
+          counter[d.agreement_type] = (counter[d.agreement_type] || 0) + 1;
+          const base = {
+            label: d.label.trim(),
+            ai_hint: String(d.ai_hint || '').trim() || null,
+            sort_order: counter[d.agreement_type],
+            is_active: d.is_system ? true : d.is_active !== false
+          };
+          if (d._new) {
+            const set = usedKeys[d.agreement_type] = usedKeys[d.agreement_type] || new Set();
+            const root = slugKey(d.label);
+            let key = root, n = 2;
+            while (set.has(key)) key = root + '_' + n++;
+            set.add(key);
+            inserts.push({ agreement_type: d.agreement_type, field_key: key, is_system: false, ...base });
+          } else {
+            const o = agreementDefs.find(x => x.id === d.id) || {};
+            if (o.label !== base.label || (o.ai_hint || null) !== base.ai_hint || o.sort_order !== base.sort_order || (o.is_active !== false) !== base.is_active) {
+              updates.push({ id: d.id, ...base });
+            }
+          }
+        }
+
+        if (inserts.length) {
+          const { error } = await tbl().insert(inserts);
+          if (error) throw error;
+        }
+        for (const u of updates) {
+          const { id, ...rest } = u;
+          const { error } = await tbl().update({ ...rest, updated_at: new Date().toISOString() }).eq('id', id);
+          if (error) throw error;
+        }
+
+        closeModal('fields-modal');
+        await loadContracts();
+        logAudit('Ubah Pengaturan Field Agreement', 'vendor_contracts', null,
+          { summary: `${inserts.length} tambah, ${updates.length} ubah, ${delIds.length} hapus` });
+      } catch (err) {
+        alert('Gagal menyimpan pengaturan: ' + err.message);
+      } finally {
+        btn.disabled = false;
       }
     }
 
