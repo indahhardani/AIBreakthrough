@@ -1990,65 +1990,227 @@
       }
     }
 
-    function downloadArtworkPdf() {
+        async function downloadArtworkPdf() {
       const c = currentArtworkResult;
       if (!c) return;
       if (!window.jspdf) { alert('Library PDF belum termuat. Muat ulang halaman lalu coba lagi.'); return; }
+
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-      const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
-      const M = 40, maxW = W - 2 * M;
-      let y = M;
-      const write = (str, size = 10, bold = false, indent = 0) => {
-        doc.setFont('helvetica', bold ? 'bold' : 'normal');
-        doc.setFontSize(size);
-        doc.splitTextToSize(String(str ?? '-'), maxW - indent).forEach(line => {
-          if (y + size + 4 > H - M) { doc.addPage(); y = M; }
-          doc.text(line, M + indent, y + size);
-          y += size + 4;
+      const W = doc.internal.pageSize.getWidth();
+      const H = doc.internal.pageSize.getHeight();
+      const M = 35;
+      const maxW = W - 2 * M;
+      let y = 0;
+
+      const d = c.d || {};
+      const score = Number(d.compliance_score || 0);
+
+      // --- 1. WATERMARK TRANSPARAN "DRAFT HASIL ANALISIS AI" ---
+      const drawWatermark = () => {
+        doc.saveGraphicsState();
+        doc.setGState(new doc.GState({ opacity: 0.12 }));
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(26);
+        doc.setTextColor(225, 29, 72); // Rose/Merah
+        doc.text('DRAFT HASIL ANALISIS AI (BELUM DIVALIDASI LEGAL)', W / 2, H / 2, {
+          align: 'center',
+          angle: 30
         });
+        doc.restoreGraphicsState();
       };
-      const section = (t) => { y += 8; write(t, 11, true); };
-      const list = (title, arr) => {
-        section(title + ' (' + (Array.isArray(arr) ? arr.length : 0) + ')');
-        if (!Array.isArray(arr) || !arr.length) { write('Tidak ada.', 10, false, 8); return; }
-        arr.forEach(x => write('- ' + x, 10, false, 8));
+
+      drawWatermark();
+
+      // --- 2. HEADER BANNER KORPORAT ---
+      doc.setFillColor(100, 188, 174); // #64bcae
+      doc.rect(0, 0, W, 70, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('LEGALOPS & COMPLIANCE INTELLIGENCE', M, 30);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text('Laporan Evaluasi Kepatuhan Artwork & Materi Iklan BPOM', M, 48);
+
+      y = 85;
+
+      // --- 3. KARTU UTAMA: GAMBAR ARTWORK + METADATA & METRIKS ---
+      const cardHeight = 160;
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(M, y, maxW, cardHeight, 6, 6, 'FD');
+
+      // Ambil file gambar dari input HTML jika baru diunggah
+      const fileInput = document.getElementById('artwork-file');
+      let imageBase64Data = null;
+
+      if (fileInput && fileInput.files[0] && fileInput.files[0].type.startsWith('image/')) {
+        try {
+          imageBase64Data = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(fileInput.files[0]);
+          });
+        } catch (e) {
+          console.warn('Gagal memuat preview gambar:', e);
+        }
+      }
+
+      // Render Gambar Artwork (Di Sebelah Kiri Kartu)
+      const imgW = 110;
+      const imgH = 135;
+      const imgX = M + 12;
+      const imgY = y + 12.5;
+
+      if (imageBase64Data) {
+        try {
+          doc.addImage(imageBase64Data, 'JPEG', imgX, imgY, imgW, imgH, undefined, 'FAST');
+          doc.setDrawColor(203, 213, 225);
+          doc.rect(imgX, imgY, imgW, imgH);
+        } catch (e) {
+          drawPlaceholderImage(doc, imgX, imgY, imgW, imgH);
+        }
+      } else {
+        drawPlaceholderImage(doc, imgX, imgY, imgW, imgH);
+      }
+
+      // Metadata & Skor (Di Sebelah Kanan Gambar)
+      const infoX = imgX + imgW + 18;
+      let infoY = y + 24;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(15, 23, 42);
+      doc.text(String(c.title || 'Materi Desain Artwork'), infoX, infoY);
+
+      infoY += 16;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Brand: ${c.brand_name || 'General'}   |   Versi: ${c.version || 'v1.0'} (${c.material_type || 'Kemasan'})`, infoX, infoY);
+
+      infoY += 13;
+      doc.text(`Kategori BPOM: ${d.product_category || 'Pangan Olahan'}   |   Audit: ${new Date(c.created_at || Date.now()).toLocaleDateString('id-ID')}`, infoX, infoY);
+
+      infoY += 22;
+
+      // BADGES METRIK (Compliance Score, Status BPOM, Status Halal)
+      const boxW = 100;
+      const boxH = 45;
+
+      // Box 1: Compliance Score
+      let scoreColor = [225, 29, 72]; // Merah
+      if (score >= 75) scoreColor = [16, 185, 129]; // Hijau
+      else if (score >= 50) scoreColor = [217, 119, 6]; // Oranye
+
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(infoX, infoY, boxW, boxH, 4, 4, 'FD');
+      doc.setFontSize(7.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 116, 139);
+      doc.text('COMPLIANCE SCORE', infoX + 8, infoY + 14);
+      doc.setFontSize(13); doc.setTextColor(...scoreColor);
+      doc.text(`${score}/100`, infoX + 8, infoY + 34);
+
+      // Box 2: Status BPOM
+      const bpomStatus = d.bpom_status || 'Non-Compliant';
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(infoX + boxW + 10, infoY, boxW + 15, boxH, 4, 4, 'FD');
+      doc.setFontSize(7.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 116, 139);
+      doc.text('STATUS BPOM', infoX + boxW + 18, infoY + 14);
+      doc.setFontSize(10); doc.setTextColor(bpomStatus === 'Compliant' ? 16 : 225, bpomStatus === 'Compliant' ? 185 : 29, bpomStatus === 'Compliant' ? 129 : 72);
+      doc.text(bpomStatus, infoX + boxW + 18, infoY + 33);
+
+      y += cardHeight + 20;
+
+      // --- HELPER PAGE BREAK & SECTION HEADER ---
+      const checkPageBreak = (neededHeight) => {
+        if (y + neededHeight > H - M) {
+          doc.addPage();
+          drawWatermark();
+          y = M + 10;
+        }
       };
-      const d = c.d;
 
-      write('Hasil Pemeriksaan Artwork', 16, true);
-      write('Ringkasan AI, belum divalidasi Legal.', 9);
-      y += 6;
-      write('Materi: ' + c.title, 10, true);
-      if (c.brand_name) write('Brand: ' + c.brand_name);
-      if (c.material_type) write('Jenis materi: ' + c.material_type);
-      if (c.file_name) write('File: ' + c.file_name);
-      write('Tanggal: ' + new Date(c.created_at).toLocaleDateString('id-ID'));
+      const drawSectionBlock = (title, items, colorRgb, iconChar) => {
+        items = Array.isArray(items) ? items : [];
+        checkPageBreak(40);
 
-      section('Ringkasan');
-      write('Kategori produk: ' + d.product_category);
-      write('Skor kepatuhan: ' + d.compliance_score + '/100');
-      write('Status BPOM: ' + d.bpom_status);
-      write('Status halal: ' + d.halal_status);
+        doc.setFillColor(...colorRgb);
+        doc.rect(M, y, 4, 14, 'F');
 
-      list('Risiko Tinggi', d.high_risk_items);
-      list('Perlu Penyesuaian', d.need_adjustment_items);
-      list('Sudah Sesuai', d.compliant_items);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10.5);
+        doc.setTextColor(...colorRgb);
+        doc.text(`${title} (${items.length})`, M + 10, y + 11);
+        y += 20;
 
+        if (items.length === 0) {
+          doc.setFont('helvetica', 'italic'); doc.setFontSize(8.5); doc.setTextColor(148, 163, 184);
+          doc.text('Tidak ditemukan temuan pada kategori ini.', M + 10, y);
+          y += 16;
+          return;
+        }
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(30, 41, 59);
+
+        items.forEach((item, idx) => {
+          const formattedText = `${idx + 1}. ${item}`;
+          const lines = doc.splitTextToSize(formattedText, maxW - 15);
+          checkPageBreak(lines.length * 11 + 6);
+
+          lines.forEach(line => {
+            doc.text(line, M + 10, y);
+            y += 11;
+          });
+          y += 3;
+        });
+        y += 10;
+      };
+
+      // --- 4. TEMUAN EVALUASI REGULASI BPOM ---
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(15, 23, 42);
+      doc.text('RINCIAN EVALUASI REGULASI BPOM', M, y);
+      y += 16;
+
+      // High Risk Items
+      drawSectionBlock('HIGH RISK (RISIKO TINGGI PELANGGARAN HUKUM)', d.high_risk_items, [225, 29, 72]);
+
+      // Need Adjustment Items
+      drawSectionBlock('NEED ADJUSTMENT / REMOVAL (PERLU REVISI/HAPUS)', d.need_adjustment_items, [217, 119, 6]);
+
+      // Compliant Items
+      drawSectionBlock('COMPLIANT (SESUAI ATURAN BPOM)', d.compliant_items, [16, 185, 129]);
+
+      // --- 5. FOOTER CATATAN HUKUM ---
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(7.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text('Dokumen ini dihasilkan secara otomatis oleh Enterprise LegalOps AI. Wajib divalidasi oleh Tim Legal sebelum cetak masal.', M, H - 20);
+
+      // Simpan PDF
       const slug = String(c.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'artwork';
-      doc.save('Artwork-' + slug + '.pdf');
+      doc.save(`Artwork-Evaluation-${slug}.pdf`);
       logAudit('Unduh PDF Artwork', 'artwork_prescreenings', c.id, { summary: c.title });
     }
 
-    async function showNpdDetail(id) {
-      const { data } = await supabaseClient.from('npd_permit_screenings').select('*').eq('id', id).single();
-      if (!data) return;
-      if (data.analysis_result && data.analysis_result.product_category) {
-        showNpdResult(data.analysis_result, data.product_idea_name, data);
-      } else {
-        showDetail('npd_permit_screenings', id); // data lama tanpa hasil analisis lengkap
-      }
+    // Function Pembantu Gambar Placeholder jika gambar tidak ada/gagal load
+    function drawPlaceholderImage(doc, x, y, w, h) {
+      doc.setFillColor(241, 245, 249);
+      doc.setDrawColor(203, 213, 225);
+      doc.rect(x, y, w, h, 'FD');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text('PREVIEW DESAIN', x + (w / 2), y + (h / 2), { align: 'center' });
     }
+
 
     async function createNpdTicket() {
       const c = currentNpdResult;
