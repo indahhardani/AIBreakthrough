@@ -124,7 +124,7 @@
           </button>
 
           <button onclick="switchTab('vendor-registration')" id="nav-vendor-registration" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
-            <i data-lucide="user-plus" class="w-4 h-4"></i> Pendaftaran Vendor
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Vendor Onboarding
           </button>
 
           <button onclick="switchTab('artwork-prescreening')" id="nav-artwork-prescreening" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
@@ -244,7 +244,7 @@
           <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white border-2 border-brand-200 rounded-xl p-5 shadow-sm">
             <div>
               <h2 class="text-base font-bold text-brand-900 flex items-center gap-2">
-                <i data-lucide="folder-search" class="w-5 h-5 text-brand"></i> Pendaftaran Vendor (Scan Folder Google Drive)
+                <i data-lucide="folder-search" class="w-5 h-5 text-brand"></i> Vendor Onboarding (Scan Folder Google Drive)
               </h2>
               <p class="text-xs text-brand-700 mt-1">Folder vendor dikenali dari nama yang diawali CV atau PT, di kedalaman folder berapa pun. Jenis dokumen dikenali dari NAMA FILE (isi file tidak dibaca dan tidak dikirim ke AI). Dokumen wajib: KTP Direktur, NPWP, Akta Pendirian, NIB, Izin Usaha. Akta Perubahan opsional. Jika lengkap, vendor otomatis siap diajukan agreement.</p>
             </div>
@@ -979,7 +979,7 @@
     // ---------- Audit Trail: catat aktivitas user ke tabel audit_logs ----------
     const AUDIT_ENTITY = {
       users: 'Pengguna', npd_permit_screenings: 'Skrining NPD', tickets: 'Tiket',
-      artwork_prescreenings: 'Artwork', vendor_onboardings: 'Pendaftaran Vendor', vendor_contracts: 'Kontrak Vendor', bpom_regulations: 'Regulasi BPOM', product_nie_records: 'Master NIE'
+      artwork_prescreenings: 'Artwork', vendor_onboardings: 'Vendor Onboarding', vendor_contracts: 'Kontrak Vendor', bpom_regulations: 'Regulasi BPOM', product_nie_records: 'Master NIE'
     };
     async function logAudit(action, entityType, entityId = null, after = null, before = null) {
       try {
@@ -1349,7 +1349,7 @@
       } else if (tab === 'vendor-registration') {
         document.getElementById('view-vendor-registration')?.classList.remove('hidden');
         document.getElementById('nav-vendor-registration')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
-        document.getElementById('page-title').innerText = "Pendaftaran Vendor";
+        document.getElementById('page-title').innerText = "Vendor Onboarding";
         loadVendorOnboardings();
       } else if (tab === 'artwork-prescreening') {
         document.getElementById('view-artwork-prescreening')?.classList.remove('hidden');
@@ -1956,7 +1956,7 @@
     }
 
     // =====================================================================
-    // PENDAFTARAN VENDOR: scan folder Google Drive (Brand > Kategori Vendor > Nama Vendor)
+    // Vendor Onboarding: scan folder Google Drive (Brand > Kategori Vendor > Nama Vendor)
     // =====================================================================
     const VENDOR_SCAN_URL = `${SUPABASE_URL}/functions/v1/scan-vendor-folders`;
     const VENDOR_DOCS = [
