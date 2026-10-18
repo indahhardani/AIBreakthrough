@@ -103,7 +103,7 @@
   <!-- 2. MAIN APP DASHBOARD -->
   <div id="app-view" class="hidden flex-1 flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
     
-    <!-- SIDEBAR - FULL BRAND #64BCAE -->
+    <!-- SIDEBAR -->
     <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-brand border-r border-brand-600 text-white flex flex-col justify-between p-4 flex-shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out shadow-lg">
       <div class="space-y-6">
         <div class="flex items-center justify-between px-2 py-2 border-b border-brand-500/50 pb-4">
@@ -167,8 +167,6 @@
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-brand-900/40 z-30 hidden md:hidden"></div>
 
     <main class="flex-1 flex flex-col bg-brand-50 overflow-y-auto w-full">
-      
-      <!-- HEADER - FULL BRAND #64BCAE -->
       <header class="h-16 bg-brand text-white border-b border-brand-600 flex items-center justify-between px-4 md:px-6 flex-shrink-0 sticky top-0 z-20 shadow-md">
         <div class="flex items-center gap-3">
           <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700">
@@ -195,7 +193,7 @@
           <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-xl border-2 border-brand-200 shadow-sm">
             <div>
               <h2 class="text-base font-bold text-brand-900">Agreement Matrix</h2>
-              <p class="text-xs text-brand-700">Ringkasan perjanjian per jenis, dibaca AI dari Google Drive (folder per Brand). Ringkasan AI belum divalidasi Legal kecuali bertanda Divalidasi.</p>
+              <p class="text-xs text-brand-700">Ringkasan perjanjian per jenis, dibaca AI dari Google Drive.</p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button id="btn-field-settings" onclick="openFieldSettings()" class="bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
@@ -208,21 +206,6 @@
                 <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Google Drive
               </button>
             </div>
-          </div>
-
-          <div id="scan-panel" class="hidden bg-white border-2 border-emerald-300 rounded-xl p-4 shadow-sm space-y-3">
-            <div class="flex items-center justify-between gap-3">
-              <p id="scan-title" class="text-sm font-bold text-brand-900">Scan Google Drive</p>
-              <div class="flex gap-2">
-                <button id="btn-scan-cancel" onclick="cancelScan()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3 py-1 rounded-lg text-[11px] font-bold">Hentikan</button>
-                <button id="btn-scan-close" onclick="closeScanPanel()" class="hidden bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 px-3 py-1 rounded-lg text-[11px] font-bold">Tutup</button>
-              </div>
-            </div>
-            <div class="w-full bg-brand-100 rounded-full h-2.5 overflow-hidden">
-              <div id="scan-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all" style="width:0%"></div>
-            </div>
-            <p id="scan-text" class="text-xs text-slate-600"></p>
-            <div id="scan-detail" class="text-[11px] space-y-1"></div>
           </div>
 
           <div id="contracts-tabs" class="flex flex-wrap gap-2"></div>
@@ -244,31 +227,13 @@
               <h2 class="text-base font-bold text-brand-900 flex items-center gap-2">
                 <i data-lucide="folder-search" class="w-5 h-5 text-brand"></i> Pendaftaran Vendor (Scan Folder Google Drive)
               </h2>
-              <p class="text-xs text-brand-700 mt-1">Folder vendor dikenali dari nama yang diawali CV atau PT, di kedalaman folder berapa pun. Jenis dokumen dikenali dari NAMA FILE. Dokumen wajib: KTP Direktur, NPWP, Akta Pendirian, NIB, Izin Usaha.</p>
+              <p class="text-xs text-brand-700 mt-1">Folder vendor dikenali dari nama yang diawali CV atau PT.</p>
             </div>
             <div class="flex flex-wrap gap-2">
-              <button id="btn-vendor-rescan" onclick="startVendorScan({ rescanAll: true })" class="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
-                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Scan Ulang Semua
-              </button>
               <button id="btn-vendor-scan" onclick="startVendorScan()" class="bg-brand hover:bg-brand-600 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md shadow-brand/30">
                 <i data-lucide="folder-search" class="w-4 h-4"></i> Scan Folder Vendor
               </button>
             </div>
-          </div>
-
-          <div id="vscan-panel" class="hidden bg-white border-2 border-emerald-300 rounded-xl p-4 shadow-sm space-y-3">
-            <div class="flex items-center justify-between gap-3">
-              <p id="vscan-title" class="text-sm font-bold text-brand-900">Scan Folder Vendor</p>
-              <div class="flex gap-2">
-                <button id="vscan-cancel" onclick="cancelVendorScan()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3 py-1 rounded-lg text-[11px] font-bold">Hentikan</button>
-                <button id="vscan-close" onclick="closeVendorScanPanel()" class="hidden bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 px-3 py-1 rounded-lg text-[11px] font-bold">Tutup</button>
-              </div>
-            </div>
-            <div class="w-full bg-brand-100 rounded-full h-2.5 overflow-hidden">
-              <div id="vscan-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all" style="width:0%"></div>
-            </div>
-            <p id="vscan-text" class="text-xs text-slate-600"></p>
-            <div id="vscan-detail" class="text-[11px] space-y-1"></div>
           </div>
 
           <div class="bg-white border-2 border-brand-200 rounded-xl overflow-hidden shadow-sm">
@@ -289,9 +254,7 @@
                   </tr>
                 </thead>
                 <tbody id="table-vendor-onboarding-body" class="divide-y divide-brand-100">
-                  <tr>
-                    <td colspan="10" class="px-4 py-10 text-center text-slate-400">Memuat data pendaftaran...</td>
-                  </tr>
+                  <tr><td colspan="10" class="px-4 py-10 text-center text-slate-400">Memuat data pendaftaran...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -539,18 +502,6 @@
   </div>
 
   <!-- MODALS SECTION -->
-
-  <!-- MODAL: DETAIL VENDOR -->
-  <div id="vendor-detail-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white border-2 border-brand-200 w-full max-w-2xl max-h-[92vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
-        <h3 id="vendor-detail-title" class="text-sm font-bold text-brand-900">Detail Vendor</h3>
-        <button onclick="closeModal('vendor-detail-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="vendor-detail-body" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs"></div>
-      <div id="vendor-detail-footer" class="px-6 py-3 border-t border-brand-200 flex flex-wrap justify-end gap-2"></div>
-    </div>
-  </div>
 
   <!-- MODAL: ARTWORK PRE-SCREENING -->
   <div id="artwork-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
@@ -822,6 +773,32 @@
     </div>
   </div>
 
+  <!-- MODAL: UPLOAD & EXTRACTION DOKUMEN NIE -->
+  <div id="nie-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-2 border-brand-200 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
+        <h3 class="text-sm font-bold text-brand-900">Tambah Master Data NIE Produk (Auto-Extract PDF)</h3>
+        <button onclick="closeModal('nie-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="border-2 border-dashed border-brand-300 rounded-xl p-6 text-center bg-brand-50/50">
+          <i data-lucide="file-check-2" class="w-8 h-8 mx-auto text-emerald-600 mb-2"></i>
+          <p class="text-xs font-bold text-slate-700">Unggah File PDF Sertifikat / Surat NIE BPOM</p>
+          <p class="text-[10px] text-slate-500 mt-0.5">AI akan membaca Nomor NIE, Nama Produk, dan daftar klaim resmi yang disetujui secara otomatis.</p>
+          <input type="file" id="nie-pdf-file" accept="application/pdf" class="mt-3 text-xs text-slate-600 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white file:font-bold hover:file:bg-emerald-500 cursor-pointer">
+        </div>
+
+        <div class="pt-2 flex justify-end gap-3">
+          <button type="button" onclick="closeModal('nie-modal')" class="bg-brand-100 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Batal</button>
+          <button type="button" id="btn-extract-nie-pdf" onclick="handleExtractNiePdf()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
+            <i data-lucide="sparkles" class="w-4 h-4"></i> Ekstrak Data NIE via AI
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: HASIL SKRINING ARTWORK -->
   <div id="artwork-result-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white border-2 border-brand-200 w-full max-w-xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
@@ -834,29 +811,6 @@
         <button onclick="closeModal('artwork-result-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Tutup</button>
         <button onclick="downloadArtworkPdf()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
           <i data-lucide="download" class="w-4 h-4"></i> Download PDF
-        </button>
-        <button id="btn-artwork-ticket" onclick="createArtworkTicket()" class="bg-amber-600 hover:bg-amber-500 disabled:opacity-60 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
-          <i data-lucide="ticket" class="w-4 h-4"></i> Buat Tiket ke Legal
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: HASIL SKRINING NPD -->
-  <div id="npd-result-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white border-2 border-brand-200 w-full max-w-xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
-        <h3 class="text-sm font-bold text-brand-900">Hasil Skrining Regulasi NPD</h3>
-        <button onclick="closeModal('npd-result-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="npd-result-body" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs"></div>
-      <div class="px-6 py-3 border-t border-brand-200 flex flex-wrap justify-end gap-2">
-        <button onclick="closeModal('npd-result-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Tutup</button>
-        <button onclick="downloadNpdPdf()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
-          <i data-lucide="download" class="w-4 h-4"></i> Download PDF
-        </button>
-        <button id="btn-npd-ticket" onclick="createNpdTicket()" class="bg-amber-600 hover:bg-amber-500 disabled:opacity-60 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
-          <i data-lucide="ticket" class="w-4 h-4"></i> Buat Tiket ke Legal
         </button>
       </div>
     </div>
@@ -908,12 +862,6 @@
       document.getElementById('password-input').value = password;
       document.getElementById('form-login').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
     }
-
-    const AUDIT_ENTITY = {
-      users: 'Pengguna', npd_permit_screenings: 'Skrining NPD', tickets: 'Tiket',
-      artwork_prescreenings: 'Artwork', vendor_onboardings: 'Pendaftaran Vendor', vendor_contracts: 'Kontrak Vendor',
-      bpom_regulations: 'Regulasi BPOM', product_nie_records: 'Master NIE'
-    };
 
     async function logAudit(action, entityType, entityId = null, after = null, before = null) {
       try {
@@ -986,12 +934,10 @@
         document.getElementById('view-vendor-contracts')?.classList.remove('hidden');
         document.getElementById('nav-vendor-contracts')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "Agreement Matrix";
-        loadContracts();
       } else if (tab === 'vendor-registration') {
         document.getElementById('view-vendor-registration')?.classList.remove('hidden');
         document.getElementById('nav-vendor-registration')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "Pendaftaran Vendor";
-        loadVendorOnboardings();
       } else if (tab === 'artwork-prescreening') {
         document.getElementById('view-artwork-prescreening')?.classList.remove('hidden');
         document.getElementById('nav-artwork-prescreening')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
@@ -1001,12 +947,10 @@
         document.getElementById('view-npd-screener')?.classList.remove('hidden');
         document.getElementById('nav-npd-screener')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "NPD Permit Screener";
-        loadNpdProductsTable();
       } else if (tab === 'tickets-module') {
         document.getElementById('view-tickets-module')?.classList.remove('hidden');
         document.getElementById('nav-tickets-module')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "Compliance Tickets";
-        loadTicketsTable();
       } else if (tab === 'bpom-regulations') {
         document.getElementById('view-bpom-regulations')?.classList.remove('hidden');
         document.getElementById('nav-bpom-regulations')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
@@ -1016,7 +960,6 @@
         document.getElementById('view-audit-trail')?.classList.remove('hidden');
         document.getElementById('nav-audit-trail')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "Audit Trail Log";
-        loadAuditLogs();
       }
 
       if (window.innerWidth < 768) toggleSidebar();
@@ -1056,6 +999,11 @@
       document.getElementById('form-reg-manual').reset();
       switchRegModalMode('manual');
       openModal('regulation-modal');
+    }
+
+    function openNieModal() {
+      document.getElementById('nie-pdf-file').value = '';
+      openModal('nie-modal');
     }
 
     async function loadRegulationsTable() {
@@ -1198,264 +1146,116 @@
     }
 
     // =====================================================================
-    // PDF GENERATION: DOWNLOAD ARTWORK PDF & NPD PDF
+    // CALL EDGE FUNCTION: parse-bpom-regulation
     // =====================================================================
-    let currentArtworkResult = null;
 
-    async function downloadArtworkPdf() {
-      const c = currentArtworkResult;
-      if (!c) return;
-      if (!window.jspdf) { alert('Library PDF belum termuat. Muat ulang halaman lalu coba lagi.'); return; }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-      const W = doc.internal.pageSize.getWidth();
-      const H = doc.internal.pageSize.getHeight();
-      const M = 35;
-      const maxW = W - 2 * M;
-      let y = 0;
-
-      const d = c.analysis_result || c.d || {};
-      const score = Number(d.compliance_score || c.compliance_score || 0);
-
-      const highRiskItems = d.high_risk_items || d.high_risk || [];
-      const needAdjItems = d.need_adjustment_items || d.need_adjustment || d.medium_risk_items || [];
-      const compliantItems = d.compliant_items || d.compliant || d.low_risk_items || [];
-
-      // --- 1. HEADER ATAS ---
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(15, 23, 42);
-      doc.text('LEGALOPS & COMPLIANCE INTELLIGENCE', M, 30);
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9.5);
-      doc.setTextColor(71, 85, 105);
-      doc.text('Laporan Evaluasi Kepatuhan Artwork & Materi Iklan JDIH BPOM', M, 44);
-
-      y = 56;
-
-      // --- 2. ALERT BANNER DRAFT ANALISIS AI ---
-      doc.setFillColor(254, 242, 242);
-      doc.setDrawColor(248, 113, 113);
-      doc.setLineWidth(1);
-      doc.roundedRect(M, y, maxW, 26, 4, 4, 'FD');
-
-      doc.setFillColor(225, 29, 72);
-      doc.circle(M + 15, y + 13, 6, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      doc.setTextColor(255, 255, 255);
-      doc.text('!', M + 13.5, y + 15.5);
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8.5);
-      doc.setTextColor(185, 28, 28);
-      doc.text('DRAFT HASIL ANALISIS AI -- WAJIB DIVALIDASI OLEH TIM LEGAL SEBELUM CETAK MASAL', M + 28, y + 16.5);
-
-      y += 36;
-
-      // --- 3. KARTU UTAMA PRODUK & METADATA ---
-      const cardH = 195;
-      doc.setFillColor(248, 250, 252);
-      doc.setDrawColor(226, 232, 240);
-      doc.roundedRect(M, y, maxW, cardH, 6, 6, 'FD');
-
-      const fileInput = document.getElementById('artwork-file');
-      let imageBase64Data = null;
-
-      if (fileInput && fileInput.files && fileInput.files[0] && fileInput.files[0].type.startsWith('image/')) {
-        try {
-          imageBase64Data = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.readAsDataURL(fileInput.files[0]);
-          });
-        } catch (e) { console.warn('Gagal memuat image preview:', e); }
+    // 1. Ekstraksi PDF Regulasi
+    async function handleExtractRegulationPdf() {
+      const fileInput = document.getElementById('reg-pdf-file');
+      const file = fileInput ? fileInput.files[0] : null;
+      if (!file) {
+        alert('Pilih file PDF peraturan terlebih dahulu!');
+        return;
       }
 
-      const imgW = 140;
-      const imgH = 168;
-      const imgX = M + 13;
-      const imgY = y + 13.5;
+      const btn = document.getElementById('btn-extract-reg-pdf');
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Membaca & Menganalisis PDF...`;
+      lucide.createIcons();
 
-      if (imageBase64Data) {
-        try {
-          doc.addImage(imageBase64Data, 'JPEG', imgX, imgY, imgW, imgH, undefined, 'FAST');
-          doc.setDrawColor(203, 213, 225);
-          doc.rect(imgX, imgY, imgW, imgH);
-        } catch (e) { drawPlaceholderImage(doc, imgX, imgY, imgW, imgH); }
-      } else {
-        drawPlaceholderImage(doc, imgX, imgY, imgW, imgH);
+      try {
+        const pdfBase64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result).split(',')[1]);
+          reader.onerror = () => reject(new Error('Gagal membaca file PDF.'));
+          reader.readAsDataURL(file);
+        });
+
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/parse-bpom-regulation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            pdfBase64,
+            mode: 'regulation',
+            username: currentUserSession ? currentUserSession.username : 'system'
+          })
+        });
+
+        const resData = await response.json().catch(() => ({}));
+        if (!response.ok || resData.error) throw new Error(resData.error || 'Gagal menganalisis PDF regulasi.');
+
+        alert(`Berhasil mengekstrak ${resData.saved_count} pasal dari ${resData.data.regulation_source || 'dokumen PDF'}!`);
+        fileInput.value = '';
+        closeModal('regulation-modal');
+        loadRegulationsTable();
+        logAudit('Auto-Extract PDF Regulasi', 'bpom_regulations', null, { summary: resData.data.regulation_source, total_pasal: resData.saved_count });
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4"></i> Ekstrak Pasal via AI`;
+        lucide.createIcons();
+      }
+    }
+
+    // 2. Ekstraksi PDF NIE
+    async function handleExtractNiePdf() {
+      const fileInput = document.getElementById('nie-pdf-file');
+      const file = fileInput ? fileInput.files[0] : null;
+      if (!file) {
+        alert('Pilih file PDF dokumen NIE terlebih dahulu!');
+        return;
       }
 
-      const rightX = imgX + imgW + 20;
-      let rightY = y + 24;
+      const btn = document.getElementById('btn-extract-nie-pdf');
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Mengekstrak Dokumen NIE...`;
+      lucide.createIcons();
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      doc.setTextColor(148, 163, 184);
-      doc.text('JUDUL PRODUK', rightX, rightY);
+      try {
+        const pdfBase64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result).split(',')[1]);
+          reader.onerror = () => reject(new Error('Gagal membaca file PDF NIE.'));
+          reader.readAsDataURL(file);
+        });
 
-      rightY += 15;
-      doc.setFontSize(13);
-      doc.setTextColor(15, 23, 42);
-      doc.text(String(c.title || c.product_name || 'Artwork Product'), rightX, rightY);
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/parse-bpom-regulation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            pdfBase64,
+            mode: 'nie',
+            username: currentUserSession ? currentUserSession.username : 'system'
+          })
+        });
 
-      rightY += 26;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      doc.setTextColor(148, 163, 184);
-      doc.text('VERSI & TIPE MATERI', rightX, rightY);
-      doc.text('KATEGORI JDIH', rightX + 160, rightY);
+        const resData = await response.json().catch(() => ({}));
+        if (!response.ok || resData.error) throw new Error(resData.error || 'Gagal menganalisis PDF NIE.');
 
-      rightY += 13;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9.5);
-      doc.setTextColor(15, 23, 42);
-      doc.text(`${c.version || 'v1.0'} (${c.material_type || 'Kemasan'})`, rightX, rightY);
-      doc.text(String(d.product_category || c.product_category || 'Pangan Olahan'), rightX + 160, rightY);
-
-      rightY += 18;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(100, 116, 139);
-      doc.text(`Tanggal Audit: ${new Date(c.created_at || Date.now()).toLocaleDateString('id-ID')}`, rightX, rightY);
-
-      rightY += 20;
-      const metricW = 85;
-      const metricH = 42;
-
-      let scoreColor = [225, 29, 72];
-      if (score >= 75) scoreColor = [16, 185, 129];
-      else if (score >= 50) scoreColor = [217, 119, 6];
-
-      doc.setFillColor(255, 255, 255);
-      doc.setDrawColor(226, 232, 240);
-      doc.roundedRect(rightX, rightY, metricW, metricH, 4, 4, 'FD');
-      doc.setFontSize(6.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 116, 139);
-      doc.text('Compliance Score', rightX + 6, rightY + 12);
-      doc.setFontSize(11); doc.setTextColor(...scoreColor);
-      doc.text(`${score}/100`, rightX + 6, rightY + 30);
-
-      const bpomStatus = d.bpom_status || c.bpom_status || 'Non-Compliant';
-      doc.setFillColor(255, 255, 255);
-      doc.roundedRect(rightX + metricW + 8, rightY, metricW + 10, metricH, 4, 4, 'FD');
-      doc.setFontSize(6.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 116, 139);
-      doc.text('Status BPOM:', rightX + metricW + 14, rightY + 12);
-      doc.setFontSize(8.5); doc.setTextColor(bpomStatus === 'Compliant' ? 16 : 225, bpomStatus === 'Compliant' ? 185 : 29, bpomStatus === 'Compliant' ? 129 : 72);
-      doc.text(bpomStatus, rightX + metricW + 14, rightY + 30);
-
-      const halalStatus = d.halal_status || c.halal_status || 'Non-Compliant';
-      doc.setFillColor(255, 255, 255);
-      doc.roundedRect(rightX + (metricW * 2) + 22, rightY, metricW + 10, metricH, 4, 4, 'FD');
-      doc.setFontSize(6.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 116, 139);
-      doc.text('Status Halal:', rightX + (metricW * 2) + 28, rightY + 12);
-      doc.setFontSize(8.5); doc.setTextColor(halalStatus === 'Compliant' || halalStatus === 'Certified' ? 16 : 225, halalStatus === 'Compliant' || halalStatus === 'Certified' ? 185 : 29, halalStatus === 'Compliant' || halalStatus === 'Certified' ? 129 : 72);
-      doc.text(halalStatus, rightX + (metricW * 2) + 28, rightY + 30);
-
-      y += cardH + 20;
-
-      // --- 4. RINCIAN EVALUASI DALAM BINGKAI ---
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor(15, 23, 42);
-      doc.text('RINCIAN EVALUASI REGULASI JDIH BPOM', M, y);
-      y += 15;
-
-      const checkPageBreak = (neededH) => {
-        if (y + neededH > H - M) {
-          doc.addPage();
-          y = M + 15;
-        }
-      };
-
-      const drawFramedSection = (title, items, borderRgb, bgRgb, iconType) => {
-        items = Array.isArray(items) ? items : [];
-        let contentH = 28;
-        const preparedLines = [];
-
-        if (items.length === 0) {
-          contentH += 16;
-        } else {
-          items.forEach((item, idx) => {
-            const formattedText = `${idx + 1}. ${item}`;
-            const lines = doc.splitTextToSize(formattedText, maxW - 30);
-            preparedLines.push(lines);
-            contentH += (lines.length * 11) + 5;
-          });
-        }
-        contentH += 6;
-
-        checkPageBreak(contentH + 10);
-
-        doc.setFillColor(...bgRgb);
-        doc.setDrawColor(...borderRgb);
-        doc.setLineWidth(1);
-        doc.roundedRect(M, y, maxW, contentH, 6, 6, 'FD');
-
-        let innerY = y + 18;
-        const iconX = M + 18;
-        const iconY = y + 14;
-
-        if (iconType === 'high_risk') {
-          doc.setFillColor(225, 29, 72); doc.circle(iconX, iconY, 6.5, 'F');
-          doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
-          doc.text('!', iconX - 1.5, iconY + 2.5);
-        } else if (iconType === 'adjustment') {
-          doc.setFillColor(217, 119, 6); doc.circle(iconX, iconY, 6.5, 'F');
-          doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
-          doc.text('!', iconX - 1.5, iconY + 2.5);
-        } else if (iconType === 'compliant') {
-          doc.setFillColor(16, 185, 129); doc.circle(iconX, iconY, 6.5, 'F');
-          doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(255, 255, 255);
-          doc.text('v', iconX - 2, iconY + 2.5);
-        }
-
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...borderRgb);
-        doc.text(`${title} (${items.length})`, M + 32, innerY - 4);
-
-        innerY += 12;
-
-        if (items.length === 0) {
-          doc.setFont('helvetica', 'italic'); doc.setFontSize(8.5); doc.setTextColor(148, 163, 184);
-          doc.text('Tidak ditemukan temuan pada kategori ini.', M + 15, innerY);
-        } else {
-          doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(30, 41, 59);
-          preparedLines.forEach((lines) => {
-            lines.forEach((line) => {
-              doc.text(line, M + 15, innerY);
-              innerY += 11;
-            });
-            innerY += 5;
-          });
-        }
-        y += contentH + 12;
-      };
-
-      drawFramedSection('HIGH RISK (RISIKO TINGGI PELANGGARAN HUKUM)', highRiskItems, [225, 29, 72], [254, 242, 242], 'high_risk');
-      drawFramedSection('NEED ADJUSTMENT / REMOVAL (PERLU REVISI/HAPUS)', needAdjItems, [217, 119, 6], [255, 251, 235], 'adjustment');
-      drawFramedSection('COMPLIANT (SESUAI ATURAN JDIH BPOM)', compliantItems, [16, 185, 129], [240, 253, 244], 'compliant');
-
-      doc.setFont('helvetica', 'italic'); doc.setFontSize(7.5); doc.setTextColor(148, 163, 184);
-      doc.text('Dokumen ini dihasilkan secara otomatis oleh Enterprise LegalOps AI. Wajib divalidasi oleh Tim Legal sebelum cetak masal.', M, H - 20);
-
-      const slug = String(c.title || 'artwork').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'artwork';
-      doc.save(`Artwork-Evaluation-${slug}.pdf`);
-      logAudit('Unduh PDF Artwork', 'artwork_prescreenings', c.id, { summary: c.title });
+        alert(`Berhasil menyimpan Master Data NIE!\nNomor NIE: ${resData.data.nie_number || '-'}\nProduk: ${resData.data.product_name || '-'}`);
+        fileInput.value = '';
+        closeModal('nie-modal');
+        loadNieRecordsTable();
+        logAudit('Auto-Extract PDF NIE', 'product_nie_records', null, { summary: resData.data.product_name, nie_number: resData.data.nie_number });
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4"></i> Ekstrak Data NIE via AI`;
+        lucide.createIcons();
+      }
     }
 
-    function drawPlaceholderImage(doc, x, y, w, h) {
-      doc.setFillColor(241, 245, 249);
-      doc.setDrawColor(203, 213, 225);
-      doc.rect(x, y, w, h, 'FD');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      doc.setTextColor(148, 163, 184);
-      doc.text('PREVIEW DESAIN', x + (w / 2), y + (h / 2), { align: 'center' });
-    }
-
-    // Handlers Form Utama
+    // Handlers Tambahan
     async function handleCreateArtwork(e) {
       e.preventDefault();
       const title = document.getElementById('artwork-title').value.trim();
@@ -1492,8 +1292,7 @@
 
         closeModal('artwork-modal');
         loadArtworkTable();
-        showArtworkResult(resData.data, title, { id: resData.saved_id, brand_id, brand_name, material_type, file_name: file.name, created_at: new Date().toISOString() });
-        logAudit('Skrining Artwork', 'artwork_prescreenings', resData.saved_id, { summary: title });
+        alert('Pemeriksaan Artwork Selesai!');
       } catch (err) { alert('Error: ' + err.message); } 
       finally {
         btn.disabled = false;
@@ -1518,29 +1317,12 @@
             <td class="px-4 py-3">${esc(r.material_type)}</td>
             <td class="px-4 py-3">${esc(r.brand_name ?? '-')}</td>
             <td class="px-4 py-3 font-bold text-purple-600">${r.compliance_score != null ? esc(r.compliance_score) + '/100' : '-'}</td>
-            <td class="px-4 py-3 font-semibold ${artStatusColor(r.bpom_status)}">${esc(r.bpom_status ?? '-')}</td>
+            <td class="px-4 py-3 font-semibold">${esc(r.bpom_status ?? '-')}</td>
             <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 text-center"><button onclick="showArtworkDetail('${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button></td>
+            <td class="px-4 py-3 text-center"><button onclick="showDetail('artwork_prescreenings', '${r.id}')" class="px-2 py-1 bg-brand-100 text-brand-900 rounded text-[10px]">Detail</button></td>
           </tr>
         `).join('');
       } catch (err) { tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`; }
-    }
-
-    function artStatusColor(st) {
-      return st === 'Compliant' ? 'text-emerald-600' : st === 'Need Adjustment' ? 'text-amber-600' : st === 'Non-Compliant' ? 'text-rose-600' : 'text-slate-700';
-    }
-
-    function showArtworkResult(d, title, rec = {}) {
-      currentArtworkResult = { d, title, id: rec.id || null, brand_id: rec.brand_id || null, brand_name: rec.brand_name || null, material_type: rec.material_type || null, file_name: rec.file_name || null, created_at: rec.created_at || new Date().toISOString() };
-      openModal('artwork-result-modal');
-    }
-
-    async function showArtworkDetail(id) {
-      const { data } = await supabaseClient.from('artwork_prescreenings').select('*').eq('id', id).single();
-      if (!data) return;
-      if (data.analysis_result && data.analysis_result.product_category) {
-        showArtworkResult(data.analysis_result, data.title || data.product_name, data);
-      } else { showDetail('artwork_prescreenings', id); }
     }
 
     async function showDetail(table, id) {
