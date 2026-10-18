@@ -140,7 +140,7 @@
           </button>
 
           <button onclick="switchTab('bpom-regulations')" id="nav-bpom-regulations" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
-            <i data-lucide="book-open" class="w-4 h-4"></i> Basis Data Regulasi & NIE
+            <i data-lucide="book-open" class="w-4 h-4"></i> Legal Standards & NIE
           </button>
 
           <button onclick="switchTab('audit-trail')" id="nav-audit-trail" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
@@ -406,7 +406,7 @@
           </div>
         </section>
 
-        <!-- 6. MODUL BASIS DATA REGULASI & NIE -->
+        <!-- 6. MODUL Legal Standards & NIE -->
         <section id="view-bpom-regulations" class="hidden space-y-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-2 border-brand-200 rounded-xl p-5 shadow-sm">
             <div>
@@ -1369,7 +1369,7 @@
       } else if (tab === 'bpom-regulations') {
         document.getElementById('view-bpom-regulations')?.classList.remove('hidden');
         document.getElementById('nav-bpom-regulations')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
-        document.getElementById('page-title').innerText = "Basis Data Regulasi & NIE";
+        document.getElementById('page-title').innerText = "Legal Standards & NIE";
         switchRegSubTab('rules');
       } else if (tab === 'audit-trail') {
         document.getElementById('view-audit-trail')?.classList.remove('hidden');
