@@ -139,6 +139,10 @@
             <i data-lucide="ticket" class="w-4 h-4"></i> Compliance Tickets
           </button>
 
+          <button onclick="switchTab('bpom-regulations')" id="nav-bpom-regulations" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
+            <i data-lucide="book-open" class="w-4 h-4"></i> Basis Data Regulasi & NIE
+          </button>
+
           <button onclick="switchTab('audit-trail')" id="nav-audit-trail" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
             <i data-lucide="history" class="w-4 h-4"></i> Audit Trail Log
           </button>
@@ -206,7 +210,6 @@
             </div>
           </div>
 
-          <!-- Panel progres scan -->
           <div id="scan-panel" class="hidden bg-white border-2 border-emerald-300 rounded-xl p-4 shadow-sm space-y-3">
             <div class="flex items-center justify-between gap-3">
               <p id="scan-title" class="text-sm font-bold text-brand-900">Scan Google Drive</p>
@@ -222,7 +225,6 @@
             <div id="scan-detail" class="text-[11px] space-y-1"></div>
           </div>
 
-          <!-- Tab per jenis perjanjian -->
           <div id="contracts-tabs" class="flex flex-wrap gap-2"></div>
 
           <div class="bg-white border-2 border-brand-200 rounded-xl overflow-hidden shadow-sm">
@@ -242,7 +244,7 @@
               <h2 class="text-base font-bold text-brand-900 flex items-center gap-2">
                 <i data-lucide="folder-search" class="w-5 h-5 text-brand"></i> Pendaftaran Vendor (Scan Folder Google Drive)
               </h2>
-              <p class="text-xs text-brand-700 mt-1">Folder vendor dikenali dari nama yang diawali CV atau PT, di kedalaman folder berapa pun. Jenis dokumen dikenali dari NAMA FILE (isi file tidak dibaca dan tidak dikirim ke AI). Dokumen wajib: KTP Direktur, NPWP, Akta Pendirian, NIB, Izin Usaha. Akta Perubahan opsional. Jika lengkap, vendor otomatis siap diajukan agreement.</p>
+              <p class="text-xs text-brand-700 mt-1">Folder vendor dikenali dari nama yang diawali CV atau PT, di kedalaman folder berapa pun. Jenis dokumen dikenali dari NAMA FILE. Dokumen wajib: KTP Direktur, NPWP, Akta Pendirian, NIB, Izin Usaha.</p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button id="btn-vendor-rescan" onclick="startVendorScan({ rescanAll: true })" class="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
@@ -254,7 +256,6 @@
             </div>
           </div>
 
-          <!-- Panel progres scan vendor -->
           <div id="vscan-panel" class="hidden bg-white border-2 border-emerald-300 rounded-xl p-4 shadow-sm space-y-3">
             <div class="flex items-center justify-between gap-3">
               <p id="vscan-title" class="text-sm font-bold text-brand-900">Scan Folder Vendor</p>
@@ -280,7 +281,7 @@
                     <th class="px-2 py-3.5 font-bold text-center">KTP Direktur</th>
                     <th class="px-2 py-3.5 font-bold text-center">NPWP</th>
                     <th class="px-2 py-3.5 font-bold text-center">Akta Pendirian</th>
-                    <th class="px-2 py-3.5 font-bold text-center">Akta Perubahan (opsional)</th>
+                    <th class="px-2 py-3.5 font-bold text-center">Akta Perubahan</th>
                     <th class="px-2 py-3.5 font-bold text-center">NIB</th>
                     <th class="px-2 py-3.5 font-bold text-center">Izin Usaha</th>
                     <th class="px-3 py-3.5 font-bold text-center min-w-[150px]">Status</th>
@@ -402,7 +403,111 @@
           </div>
         </section>
 
-        <!-- 6. AUDIT TRAIL LOG TAB -->
+        <!-- 6. MODUL BASIS DATA REGULASI & NIE -->
+        <section id="view-bpom-regulations" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-2 border-brand-200 rounded-xl p-5 shadow-sm">
+            <div>
+              <h2 class="text-base font-bold text-brand-900 flex items-center gap-2">
+                <i data-lucide="book-open" class="w-5 h-5 text-brand"></i> Basis Data Regulasi & Master NIE Produk
+              </h2>
+              <p class="text-xs text-brand-700 mt-1">Kelola direktori hukum BPOM/BPJPH/PP dan dokumen NIE resmi sebagai acuan pemindaian AI untuk kemasan & iklan.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="openRegulationModal()" class="bg-brand hover:bg-brand-600 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Aturan BPOM
+              </button>
+              <button onclick="openNieModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                <i data-lucide="file-check-2" class="w-4 h-4"></i> Tambah Master NIE
+              </button>
+            </div>
+          </div>
+
+          <div class="flex border-b border-brand-200 text-xs font-bold gap-4">
+            <button id="subtab-reg-btn" onclick="switchRegSubTab('rules')" class="pb-2.5 border-b-2 border-brand text-brand-900 font-extrabold flex items-center gap-2">
+              <i data-lucide="scale" class="w-4 h-4"></i> Direktori Aturan Hukum (BPOM/BPJPH/PP)
+            </button>
+            <button id="subtab-nie-btn" onclick="switchRegSubTab('nie')" class="pb-2.5 border-b-2 border-transparent text-slate-500 hover:text-brand-900 flex items-center gap-2">
+              <i data-lucide="award" class="w-4 h-4"></i> Master Data NIE Produk
+            </button>
+          </div>
+
+          <!-- SUB-VIEW 1: REGULASI HUKUM -->
+          <div id="subview-reg-rules" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-4 rounded-xl border-2 border-brand-200 shadow-sm text-xs">
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-brand-800 mb-1">Cari Pasal / Kata Kunci</label>
+                <input type="text" id="reg-search" onkeyup="renderRegulationsTable()" placeholder="Cari pasal, klaim, kata..." class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-brand-600">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-brand-800 mb-1">Jenis Regulasi</label>
+                <select id="reg-filter-type" onchange="renderRegulationsTable()" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand-600">
+                  <option value="ALL">Semua Jenis Peraturan</option>
+                  <option value="Peraturan BPOM">Peraturan BPOM</option>
+                  <option value="Peraturan BPJPH">Peraturan BPJPH (Halal)</option>
+                  <option value="PP">Peraturan Pemerintah (PP)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-brand-800 mb-1">Cakupan Materi</label>
+                <select id="reg-filter-scope" onchange="renderRegulationsTable()" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand-600">
+                  <option value="ALL">Semua (Kemasan & Iklan)</option>
+                  <option value="Kemasan">Kemasan</option>
+                  <option value="Iklan / Advertising">Iklan / Advertising</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-brand-800 mb-1">Status Keberlakuan</label>
+                <select id="reg-filter-status" onchange="renderRegulationsTable()" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand-600">
+                  <option value="ALL">Semua Status</option>
+                  <option value="ACTIVE" selected>Aktif Digunakan AI</option>
+                  <option value="INACTIVE">Non-Aktif (Diarsipkan)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="bg-white border-2 border-brand-200 rounded-xl overflow-hidden shadow-sm">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                  <thead class="bg-brand-100 text-brand-900 uppercase tracking-wider border-b border-brand-200 text-[10px] font-bold">
+                    <tr>
+                      <th class="px-4 py-3.5 min-w-[150px]">Sumber & Pasal</th>
+                      <th class="px-4 py-3.5 min-w-[180px]">Judul Aturan</th>
+                      <th class="px-4 py-3.5 min-w-[110px]">Jenis & Scope</th>
+                      <th class="px-4 py-3.5 min-w-[120px]">Kategori Produk</th>
+                      <th class="px-4 py-3.5 min-w-[110px]">Tingkat Risiko</th>
+                      <th class="px-4 py-3.5 min-w-[90px] text-center">Status AI</th>
+                      <th class="px-4 py-3.5 text-center min-w-[100px]">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-regulations-body" class="divide-y divide-brand-100"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW 2: MASTER NIE -->
+          <div id="subview-reg-nie" class="hidden space-y-4">
+            <div class="bg-white border-2 border-brand-200 rounded-xl overflow-hidden shadow-sm">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                  <thead class="bg-brand-100 text-brand-900 uppercase tracking-wider border-b border-brand-200 text-[10px] font-bold">
+                    <tr>
+                      <th class="px-4 py-3.5 min-w-[140px]">Nomor NIE</th>
+                      <th class="px-4 py-3.5 min-w-[180px]">Nama Produk</th>
+                      <th class="px-4 py-3.5 min-w-[110px]">Brand</th>
+                      <th class="px-4 py-3.5 min-w-[120px]">Kategori BPOM</th>
+                      <th class="px-4 py-3.5 min-w-[200px]">Klaim Resmi Disetujui</th>
+                      <th class="px-4 py-3.5 text-center min-w-[100px]">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-nie-body" class="divide-y divide-brand-100"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. AUDIT TRAIL LOG TAB -->
         <section id="view-audit-trail" class="hidden space-y-4">
           <div class="flex justify-between items-center bg-white p-4 rounded-xl border-2 border-brand-200 shadow-sm">
             <div>
@@ -433,7 +538,9 @@
     </main>
   </div>
 
-  <!-- MODAL: DETAIL VENDOR (hasil scan folder + koreksi manual) -->
+  <!-- MODALS SECTION -->
+
+  <!-- MODAL: DETAIL VENDOR -->
   <div id="vendor-detail-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white border-2 border-brand-200 w-full max-w-2xl max-h-[92vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
@@ -445,7 +552,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: ARTWORK PRE-SCREENING -->
+  <!-- MODAL: ARTWORK PRE-SCREENING -->
   <div id="artwork-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white border-2 border-brand-200 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
@@ -459,7 +566,6 @@
           <input type="text" id="artwork-title" required placeholder="Contoh: Design Kemasan Cushion Vol. 2" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-500">
         </div>
 
-                   <!-- Tambahkan field Versi di sebelah Jenis dan Brand -->
         <div class="grid grid-cols-3 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Materi</label>
@@ -474,12 +580,9 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Versi Artwork</label>
-            <input type="text" id="artwork-version" required placeholder="v1.0" defaultValue="v1.0" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-500">
+            <input type="text" id="artwork-version" required placeholder="v1.0" value="v1.0" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-500">
           </div>
         </div>
-          
-
-
 
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Unggah Desain (Gambar/PDF)</label>
@@ -496,7 +599,7 @@
     </div>
   </div>
 
-  <!-- MODAL 3: NPD PERMIT SCREENER -->
+  <!-- MODAL: NPD SCREENER -->
   <div id="npd-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white border-2 border-brand-200 w-full max-w-xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
@@ -518,8 +621,7 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Usia Target Pasar</label>
-          <input type="text" id="npd-target-age" required placeholder="Contoh: Dewasa 25-40 tahun / Anak 6-12 tahun" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
-          <p class="text-[10px] text-slate-400 mt-1">Kategori produk (pangan/suplemen/obat bahan alam/kosmetik) ditentukan otomatis oleh AI.</p>
+          <input type="text" id="npd-target-age" required placeholder="Contoh: Dewasa 25-40 tahun" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Skema Produksi</label>
@@ -536,7 +638,7 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Checklist Kanal Penjualan yang Direncanakan</label>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Checklist Kanal Penjualan</label>
           <div class="grid grid-cols-2 gap-2 text-xs bg-brand-50/60 p-3 rounded-lg border border-brand-200">
             <label class="flex items-center gap-2 cursor-pointer text-slate-700 font-medium">
               <input type="checkbox" value="Toko Fisik atau Ritel" class="npd-channel-cb rounded text-emerald-600 focus:ring-emerald-500"> Toko Fisik / Ritel
@@ -550,20 +652,17 @@
             <label class="flex items-center gap-2 cursor-pointer text-slate-700 font-medium">
               <input type="checkbox" value="Ekspor" class="npd-channel-cb rounded text-emerald-600 focus:ring-emerald-500"> Ekspor
             </label>
-            <label class="flex items-center gap-2 cursor-pointer text-slate-700 font-medium col-span-2">
-              <input type="checkbox" value="B2B atau Distributor" class="npd-channel-cb rounded text-emerald-600 focus:ring-emerald-500"> B2B / Distributor
-            </label>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Klaim Produk (Ketik Manual)</label>
-          <textarea id="npd-claim" rows="2" placeholder="Contoh: Mencerahkan kulit dalam 14 hari, Mencegah timbulnya jerawat..." class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500"></textarea>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Klaim Produk</label>
+          <textarea id="npd-claim" rows="2" placeholder="Contoh: Mencerahkan kulit..." class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500"></textarea>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Komposisi Bahan / InCI Name (Ketik Manual)</label>
-          <textarea id="npd-ingredients" rows="2" placeholder="Contoh: Aqua, Niacinamide 5%, Alpha Arbutin, Centella Asiatica..." class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500"></textarea>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Komposisi Bahan</label>
+          <textarea id="npd-ingredients" rows="2" placeholder="Contoh: Niacinamide 5%, Alpha Arbutin..." class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500"></textarea>
         </div>
 
         <div class="pt-3 border-t border-brand-200 flex justify-end gap-3">
@@ -576,7 +675,7 @@
     </div>
   </div>
 
-  <!-- MODAL 4: COMPLIANCE TICKET CREATION -->
+  <!-- MODAL: TIKET -->
   <div id="ticket-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white border-2 border-brand-200 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
@@ -587,7 +686,7 @@
       <form onsubmit="handleCreateTicket(event)" class="p-6 space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Permintaan / Tiket</label>
-          <input type="text" id="ticket-title" required placeholder="Contoh: Review Kontrak MoU Vendor Packaging" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
+          <input type="text" id="ticket-title" required placeholder="Contoh: Review Kontrak MoU Vendor" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -612,8 +711,8 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Rincian Deskripsi Permintaan</label>
-          <textarea id="ticket-description" rows="3" required placeholder="Jelaskan kebutuhan legalitas secara rinci..." class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500"></textarea>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Deskripsi Permintaan</label>
+          <textarea id="ticket-description" rows="3" required placeholder="Jelaskan kebutuhan legalitas..." class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500"></textarea>
         </div>
 
         <div class="pt-3 border-t border-brand-200 flex justify-end gap-3">
@@ -623,6 +722,103 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH / EDIT ATURAN BPOM -->
+  <div id="regulation-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-2 border-brand-200 w-full max-w-2xl max-h-[92vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
+        <h3 id="regulation-modal-title" class="text-sm font-bold text-brand-900">Kelola Aturan Regulasi BPOM / Halal</h3>
+        <button onclick="closeModal('regulation-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="flex border-b border-brand-200 px-6 pt-3 text-xs font-bold gap-4 bg-brand-50/30">
+        <button type="button" onclick="switchRegModalMode('manual')" id="tab-reg-manual" class="pb-2 border-b-2 border-brand text-brand-900">Input Manual</button>
+        <button type="button" onclick="switchRegModalMode('pdf')" id="tab-reg-pdf" class="pb-2 border-b-2 border-transparent text-slate-500 hover:text-brand-900">⚡ Auto-Extract dari PDF Regulasi</button>
+      </div>
+
+      <form id="form-reg-manual" onsubmit="handleSaveRegulation(event)" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+        <input type="hidden" id="reg-id-input">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Peraturan</label>
+            <select id="reg-type-input" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-600">
+              <option value="Peraturan BPOM">Peraturan BPOM</option>
+              <option value="Peraturan BPJPH">Peraturan BPJPH (Halal)</option>
+              <option value="PP">Peraturan Pemerintah (PP)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Sumber / Nomor UU</label>
+            <input type="text" id="reg-source-input" required placeholder="Contoh: PerBPOM No. 31 Tahun 2018" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-600">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Pasal / Ayat</label>
+            <input type="text" id="reg-article-input" placeholder="Contoh: Pasal 12 Ayat (1)" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-600">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Ringkas Aturan</label>
+            <input type="text" id="reg-title-input" required placeholder="Contoh: Larangan Klaim Superlatif" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-600">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Cakupan Materi</label>
+            <select id="reg-scope-input" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-600">
+              <option value="Semua">Semua (Kemasan & Iklan)</option>
+              <option value="Kemasan">Kemasan</option>
+              <option value="Iklan / Advertising">Iklan / Advertising</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori Produk</label>
+            <select id="reg-product-cat-input" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-600">
+              <option value="Semua">Semua Kategori</option>
+              <option value="Kosmetik">Kosmetik</option>
+              <option value="Pangan Olahan">Pangan Olahan</option>
+              <option value="Suplemen Kesehatan">Suplemen Kesehatan</option>
+              <option value="Obat Tradisional">Obat Tradisional</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tingkat Risiko Violation</label>
+            <select id="reg-risk-input" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-600">
+              <option value="High Risk">High Risk</option>
+              <option value="Need Adjustment">Need Adjustment</option>
+              <option value="Compliant">Compliant</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Deskripsi Aturan & Panduan AI</label>
+          <textarea id="reg-description-input" rows="3" required placeholder="Jelaskan detail larangan/kewajiban sebagai panduan AI..." class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-600"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-brand-200 flex justify-end gap-3">
+          <button type="button" onclick="closeModal('regulation-modal')" class="bg-brand-100 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Batal</button>
+          <button type="submit" id="btn-save-reg" class="bg-brand hover:bg-brand-600 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md shadow-brand/30">
+            <i data-lucide="save" class="w-4 h-4"></i> Simpan Aturan
+          </button>
+        </div>
+      </form>
+
+      <div id="form-reg-pdf" class="hidden p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+        <div class="border-2 border-dashed border-brand-300 rounded-xl p-6 text-center bg-brand-50/50">
+          <i data-lucide="file-up" class="w-8 h-8 mx-auto text-brand mb-2"></i>
+          <p class="text-xs font-bold text-slate-700">Unggah File PDF Peraturan BPOM / BPJPH / PP Baru</p>
+          <p class="text-[10px] text-slate-500 mt-0.5">AI akan membaca dan mengekstrak daftar pasal secara otomatis.</p>
+          <input type="file" id="reg-pdf-file" accept="application/pdf" class="mt-3 text-xs text-slate-600 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-brand file:text-white file:font-bold hover:file:bg-brand-600 cursor-pointer">
+        </div>
+        <button type="button" onclick="handleExtractRegulationPdf()" id="btn-extract-reg-pdf" class="w-full bg-brand hover:bg-brand-600 text-white font-bold py-2.5 rounded-lg text-xs transition flex items-center justify-center gap-2 shadow-md shadow-brand/30">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Ekstrak Pasal via AI
+        </button>
+      </div>
     </div>
   </div>
 
@@ -666,7 +862,7 @@
     </div>
   </div>
 
-  <!-- MODAL 5: DETAIL ROW DATA -->
+  <!-- MODAL: DETAIL GENERAL DATA -->
   <div id="detail-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white border-2 border-brand-200 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
@@ -677,38 +873,6 @@
     </div>
   </div>
 
-  <!-- MODAL: DETAIL / EDIT KONTRAK -->
-  <div id="contract-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white border-2 border-brand-200 w-full max-w-3xl max-h-[92vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
-        <h3 id="contract-modal-title" class="text-sm font-bold text-brand-900">Detail Perjanjian</h3>
-        <button onclick="closeModal('contract-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="contract-body" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs"></div>
-      <div id="contract-footer" class="px-6 py-3 border-t border-brand-200 flex flex-wrap justify-end gap-2"></div>
-    </div>
-  </div>
-
-  <!-- MODAL: PENGATURAN FIELD AGREEMENT -->
-  <div id="fields-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white border-2 border-brand-200 w-full max-w-4xl max-h-[92vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
-        <h3 class="text-sm font-bold text-brand-900">Pengaturan Field Agreement</h3>
-        <button onclick="closeModal('fields-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div class="px-6 pt-4 text-[11px] text-slate-500 space-y-1">
-        <p>Judul field bisa diganti, ditambah, diurutkan, atau dinonaktifkan. <b>Petunjuk untuk AI</b> menjelaskan apa yang harus dicari di dokumen.</p>
-        <p>Perubahan baru berlaku pada scan berikutnya. Untuk mengisi kontrak yang sudah ada dengan field baru, jalankan <b>Scan Ulang</b>. Data field yang dihapus tetap tersimpan sampai kontrak di-scan ulang.</p>
-      </div>
-      <div id="fields-body" class="p-6 space-y-5 overflow-y-auto flex-1 text-xs"></div>
-      <div class="px-6 py-3 border-t border-brand-200 flex justify-end gap-2">
-        <button onclick="closeModal('fields-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Batal</button>
-        <button id="btn-save-fields" onclick="saveFieldDefs()" class="bg-brand hover:bg-brand-600 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md shadow-brand/30">
-          <i data-lucide="save" class="w-4 h-4"></i> Simpan Pengaturan
-        </button>
-      </div>
-    </div>
-  </div>
   <!-- SCRIPT ENGINE UTUH -->
   <script>
     const SUPABASE_URL = 'https://zsifocstbcbrxtexkuyi.supabase.co';
@@ -717,6 +881,8 @@
     
     let currentUserSession = null;
     let masterBrands = [];
+    let masterRegulationsData = [];
+    let masterNieData = [];
 
     lucide.createIcons();
 
@@ -743,15 +909,16 @@
       document.getElementById('form-login').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
     }
 
-    // ---------- Audit Trail: catat aktivitas user ke tabel audit_logs ----------
     const AUDIT_ENTITY = {
       users: 'Pengguna', npd_permit_screenings: 'Skrining NPD', tickets: 'Tiket',
-      artwork_prescreenings: 'Artwork', vendor_onboardings: 'Pendaftaran Vendor', vendor_contracts: 'Kontrak Vendor'
+      artwork_prescreenings: 'Artwork', vendor_onboardings: 'Pendaftaran Vendor', vendor_contracts: 'Kontrak Vendor',
+      bpom_regulations: 'Regulasi BPOM', product_nie_records: 'Master NIE'
     };
+
     async function logAudit(action, entityType, entityId = null, after = null, before = null) {
       try {
         const isUuid = typeof entityId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(entityId);
-        const { error } = await supabaseClient.from('audit_logs').insert([{
+        await supabaseClient.from('audit_logs').insert([{
           actor_username: currentUserSession ? currentUserSession.username : 'system',
           action,
           entity_type: entityType,
@@ -759,10 +926,7 @@
           payload_before: before,
           payload_after: after
         }]);
-        if (error) console.warn('Audit log gagal disimpan:', error.message);
-      } catch (e) {
-        console.warn('Audit log gagal disimpan:', e);
-      }
+      } catch (e) { console.warn('Audit log gagal:', e); }
     }
 
     async function handlePureSupabaseLogin(e) {
@@ -809,10 +973,10 @@
     function openCreateTicketModal() { openModal('ticket-modal'); }
 
     function switchTab(tab) {
-      const allTabs = ['view-vendor-contracts', 'view-vendor-registration', 'view-artwork-prescreening', 'view-npd-screener', 'view-tickets-module', 'view-audit-trail'];
+      const allTabs = ['view-vendor-contracts', 'view-vendor-registration', 'view-artwork-prescreening', 'view-npd-screener', 'view-tickets-module', 'view-audit-trail', 'view-bpom-regulations'];
       allTabs.forEach(id => document.getElementById(id)?.classList.add('hidden'));
 
-      const navIds = ['nav-vendor-contracts', 'nav-vendor-registration', 'nav-artwork-prescreening', 'nav-npd-screener', 'nav-tickets-module', 'nav-audit-trail'];
+      const navIds = ['nav-vendor-contracts', 'nav-vendor-registration', 'nav-artwork-prescreening', 'nav-npd-screener', 'nav-tickets-module', 'nav-audit-trail', 'nav-bpom-regulations'];
       navIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition";
@@ -843,6 +1007,11 @@
         document.getElementById('nav-tickets-module')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "Compliance Tickets";
         loadTicketsTable();
+      } else if (tab === 'bpom-regulations') {
+        document.getElementById('view-bpom-regulations')?.classList.remove('hidden');
+        document.getElementById('nav-bpom-regulations')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
+        document.getElementById('page-title').innerText = "Basis Data Regulasi & NIE";
+        switchRegSubTab('rules');
       } else if (tab === 'audit-trail') {
         document.getElementById('view-audit-trail')?.classList.remove('hidden');
         document.getElementById('nav-audit-trail')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
@@ -855,1211 +1024,185 @@
     }
 
     // =====================================================================
-    // AGREEMENT MATRIX: ringkasan perjanjian per jenis (vendor / distributor / GT-MT / sewa)
+    // REGULASI & NIE MODULE LOGIC
     // =====================================================================
-    const AGR_TYPES = [
-      { code: 'vendor', label: 'Vendor' },
-      { code: 'distributor', label: 'Distributor' },
-      { code: 'gt_mt', label: 'GT/MT' },
-      { code: 'sewa', label: 'Sewa' }
-    ];
-    const AGR_GROUPS = [{ code: 'umum', label: 'Umum (semua perjanjian)' }, ...AGR_TYPES];
-    // field "umum" bawaan yang tersimpan di kolom vendor_contracts (bukan di custom_fields)
-    const COLUMN_FIELD_KEYS = ['jangka_waktu_perjanjian', 'payment_terms', 'late_penalty'];
-    const EXPIRY_WARN_DAYS = 60;
-    const SCAN_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/Scan-gdrive`;
+    function switchRegSubTab(type) {
+      const isRules = type === 'rules';
+      document.getElementById('subview-reg-rules').classList.toggle('hidden', !isRules);
+      document.getElementById('subview-reg-nie').classList.toggle('hidden', isRules);
 
-    let agreementDefs = [];
-    let contractsData = [];
-    let activeAgrTab = 'all';
+      document.getElementById('subtab-reg-btn').className = isRules
+        ? "pb-2.5 border-b-2 border-brand text-brand-900 font-extrabold flex items-center gap-2"
+        : "pb-2.5 border-b-2 border-transparent text-slate-500 hover:text-brand-900 flex items-center gap-2";
 
-    const agrTypeLabel = (code) => (AGR_TYPES.find(t => t.code === code) || {}).label || code;
-    const safeUrl = (u) => /^https:\/\//i.test(String(u || '')) ? u : '#';
-    const defsOf = (type) => agreementDefs.filter(d => d.agreement_type === type && d.is_active !== false);
-    const isColumnField = (d) => d.agreement_type === 'umum' && d.is_system && COLUMN_FIELD_KEYS.includes(d.field_key);
-    const editedKeyOf = (d) => isColumnField(d) ? d.field_key : (d.agreement_type + '.' + d.field_key);
-    const isEdited = (c, key) => Array.isArray(c.edited_fields) && c.edited_fields.includes(key);
+      document.getElementById('subtab-nie-btn').className = !isRules
+        ? "pb-2.5 border-b-2 border-brand text-brand-900 font-extrabold flex items-center gap-2"
+        : "pb-2.5 border-b-2 border-transparent text-slate-500 hover:text-brand-900 flex items-center gap-2";
 
-    function fieldValue(c, d) {
-      if (isColumnField(d)) return c[d.field_key];
-      const grp = c.custom_fields && c.custom_fields[d.agreement_type];
-      return grp ? grp[d.field_key] : null;
+      if (isRules) loadRegulationsTable();
+      else loadNieRecordsTable();
     }
 
-    const isEmptyVal = (v) => v === null || v === undefined || String(v).trim() === '';
-    // Sel kosong: kontrak yang belum pernah di-scan dengan daftar field baru diberi petunjuk khusus
-    function textCell(v, c) {
-      if (!isEmptyVal(v)) return esc(v);
-      if (c && !c.last_scanned_at) return '<span class="text-amber-500 italic">Belum di-scan ulang</span>';
-      return '<span class="text-slate-400 italic">Tidak disebutkan</span>';
+    function switchRegModalMode(mode) {
+      const isManual = mode === 'manual';
+      document.getElementById('form-reg-manual').classList.toggle('hidden', !isManual);
+      document.getElementById('form-reg-pdf').classList.toggle('hidden', isManual);
+      document.getElementById('tab-reg-manual').className = isManual ? "pb-2 border-b-2 border-brand text-brand-900" : "pb-2 border-b-2 border-transparent text-slate-500 hover:text-brand-900";
+      document.getElementById('tab-reg-pdf').className = !isManual ? "pb-2 border-b-2 border-brand text-brand-900" : "pb-2 border-b-2 border-transparent text-slate-500 hover:text-brand-900";
     }
 
-    function parseYmd(dateStr) {
-      const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(dateStr || ''));
-      return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+    function openRegulationModal() {
+      document.getElementById('reg-id-input').value = '';
+      document.getElementById('form-reg-manual').reset();
+      switchRegModalMode('manual');
+      openModal('regulation-modal');
     }
-    function fmtDateId(dateStr) {
-      const d = parseYmd(dateStr);
-      return d ? d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+
+    async function loadRegulationsTable() {
+      const tbody = document.getElementById('table-regulations-body');
+      tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Memuat data regulasi...</td></tr>`;
+      try {
+        const { data, error } = await supabaseClient.from('bpom_regulations').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        masterRegulationsData = data || [];
+        renderRegulationsTable();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-rose-500">Gagal memuat regulasi: ${esc(err.message)}</td></tr>`;
+      }
     }
-    function daysUntil(dateStr) {
-      const end = parseYmd(dateStr);
-      if (!end) return null;
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      return Math.round((end - today) / 86400000);
-    }
-    function expiryBadge(dateStr) {
-      const d = daysUntil(dateStr);
-      if (d === null) return '<span class="text-slate-400">-</span>';
-      const date = `<div class="font-semibold text-slate-800">${esc(fmtDateId(dateStr))}</div>`;
-      const pill = (cls, t) => `<span class="inline-block mt-0.5 px-1.5 py-0.5 rounded border text-[10px] font-bold ${cls}">${t}</span>`;
-      if (d < 0) return date + pill('bg-rose-100 text-rose-700 border-rose-300', 'Lewat ' + (-d) + ' hari');
-      if (d === 0) return date + pill('bg-amber-100 text-amber-700 border-amber-300', 'Berakhir hari ini');
-      if (d <= EXPIRY_WARN_DAYS) return date + pill('bg-amber-100 text-amber-700 border-amber-300', 'Sisa ' + d + ' hari');
-      return date;
-    }
-    const verifiedBadge = (c) => c.is_verified_by_legal
-      ? '<span class="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-300 text-[10px] font-bold">Divalidasi Legal</span>'
-      : '<span class="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-300 text-[10px] font-semibold">Ringkasan AI, belum divalidasi</span>';
 
-    const selectedBrandId = () => {
-      const v = document.getElementById('header-brand-filter')?.value;
-      return v && v !== 'ALL' ? v : null;
-    };
-    function filteredContracts() {
-      const sel = selectedBrandId();
-      return sel ? contractsData.filter(c => String(c.brand_id) === String(sel)) : contractsData;
-    }
-    const inTab = (c, tab) => tab === 'all' || (Array.isArray(c.agreement_categories) && c.agreement_categories.includes(tab));
+    function renderRegulationsTable() {
+      const tbody = document.getElementById('table-regulations-body');
+      const search = document.getElementById('reg-search').value.toLowerCase();
+      const type = document.getElementById('reg-filter-type').value;
+      const scope = document.getElementById('reg-filter-scope').value;
+      const status = document.getElementById('reg-filter-status').value;
 
-    // Dipanggil oleh dropdown brand di header (saat ini memfilter tabel Agreement Matrix)
-    function handleBrandFilterChange() { renderContracts(); renderVendorOnboardings(); }
-    function setAgrTab(code) { activeAgrTab = code; renderContracts(); }
+      let filtered = masterRegulationsData.filter(r => {
+        const matchSearch = !search || (r.rule_title + ' ' + r.regulation_source + ' ' + (r.article_number || '')).toLowerCase().includes(search);
+        const matchType = type === 'ALL' || r.regulation_type === type;
+        const matchScope = scope === 'ALL' || r.scope === scope || r.scope === 'Semua';
+        const matchStatus = status === 'ALL' || (status === 'ACTIVE' ? r.is_active : !r.is_active);
+        return matchSearch && matchType && matchScope && matchStatus;
+      });
 
-    function renderContracts() {
-      const head = document.getElementById('table-contracts-head');
-      const body = document.getElementById('table-contracts-body');
-      const tabsEl = document.getElementById('contracts-tabs');
-      const list = filteredContracts();
-
-      tabsEl.innerHTML = [{ code: 'all', label: 'Semua' }, ...AGR_TYPES].map(t => {
-        const n = list.filter(c => inTab(c, t.code)).length;
-        const on = t.code === activeAgrTab;
-        return `<button onclick="setAgrTab('${t.code}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold border transition ${on ? 'bg-brand-800 text-white border-brand-800' : 'bg-white text-brand-900 border-brand-300 hover:bg-brand-100'}">${esc(t.label)} <span class="${on ? 'text-brand-200' : 'text-brand-600'} font-semibold">${n}</span></button>`;
-      }).join('');
-
-      const umum = defsOf('umum');
-      const spec = activeAgrTab === 'all' ? [] : defsOf(activeAgrTab);
-      const colCount = 6 + umum.length + spec.length;
-      const th = (t, extra = '') => `<th class="px-3.5 py-3.5 font-bold ${extra}">${esc(t)}</th>`;
-      head.innerHTML = '<tr>' +
-        th('Pihak', 'min-w-[160px]') + th('Brand') + th('Jenis', 'min-w-[110px]') +
-        umum.map(d => th(d.label, 'min-w-[170px]')).join('') +
-        spec.map(d => th(d.label, 'min-w-[170px] bg-brand-200/60')).join('') +
-        th('Berakhir', 'min-w-[120px]') + th('Status', 'min-w-[120px]') +
-        '<th class="px-4 py-3.5 font-bold text-center min-w-[110px]">Aksi</th></tr>';
-
-      const rows = list.filter(c => inTab(c, activeAgrTab));
-      if (!rows.length) {
-        const msg = contractsData.length ? 'Tidak ada perjanjian untuk tab / brand ini.' : 'Belum ada kontrak. Tekan "Scan Google Drive".';
-        body.innerHTML = `<tr><td colspan="${colCount}" class="px-4 py-8 text-center text-slate-400">${msg}</td></tr>`;
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Tidak ada data regulasi yang cocok.</td></tr>`;
         return;
       }
-      body.innerHTML = rows.map(c => {
-        const cats = Array.isArray(c.agreement_categories) ? c.agreement_categories : [];
-        const catTags = cats.length
-          ? cats.map(k => `<span class="inline-block px-1.5 py-0.5 rounded bg-brand-100 text-brand-800 border border-brand-300 text-[10px] font-semibold mr-1 mb-0.5">${esc(agrTypeLabel(k))}</span>`).join('')
-          : '<span class="text-slate-400 italic text-[10px]">Belum terklasifikasi</span>';
-        const cell = (d) => `<td class="px-3.5 py-3 align-top"><div class="line-clamp-4 whitespace-pre-line">${textCell(fieldValue(c, d), c)}</div></td>`;
-        const no = c.contract_number && c.contract_number !== '-' ? c.contract_number : '';
-        return `
-          <tr class="hover:bg-brand-50/50 text-xs">
-            <td class="px-4 py-3 align-top"><div class="font-bold text-slate-800">${esc(c.vendor_name)}</div><div class="text-[10px] text-slate-400 font-mono">${esc(no)}</div></td>
-            <td class="px-3.5 py-3 align-top">${esc(c.brand_name || 'General')}</td>
-            <td class="px-3.5 py-3 align-top">${catTags}</td>
-            ${umum.map(cell).join('')}${spec.map(cell).join('')}
-            <td class="px-3.5 py-3 align-top">${expiryBadge(c.expiration_date)}</td>
-            <td class="px-3.5 py-3 align-top"><div class="font-bold ${c.status === 'Kadaluwarsa' ? 'text-rose-600' : c.status === 'Menunggu Dokumen' ? 'text-amber-600' : 'text-emerald-600'}">${esc(c.status || 'Aktif')}</div>${verifiedBadge(c)}</td>
-            <td class="px-4 py-3 text-center align-top space-y-1">
-              <button onclick="openContractModal('${esc(c.id)}')" class="block w-full px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px] font-semibold">Detail</button>
-              <a href="${esc(safeUrl(c.gdrive_web_link))}" target="_blank" rel="noopener" class="block text-brand-700 font-bold hover:underline text-[10px]">Buka PDF</a>
-            </td>
-          </tr>`;
-      }).join('');
+
+      tbody.innerHTML = filtered.map(r => `
+        <tr class="hover:bg-brand-50/50 border-b border-brand-100 text-xs">
+          <td class="px-4 py-3 align-top">
+            <div class="font-bold text-slate-800">${esc(r.regulation_source)}</div>
+            <div class="text-[10px] text-brand-700 font-semibold">${esc(r.article_number || '-')}</div>
+          </td>
+          <td class="px-4 py-3 align-top">
+            <div class="font-semibold text-slate-800">${esc(r.rule_title)}</div>
+            <div class="text-[10px] text-slate-500 line-clamp-2 mt-0.5">${esc(r.rule_description)}</div>
+          </td>
+          <td class="px-4 py-3 align-top">
+            <span class="inline-block px-1.5 py-0.5 bg-brand-100 text-brand-800 border border-brand-300 rounded text-[10px] font-semibold">${esc(r.scope)}</span>
+          </td>
+          <td class="px-4 py-3 align-top">${esc(r.product_category)}</td>
+          <td class="px-4 py-3 align-top font-bold ${r.risk_level === 'High Risk' ? 'text-rose-600' : 'text-amber-600'}">${esc(r.risk_level)}</td>
+          <td class="px-4 py-3 align-top text-center">
+            ${r.is_active
+              ? '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold text-[10px]">🟢 Aktif</span>'
+              : '<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-300 font-bold text-[10px]">⚪ Non-Aktif</span>'}
+          </td>
+          <td class="px-4 py-3 align-top text-center space-y-1">
+            <button onclick="toggleRegulationStatus('${r.id}', ${!r.is_active})" class="block w-full px-2 py-1 ${r.is_active ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-300' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-300'} border rounded text-[10px] font-semibold">
+              ${r.is_active ? 'Matikan' : 'Aktifkan'}
+            </button>
+          </td>
+        </tr>
+      `).join('');
     }
 
-    async function loadContracts() {
-      const tbody = document.getElementById('table-contracts-body');
-      tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-8 text-center text-slate-400">Memuat data kontrak...</td></tr>`;
+    async function toggleRegulationStatus(id, newStatus) {
+      if (!confirm(`Ubah status aturan ini menjadi ${newStatus ? 'AKTIF' : 'NON-AKTIF'}?`)) return;
       try {
-        const [defsRes, conRes] = await Promise.all([
-          supabaseClient.from('agreement_field_defs').select('*').order('sort_order', { ascending: true }),
-          supabaseClient.from('vendor_contracts').select('*').order('created_at', { ascending: false })
-        ]);
-        if (defsRes.error) throw new Error('Tabel agreement_field_defs belum siap (' + defsRes.error.message + '). Jalankan SQL tahap 1.');
-        if (conRes.error) throw conRes.error;
-        agreementDefs = defsRes.data || [];
-        contractsData = conRes.data || [];
-        renderContracts();
-      } catch (err) {
-        document.getElementById('table-contracts-head').innerHTML = '';
-        tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-6 text-center text-rose-500">Gagal memuat: ${esc(err.message)}</td></tr>`;
-      }
-    }
-
-    // ---------- Detail & edit satu perjanjian ----------
-    function openContractModal(id, edit = false) {
-      const c = contractsData.find(x => x.id === id);
-      if (!c) return;
-      const eid = esc(c.id);
-      document.getElementById('contract-modal-title').innerText = (edit ? 'Edit Perjanjian: ' : 'Detail Perjanjian: ') + (c.vendor_name || '-');
-      document.getElementById('contract-body').innerHTML = edit ? contractFormHtml(c) : contractViewHtml(c);
-      document.getElementById('contract-footer').innerHTML = edit
-        ? `<button onclick="openContractModal('${eid}')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Batal</button>
-           <button id="btn-save-contract" onclick="saveContract('${eid}')" class="bg-brand hover:bg-brand-600 disabled:opacity-60 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-md shadow-brand/30">Simpan Perubahan</button>`
-        : `<button onclick="closeModal('contract-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Tutup</button>
-           <a href="${esc(safeUrl(c.gdrive_web_link))}" target="_blank" rel="noopener" class="bg-white hover:bg-brand-50 text-brand-800 border border-brand-300 px-4 py-2 rounded-lg text-xs font-bold">Buka PDF</a>
-           <button onclick="rescanOne('${eid}')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold">Scan Ulang</button>
-           <button onclick="openContractModal('${eid}', true)" class="bg-brand hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Edit</button>`;
-      openModal('contract-modal');
-    }
-
-    function contractViewHtml(c) {
-      const cats = Array.isArray(c.agreement_categories) ? c.agreement_categories : [];
-      const row = (label, valueHtml, edited) => `
-        <div class="border border-brand-200 rounded-lg p-3 bg-white">
-          <p class="text-[10px] uppercase font-bold text-brand-700">${esc(label)}${edited ? ' <span class="normal-case text-amber-600" title="Diedit manual oleh Legal">&#9998; diedit</span>' : ''}</p>
-          <div class="mt-1 text-slate-800 whitespace-pre-line">${valueHtml}</div>
-        </div>`;
-      const fieldRows = (type) => defsOf(type).map(d => row(d.label, textCell(fieldValue(c, d), c), isEdited(c, editedKeyOf(d)))).join('')
-        || '<p class="text-slate-400">Belum ada field di pengaturan.</p>';
-      const section = (title, inner) => `<div><p class="text-[11px] uppercase font-extrabold tracking-wider text-brand-800 mb-2">${esc(title)}</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${inner}</div></div>`;
-      const catTags = cats.length ? cats.map(k => esc(agrTypeLabel(k))).join(', ') : '<span class="text-slate-400 italic">Belum terklasifikasi</span>';
-      const scanned = c.last_scanned_at ? new Date(c.last_scanned_at).toLocaleString('id-ID') : null;
-
-      return `
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="font-semibold text-slate-800">${esc(c.brand_name || 'General')}</span>
-          ${c.contract_number && c.contract_number !== '-' ? '<span class="font-mono text-slate-500">&middot; ' + esc(c.contract_number) + '</span>' : ''}
-          ${verifiedBadge(c)}
-        </div>
-        ${scanned ? '' : '<p class="text-amber-600">Kontrak ini belum di-scan dengan daftar field terbaru. Tekan <b>Scan Ulang</b> agar field khusus terisi.</p>'}
-        ${section('Informasi Perjanjian',
-          row('Judul Dokumen', textCell(c.agreement_type, c), isEdited(c, 'agreement_type')) +
-          row('Jenis', catTags, isEdited(c, 'agreement_categories')) +
-          row('Tanggal Mulai', esc(fmtDateId(c.effective_date)), isEdited(c, 'effective_date')) +
-          row('Tanggal Berakhir', expiryBadge(c.expiration_date), isEdited(c, 'expiration_date')) +
-          row('Status', esc(c.status || 'Aktif'), false))}
-        ${section('Ketentuan Umum', fieldRows('umum'))}
-        ${AGR_TYPES.filter(t => cats.includes(t.code)).map(t => section('Ketentuan ' + t.label, fieldRows(t.code))).join('')}
-        ${section('Klausul Lainnya',
-          row('Pengakhiran Perjanjian', textCell(c.termination_clause, c), isEdited(c, 'termination_clause')) +
-          row('Kerahasiaan', textCell(c.confidentiality_clause, c), isEdited(c, 'confidentiality_clause')) +
-          row('Hukum yang Berlaku', textCell(c.governing_law, c), isEdited(c, 'governing_law')))}
-        <p class="text-[10px] text-slate-400">${scanned ? 'Terakhir di-scan AI: ' + esc(scanned) + '. ' : ''}Ringkasan AI, belum divalidasi Legal kecuali bertanda Divalidasi. Rujuk PDF asli untuk keputusan hukum.</p>
-      `;
-    }
-
-    function contractFormHtml(c) {
-      const cats = Array.isArray(c.agreement_categories) ? c.agreement_categories : [];
-      const cls = 'w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-brand-600';
-      const lbl = (t) => `<label class="block text-[10px] uppercase font-bold text-brand-700 mb-1">${esc(t)}</label>`;
-      const input = (label, attr, value, type = 'text') => `<div>${lbl(label)}<input type="${type}" ${attr} value="${esc(value ?? '')}" class="${cls}"></div>`;
-      const area = (label, attr, value) => `<div>${lbl(label)}<textarea rows="2" ${attr} class="${cls}">${esc(value ?? '')}</textarea></div>`;
-      const fieldArea = (d) => area(d.label, isColumnField(d) ? `data-col="${esc(d.field_key)}"` : `data-cf="${esc(d.agreement_type)}.${esc(d.field_key)}"`, fieldValue(c, d));
-      const title = (t) => `<p class="text-[11px] uppercase font-extrabold tracking-wider text-brand-800 mb-2">${esc(t)}</p>`;
-
-      return `
-        <p class="text-slate-500">Perubahan yang Anda simpan ditandai sebagai diedit manual dan <b>tidak ditimpa</b> saat scan ulang.</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          ${input('Pihak', 'data-col="vendor_name"', c.vendor_name)}
-          ${input('Judul Dokumen', 'data-col="agreement_type"', c.agreement_type)}
-          ${input('No. Kontrak', 'data-col="contract_number"', c.contract_number)}
-          <div></div>
-          ${input('Tanggal Mulai', 'data-col="effective_date"', c.effective_date, 'date')}
-          ${input('Tanggal Berakhir', 'data-col="expiration_date"', c.expiration_date, 'date')}
-        </div>
-        <div>
-          ${title('Jenis Perjanjian')}
-          <div class="flex flex-wrap gap-4">
-            ${AGR_TYPES.map(t => `<label class="flex items-center gap-2 cursor-pointer font-medium text-slate-700"><input type="checkbox" id="ef-cat-${t.code}" ${cats.includes(t.code) ? 'checked' : ''} onchange="toggleFormType('${t.code}')" class="rounded text-brand-600"> ${esc(t.label)}</label>`).join('')}
-          </div>
-        </div>
-        <div>${title('Ketentuan Umum')}<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${defsOf('umum').map(fieldArea).join('')}</div></div>
-        ${AGR_TYPES.map(t => `
-          <div id="ef-sec-${t.code}" class="${cats.includes(t.code) ? '' : 'hidden'}">
-            ${title('Ketentuan ' + t.label)}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${defsOf(t.code).map(fieldArea).join('') || '<p class="text-slate-400">Belum ada field.</p>'}</div>
-          </div>`).join('')}
-        <div>${title('Klausul Lainnya')}<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          ${area('Pengakhiran Perjanjian', 'data-col="termination_clause"', c.termination_clause)}
-          ${area('Kerahasiaan', 'data-col="confidentiality_clause"', c.confidentiality_clause)}
-          ${area('Hukum yang Berlaku', 'data-col="governing_law"', c.governing_law)}
-        </div></div>
-        <label class="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-          <input type="checkbox" id="ef-verified" checked class="rounded text-emerald-600"> Tandai sudah divalidasi Legal
-        </label>
-      `;
-    }
-
-    function toggleFormType(code) {
-      const on = document.getElementById('ef-cat-' + code).checked;
-      document.getElementById('ef-sec-' + code)?.classList.toggle('hidden', !on);
-    }
-
-    async function saveContract(id) {
-      const c = contractsData.find(x => x.id === id);
-      if (!c) return;
-      const body = document.getElementById('contract-body');
-      const vendorEl = body.querySelector('[data-col="vendor_name"]');
-      if (!vendorEl.value.trim()) { alert('Nama pihak wajib diisi.'); return; }
-
-      const btn = document.getElementById('btn-save-contract');
-      btn.disabled = true;
-      try {
-        const upd = {};
-        const changed = [];
-
-        body.querySelectorAll('[data-col]').forEach(el => {
-          const k = el.dataset.col;
-          let nv = el.value.trim() === '' ? null : el.value.trim();
-          if (k === 'contract_number' && nv === null) nv = '-';
-          const ov = isEmptyVal(c[k]) ? null : c[k];
-          if (nv !== ov) { upd[k] = nv; changed.push(k); }
-        });
-
-        const newCats = AGR_TYPES.map(t => t.code).filter(code => document.getElementById('ef-cat-' + code).checked);
-        const oldCats = Array.isArray(c.agreement_categories) ? c.agreement_categories : [];
-        if ([...newCats].sort().join() !== [...oldCats].sort().join()) {
-          upd.agreement_categories = newCats;
-          changed.push('agreement_categories');
-        }
-
-        const custom = JSON.parse(JSON.stringify(c.custom_fields || {}));
-        let customTouched = false;
-        body.querySelectorAll('[data-cf]').forEach(el => {
-          const [t, ...rest] = el.dataset.cf.split('.');
-          const key = rest.join('.');
-          if (t !== 'umum' && !newCats.includes(t)) return; // jenis tidak dipilih: data lama dibiarkan
-          const nv = el.value.trim();
-          const ov = (custom[t] && custom[t][key]) || '';
-          if (nv === ov) return;
-          customTouched = true;
-          changed.push(t + '.' + key);
-          if (nv === '') { if (custom[t]) delete custom[t][key]; }
-          else { (custom[t] = custom[t] || {})[key] = nv; }
-        });
-        if (customTouched) upd.custom_fields = custom;
-
-        if (upd.expiration_date) upd.status = daysUntil(upd.expiration_date) < 0 ? 'Kadaluwarsa' : 'Aktif';
-
-        const verified = document.getElementById('ef-verified').checked;
-        if (verified !== !!c.is_verified_by_legal) upd.is_verified_by_legal = verified;
-
-        if (changed.length) upd.edited_fields = [...new Set([...(c.edited_fields || []), ...changed])];
-
-        if (Object.keys(upd).length === 0) { openContractModal(id); return; }
-        upd.updated_at = new Date().toISOString();
-
-        const { error } = await supabaseClient.from('vendor_contracts').update(upd).eq('id', id);
+        const { error } = await supabaseClient.from('bpom_regulations')
+          .update({ is_active: newStatus, updated_at: new Date().toISOString() }).eq('id', id);
         if (error) throw error;
-        Object.assign(c, upd);
-        renderContracts();
-        openContractModal(id);
-        logAudit('Edit Kontrak', 'vendor_contracts', id, { summary: c.vendor_name, bidang: changed.join(', ') || 'status validasi' });
+        loadRegulationsTable();
+        logAudit('Ubah Status Regulasi', 'bpom_regulations', id, { is_active: newStatus });
       } catch (err) {
-        alert('Gagal menyimpan: ' + err.message);
-        btn.disabled = false;
+        alert('Gagal mengubah status: ' + err.message);
       }
     }
 
-    // ---------- Scan Google Drive (loop satu file per panggilan) ----------
-    let scanRunning = false;
-    let scanCancelled = false;
-
-    function setScanButtons(disabled) {
-      ['btn-scan-drive', 'btn-rescan-all'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = disabled; });
-    }
-    function scanUi({ title, pct, text, detail = '', finished = false }) {
-      document.getElementById('scan-panel').classList.remove('hidden');
-      document.getElementById('scan-title').innerText = title;
-      document.getElementById('scan-bar').style.width = Math.max(0, Math.min(100, pct)) + '%';
-      document.getElementById('scan-text').innerText = text;
-      document.getElementById('scan-detail').innerHTML = detail;
-      document.getElementById('btn-scan-cancel').classList.toggle('hidden', finished);
-      document.getElementById('btn-scan-close').classList.toggle('hidden', !finished);
-    }
-    function cancelScan() {
-      scanCancelled = true;
-      document.getElementById('scan-text').innerText = 'Menghentikan setelah file yang sedang diproses selesai...';
-    }
-    function closeScanPanel() { document.getElementById('scan-panel').classList.add('hidden'); }
-
-    function startDriveScan() { runScan({ brandId: selectedBrandId() }); }
-
-    function startRescanAll() {
-      const n = filteredContracts().length;
-      if (!n) { alert('Belum ada kontrak untuk di-scan ulang.'); return; }
-      const brandId = selectedBrandId();
-      const brand = brandId ? ((masterBrands.find(b => String(b.id) === String(brandId)) || {}).name || '') : '';
-      if (!confirm(`Scan ulang ${n} kontrak${brand ? ' (brand ' + brand + ')' : ''}?\n\nProses ini memakai kredit AI satu kali per kontrak dan bisa memakan waktu beberapa menit.\nSel yang sudah diedit manual TIDAK akan ditimpa.`)) return;
-      runScan({ rescanAll: true, brandId });
-    }
-
-    function rescanOne(id) {
-      const c = contractsData.find(x => x.id === id);
-      if (!c || !c.gdrive_file_id) { alert('Kontrak ini tidak punya ID file Drive.'); return; }
-      if (!confirm('Scan ulang kontrak "' + c.vendor_name + '"?\nSel yang sudah diedit manual tidak akan ditimpa.')) return;
-      closeModal('contract-modal');
-      runScan({ rescanIds: [c.gdrive_file_id], brandId: c.brand_id || null, label: c.vendor_name });
-    }
-
-    async function runScan({ rescanAll = false, rescanIds = [], brandId = null, label = '' } = {}) {
-      if (scanRunning) return;
-      scanRunning = true;
-      scanCancelled = false;
-      setScanButtons(true);
-
-      const isRescan = rescanAll || rescanIds.length > 0;
-      const rescanBefore = isRescan ? new Date().toISOString() : undefined; // sama di setiap putaran
-      const brandName = brandId ? ((masterBrands.find(b => String(b.id) === String(brandId)) || {}).name || '') : '';
-      const title = (isRescan ? 'Scan Ulang' : 'Scan Google Drive') + (label ? ': ' + label : brandName ? ' (brand ' + brandName + ')' : '');
-      const skip = [];
-      const errors = [];
-      let unmatched = [];
-      let done = 0, failed = 0, total = 0, fatal = null;
-
-      scanUi({ title, pct: 5, text: 'Menghubungi Google Drive dan memproses file pertama...' });
-      try {
-        for (let i = 0; i < 2000 && !scanCancelled; i++) {
-          const res = await fetch(SCAN_FUNCTION_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-            body: JSON.stringify({
-              skip,
-              brand_id: brandId || undefined,
-              rescan_all: rescanAll || undefined,
-              rescan_file_ids: rescanIds.length ? rescanIds : undefined,
-              rescan_before: rescanBefore
-            })
-          });
-          const r = await res.json().catch(() => ({}));
-          if (!res.ok || r.error) throw new Error(r.error || ('Edge Function gagal (HTTP ' + res.status + ')'));
-
-          unmatched = r.unmatched_folders || unmatched;
-          done += r.count || 0;
-          const fids = r.failed_ids || [];
-          if (fids.length) { skip.push(...fids); failed += fids.length; errors.push(...(r.errors || [])); }
-          total = done + failed + (r.remaining || 0);
-
-          scanUi({
-            title,
-            pct: total ? Math.round(((done + failed) / total) * 100) : 100,
-            text: total ? `Memproses ${done + failed} dari ${total} file (${failed} gagal)...` : 'Tidak ada file yang perlu diproses.'
-          });
-          if (!r.remaining) break;
-          if (!(r.count || 0) && !fids.length) break; // tidak ada kemajuan: hindari loop tak berujung
-        }
-      } catch (e) {
-        fatal = e.message;
-      }
-
-      scanRunning = false;
-      setScanButtons(false);
-
-      const lines = [];
-      errors.forEach(m => lines.push(`<p class="text-rose-600">&bull; ${esc(m)}</p>`));
-      if (unmatched.length) {
-        lines.push(`<p class="text-amber-700">Folder tidak cocok dengan brand mana pun (nama folder harus sama dengan nama/kode brand): <b>${esc(unmatched.join(', '))}</b></p>`);
-      }
-      if (fatal) lines.push(`<p class="text-rose-600 font-semibold">Berhenti karena error: ${esc(fatal)}</p>`);
-      const state = fatal ? 'Berhenti karena error' : scanCancelled ? 'Dihentikan' : 'Selesai';
-      scanUi({
-        title,
-        pct: total && !fatal && !scanCancelled ? 100 : (total ? Math.round(((done + failed) / total) * 100) : 0),
-        text: `${state}: ${done} berhasil, ${failed} gagal${total ? ' dari ' + total + ' file' : ''}.`,
-        detail: lines.join(''),
-        finished: true
-      });
-      await loadContracts();
-      logAudit(isRescan ? 'Scan Ulang Kontrak' : 'Scan Drive Kontrak', 'vendor_contracts', null,
-        { summary: `${done} berhasil, ${failed} gagal` + (brandName ? ', brand ' + brandName : '') });
-    }
-
-    // ---------- Pengaturan field ----------
-    let fieldDraft = [];
-
-    function slugKey(label) {
-      return String(label).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-        .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'field';
-    }
-
-    function openFieldSettings() {
-      fieldDraft = agreementDefs.map(d => ({ ...d }));
-      renderFieldSettings();
-      openModal('fields-modal');
-    }
-
-    function renderFieldSettings() {
-      const cls = 'w-full bg-white border border-brand-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-brand-600';
-      document.getElementById('fields-body').innerHTML = AGR_GROUPS.map(g => {
-        const items = fieldDraft.map((d, i) => ({ d, i })).filter(x => x.d.agreement_type === g.code && !x.d._deleted);
-        const rows = items.map(({ d, i }, pos) => `
-          <div class="grid grid-cols-12 gap-2 items-start bg-brand-50/50 border border-brand-200 rounded-lg p-2.5">
-            <div class="col-span-12 sm:col-span-1 flex sm:flex-col gap-1 items-center justify-center">
-              <button type="button" ${pos === 0 ? 'disabled' : ''} onclick="fdMove(${i}, -1)" class="px-2 py-0.5 rounded bg-white border border-brand-300 text-brand-800 disabled:opacity-30" title="Naik">&#9650;</button>
-              <button type="button" ${pos === items.length - 1 ? 'disabled' : ''} onclick="fdMove(${i}, 1)" class="px-2 py-0.5 rounded bg-white border border-brand-300 text-brand-800 disabled:opacity-30" title="Turun">&#9660;</button>
-            </div>
-            <div class="col-span-12 sm:col-span-3">
-              <label class="block text-[10px] uppercase font-bold text-brand-700 mb-1">Judul</label>
-              <input type="text" value="${esc(d.label)}" placeholder="Judul kolom" oninput="fdSet(${i}, 'label', this.value)" class="${cls}">
-            </div>
-            <div class="col-span-12 sm:col-span-5">
-              <label class="block text-[10px] uppercase font-bold text-brand-700 mb-1">Petunjuk untuk AI</label>
-              <input type="text" value="${esc(d.ai_hint || '')}" placeholder="Apa yang harus dicari AI di dokumen" oninput="fdSet(${i}, 'ai_hint', this.value)" class="${cls}">
-            </div>
-            <div class="col-span-8 sm:col-span-2 pt-4">
-              <label class="flex items-center gap-1.5 text-slate-700 font-medium ${d.is_system ? 'opacity-60' : 'cursor-pointer'}">
-                <input type="checkbox" ${d.is_active !== false ? 'checked' : ''} ${d.is_system ? 'disabled' : ''} onchange="fdSet(${i}, 'is_active', this.checked)" class="rounded text-brand-600"> Aktif
-              </label>
-              <p class="text-[10px] text-slate-400 font-mono mt-0.5">${d.field_key ? esc(d.field_key) : 'kunci otomatis'}</p>
-            </div>
-            <div class="col-span-4 sm:col-span-1 pt-4 text-right">
-              ${d.is_system
-                ? '<span class="text-[10px] text-slate-400">bawaan</span>'
-                : `<button type="button" onclick="fdDelete(${i})" class="px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-[10px] font-bold">Hapus</button>`}
-            </div>
-          </div>`).join('');
-        return `
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <h4 class="text-xs font-extrabold uppercase tracking-wider text-brand-800">${esc(g.label)}</h4>
-              <button type="button" onclick="fdAdd('${g.code}')" class="px-3 py-1 rounded-lg bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 text-[11px] font-bold">+ Tambah field</button>
-            </div>
-            <div class="space-y-2">${rows || '<p class="text-slate-400">Belum ada field.</p>'}</div>
-          </div>`;
-      }).join('');
-    }
-
-    function fdSet(i, prop, value) { if (fieldDraft[i]) fieldDraft[i][prop] = value; }
-    function fdAdd(type) {
-      fieldDraft.push({ agreement_type: type, field_key: null, label: '', ai_hint: '', is_active: true, is_system: false, _new: true });
-      renderFieldSettings();
-    }
-    function fdDelete(i) {
-      if (fieldDraft[i]._new) fieldDraft.splice(i, 1);
-      else fieldDraft[i]._deleted = true;
-      renderFieldSettings();
-    }
-    function fdMove(i, dir) {
-      const t = fieldDraft[i].agreement_type;
-      let j = i + dir;
-      while (j >= 0 && j < fieldDraft.length && (fieldDraft[j].agreement_type !== t || fieldDraft[j]._deleted)) j += dir;
-      if (j < 0 || j >= fieldDraft.length) return;
-      [fieldDraft[i], fieldDraft[j]] = [fieldDraft[j], fieldDraft[i]];
-      renderFieldSettings();
-    }
-
-    async function saveFieldDefs() {
-      const live = fieldDraft.filter(d => !d._deleted);
-      if (live.some(d => !String(d.label || '').trim())) { alert('Ada field tanpa judul. Isi judulnya atau hapus field tersebut.'); return; }
-
-      const btn = document.getElementById('btn-save-fields');
+    async function handleSaveRegulation(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-save-reg');
       btn.disabled = true;
+
+      const payload = {
+        regulation_type: document.getElementById('reg-type-input').value,
+        regulation_source: document.getElementById('reg-source-input').value.trim(),
+        article_number: document.getElementById('reg-article-input').value.trim(),
+        rule_title: document.getElementById('reg-title-input').value.trim(),
+        scope: document.getElementById('reg-scope-input').value,
+        product_category: document.getElementById('reg-product-cat-input').value,
+        risk_level: document.getElementById('reg-risk-input').value,
+        rule_description: document.getElementById('reg-description-input').value.trim(),
+        is_active: true,
+        created_by: currentUserSession ? currentUserSession.username : 'system'
+      };
+
       try {
-        const tbl = () => supabaseClient.from('agreement_field_defs');
-
-        // 1) Hapus dulu (supaya kunci yang sama bisa dipakai lagi)
-        const delIds = fieldDraft.filter(d => d._deleted && d.id).map(d => d.id);
-        if (delIds.length) {
-          const { error } = await tbl().delete().in('id', delIds);
-          if (error) throw error;
-        }
-
-        // 2) Susun urutan per grup, kunci untuk field baru, dan daftar perubahan
-        const usedKeys = {};
-        live.filter(d => !d._new).forEach(d => { (usedKeys[d.agreement_type] = usedKeys[d.agreement_type] || new Set()).add(d.field_key); });
-        const counter = {};
-        const inserts = [];
-        const updates = [];
-        for (const d of live) {
-          counter[d.agreement_type] = (counter[d.agreement_type] || 0) + 1;
-          const base = {
-            label: d.label.trim(),
-            ai_hint: String(d.ai_hint || '').trim() || null,
-            sort_order: counter[d.agreement_type],
-            is_active: d.is_system ? true : d.is_active !== false
-          };
-          if (d._new) {
-            const set = usedKeys[d.agreement_type] = usedKeys[d.agreement_type] || new Set();
-            const root = slugKey(d.label);
-            let key = root, n = 2;
-            while (set.has(key)) key = root + '_' + n++;
-            set.add(key);
-            inserts.push({ agreement_type: d.agreement_type, field_key: key, is_system: false, ...base });
-          } else {
-            const o = agreementDefs.find(x => x.id === d.id) || {};
-            if (o.label !== base.label || (o.ai_hint || null) !== base.ai_hint || o.sort_order !== base.sort_order || (o.is_active !== false) !== base.is_active) {
-              updates.push({ id: d.id, ...base });
-            }
-          }
-        }
-
-        if (inserts.length) {
-          const { error } = await tbl().insert(inserts);
-          if (error) throw error;
-        }
-        for (const u of updates) {
-          const { id, ...rest } = u;
-          const { error } = await tbl().update({ ...rest, updated_at: new Date().toISOString() }).eq('id', id);
-          if (error) throw error;
-        }
-
-        closeModal('fields-modal');
-        await loadContracts();
-        logAudit('Ubah Pengaturan Field Agreement', 'vendor_contracts', null,
-          { summary: `${inserts.length} tambah, ${updates.length} ubah, ${delIds.length} hapus` });
+        const { error } = await supabaseClient.from('bpom_regulations').insert([payload]);
+        if (error) throw error;
+        closeModal('regulation-modal');
+        loadRegulationsTable();
+        logAudit('Tambah Regulasi BPOM', 'bpom_regulations', null, { summary: payload.rule_title });
+        alert('Aturan berhasil disimpan!');
       } catch (err) {
-        alert('Gagal menyimpan pengaturan: ' + err.message);
+        alert('Gagal menyimpan aturan: ' + err.message);
       } finally {
         btn.disabled = false;
       }
     }
 
+    async function loadNieRecordsTable() {
+      const tbody = document.getElementById('table-nie-body');
+      tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">Memuat data NIE...</td></tr>`;
+      try {
+        const { data, error } = await supabaseClient.from('product_nie_records').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        masterNieData = data || [];
+        if (!masterNieData.length) {
+          tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">Belum ada master data NIE produk.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = masterNieData.map(n => `
+          <tr class="hover:bg-brand-50/50 border-b border-brand-100 text-xs">
+            <td class="px-4 py-3 font-mono font-bold text-slate-800">${esc(n.nie_number)}</td>
+            <td class="px-4 py-3 font-semibold text-slate-800">${esc(n.product_name)}</td>
+            <td class="px-4 py-3">${esc(n.brand_name || '-')}</td>
+            <td class="px-4 py-3">${esc(n.product_category || '-')}</td>
+            <td class="px-4 py-3">
+              ${Array.isArray(n.approved_claims) && n.approved_claims.length 
+                ? '<ul class="list-disc pl-4 text-[10px] space-y-0.5 text-slate-700">' + n.approved_claims.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul>' 
+                : '-'}
+            </td>
+            <td class="px-4 py-3 text-center">
+              <button onclick="showDetail('product_nie_records', '${n.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-rose-500">Gagal memuat NIE: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
     // =====================================================================
-    // PENDAFTARAN VENDOR: scan folder Google Drive (Brand > Kategori Vendor > Nama Vendor)
+    // PDF GENERATION: DOWNLOAD ARTWORK PDF & NPD PDF
     // =====================================================================
-    const VENDOR_SCAN_URL = `${SUPABASE_URL}/functions/v1/scan-vendor-folders`;
-    const VENDOR_DOCS = [
-      { key: 'ktp_direktur',   col: 'ktp_direktur_exists',   label: 'KTP Direktur',   required: true },
-      { key: 'npwp',           col: 'npwp_exists',           label: 'NPWP',           required: true },
-      { key: 'akta_pendirian', col: 'akta_pendirian_exists', label: 'Akta Pendirian', required: true },
-      { key: 'akta_perubahan', col: 'akta_perubahan_exists', label: 'Akta Perubahan', required: false },
-      { key: 'nib',            col: 'nib_exists',            label: 'NIB',            required: true },
-      { key: 'izin_usaha',     col: 'izin_usaha_exists',     label: 'Izin Usaha',     required: true }
-    ];
-    let vendorsData = [];
-    let vendorFilesCache = [];
-    let vendorScanRunning = false;
-    let vendorScanCancelled = false;
-
-    // Aturan status (harus sama dengan Edge Function scan-vendor-folders)
-    function vendorStatusOf(typeSet, fileCount) {
-      if (!fileCount) return { status: 'Folder Kosong', flags: ['Folder vendor kosong, belum ada file'] };
-      const missing = VENDOR_DOCS.filter(d => d.required && !typeSet.has(d.key));
-      if (missing.length) return { status: 'Dokumen Belum Lengkap', flags: missing.map(d => 'Belum ada: ' + d.label) };
-      return { status: 'Ready for Agreement', flags: [] };
-    }
-
-    function vendorStatusBadge(s) {
-      const cls = s === 'Ready for Agreement' ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
-        : (s === 'Folder Tidak Ditemukan' || s === 'Folder Kosong') ? 'bg-rose-100 text-rose-700 border-rose-300'
-        : 'bg-amber-100 text-amber-700 border-amber-300';
-      return `<span class="inline-block px-2 py-0.5 rounded border text-[10px] font-bold ${cls}">${esc(s || '-')}</span>`;
-    }
-
-    async function loadVendorOnboardings() {
-      const tbody = document.getElementById('table-vendor-onboarding-body');
-      tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400">Memuat data vendor...</td></tr>`;
-      try {
-        const { data, error } = await supabaseClient.from('vendor_onboardings').select('*').order('vendor_name', { ascending: true });
-        if (error) throw error;
-        vendorsData = data || [];
-        renderVendorOnboardings();
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
-      }
-    }
-
-    function renderVendorOnboardings() {
-      const tbody = document.getElementById('table-vendor-onboarding-body');
-      if (!tbody) return;
-      const sel = selectedBrandId();
-      const list = sel ? vendorsData.filter(v => String(v.brand_id) === String(sel)) : vendorsData;
-      if (!list.length) {
-        const msg = vendorsData.length ? 'Tidak ada vendor untuk brand ini.' : 'Belum ada vendor. Tekan "Scan Folder Vendor".';
-        tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400">${msg}</td></tr>`;
-        return;
-      }
-      const cell = (v, d) => v[d.col]
-        ? '<span class="text-emerald-600 font-bold">🟢 Ada</span>'
-        : (d.required ? '<span class="text-rose-500 font-bold">🔴 Tidak</span>' : '<span class="text-slate-400 font-semibold">⚪ Opsional</span>');
-
-      tbody.innerHTML = list.map(v => {
-        const isReady = v.status === 'Ready for Agreement';
-        const eid = esc(v.id);
-        const flags = Array.isArray(v.ai_missing_flags) ? v.ai_missing_flags : [];
-        return `
-          <tr class="hover:bg-brand-50/50 transition border-b border-brand-100 text-xs">
-            <td class="px-3 py-3 align-top">
-              <div class="font-semibold text-slate-800">${esc(v.vendor_name)}</div>
-              <div class="text-[10px] text-slate-400">${esc(v.brand_name || '')}</div>
-              ${v.gdrive_folder_link ? `<a href="${esc(safeUrl(v.gdrive_folder_link))}" target="_blank" rel="noopener" class="text-[10px] text-brand-700 font-bold hover:underline">Buka folder</a>` : ''}
-            </td>
-            <td class="px-3 py-3 align-top text-slate-600">${esc(v.vendor_category)}</td>
-            ${VENDOR_DOCS.map(d => `<td class="px-2 py-3 align-top text-center">${cell(v, d)}</td>`).join('')}
-            <td class="px-3 py-3 align-top text-center">
-              ${vendorStatusBadge(v.status)}
-              ${!isReady && flags.length ? `<div class="mt-1 text-[10px] text-rose-600 text-left space-y-0.5">${flags.map(f => '<div>&bull; ' + esc(f) + '</div>').join('')}</div>` : ''}
-            </td>
-            <td class="px-3 py-3 align-top text-center space-y-1">
-              ${isReady ? (v.agreement_id
-                ? `<button onclick="createAgreementFromVendor('${eid}')" class="block w-full px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-400 rounded font-bold text-[10px]">Lihat Agreement</button>`
-                : `<button id="btn-agr-${eid}" onclick="createAgreementFromVendor('${eid}')" class="block w-full px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white rounded font-bold text-[10px] shadow-sm">Buat Agreement</button>`) : ''}
-              <button onclick="openVendorDetail('${eid}')" class="block w-full px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 rounded border border-brand-300 font-semibold text-[10px]">Detail</button>
-            </td>
-          </tr>`;
-      }).join('');
-    }
-
-    // Buat baris perjanjian kosong dari vendor yang dokumennya lengkap, tautkan ke vendor,
-    // lalu buka formulir edit di Agreement Matrix agar Legal bisa melengkapinya.
-    async function createAgreementFromVendor(id) {
-      const v = vendorsData.find(x => x.id === id);
-      if (!v) return;
-
-      // Sudah pernah dibuat: langsung buka perjanjiannya
-      if (v.agreement_id) { await openAgreementOfVendor(v.agreement_id); return; }
-
-      if (!confirm('Buat perjanjian baru untuk vendor "' + v.vendor_name + '"?\n\nSistem membuat baris perjanjian kosong (status "Menunggu Dokumen") di Agreement Matrix, lalu membuka formulir untuk dilengkapi.')) return;
-
-      const btn = document.getElementById('btn-agr-' + id);
-      if (btn) btn.disabled = true;
-      try {
-        const row = {
-          vendor_name: v.vendor_name,
-          brand_id: v.brand_id || null,
-          brand_name: v.brand_name || null,
-          agreement_type: 'Perjanjian Vendor ' + v.vendor_name,
-          contract_number: '-',
-          agreement_categories: ['vendor'],
-          custom_fields: {},
-          edited_fields: [],
-          status: 'Menunggu Dokumen',
-          is_verified_by_legal: false,
-          gdrive_web_link: v.gdrive_folder_link || null
-        };
-        const { data: created, error } = await supabaseClient.from('vendor_contracts').insert([row]).select().single();
-        if (error) throw error;
-
-        // Tautkan ke vendor (kolom agreement_id; lihat SQL penambahan kolom)
-        const link = await supabaseClient.from('vendor_onboardings')
-          .update({ agreement_id: String(created.id), updated_at: new Date().toISOString() }).eq('id', id);
-        if (link.error) {
-          alert('Perjanjian berhasil dibuat, tetapi gagal menautkan ke vendor (' + link.error.message + ').\nPastikan kolom agreement_id sudah ditambahkan di tabel vendor_onboardings.');
-        } else {
-          v.agreement_id = String(created.id);
-        }
-        logAudit('Buat Agreement dari Vendor', 'vendor_contracts', created.id, { summary: v.vendor_name, brand: v.brand_name || '' });
-        renderVendorOnboardings();
-        await openAgreementOfVendor(String(created.id), true);
-      } catch (err) {
-        alert('Gagal membuat perjanjian: ' + err.message);
-        if (btn) btn.disabled = false;
-      }
-    }
-
-    async function openAgreementOfVendor(agreementId, edit = false) {
-      activeAgrTab = 'all';
-      switchTab('vendor-contracts');
-      await loadContracts();
-      const c = contractsData.find(x => String(x.id) === String(agreementId));
-      if (!c) { alert('Perjanjian yang tertaut sudah tidak ditemukan di Agreement Matrix.'); return; }
-      openContractModal(c.id, edit);
-    }
-
-    // ---------- Scan folder vendor (satu vendor per putaran, klasifikasi dari nama file) ----------
-    function vendorScanUi({ title, pct, text, detail = '', finished = false }) {
-      document.getElementById('vscan-panel').classList.remove('hidden');
-      document.getElementById('vscan-title').innerText = title;
-      document.getElementById('vscan-bar').style.width = Math.max(0, Math.min(100, pct)) + '%';
-      document.getElementById('vscan-text').innerText = text;
-      document.getElementById('vscan-detail').innerHTML = detail;
-      document.getElementById('vscan-cancel').classList.toggle('hidden', finished);
-      document.getElementById('vscan-close').classList.toggle('hidden', !finished);
-    }
-    function setVendorScanButtons(disabled) {
-      ['btn-vendor-scan', 'btn-vendor-rescan'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = disabled; });
-    }
-    function cancelVendorScan() {
-      vendorScanCancelled = true;
-      document.getElementById('vscan-text').innerText = 'Menghentikan setelah proses yang sedang berjalan selesai...';
-    }
-    function closeVendorScanPanel() { document.getElementById('vscan-panel').classList.add('hidden'); }
-
-    async function callVendorFn(payload) {
-      const res = await fetch(VENDOR_SCAN_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-        body: JSON.stringify(payload)
-      });
-      const r = await res.json().catch(() => ({}));
-      if (!res.ok || r.error) throw new Error(r.error || ('Edge Function gagal (HTTP ' + res.status + ')'));
-      return r;
-    }
-
-    async function startVendorScan({ rescanAll = false, vendorFolderId = null } = {}) {
-      if (vendorScanRunning) return;
-      if (rescanAll && !vendorFolderId && !confirm('Scan ulang semua vendor?\n\nNama semua file diperiksa ulang (isi file tidak dibaca). Koreksi manual Legal TIDAK akan ditimpa.')) return;
-
-      vendorScanRunning = true;
-      vendorScanCancelled = false;
-      setVendorScanButtons(true);
-
-      const brandId = selectedBrandId();
-      const brandName = brandId ? ((masterBrands.find(b => String(b.id) === String(brandId)) || {}).name || '') : '';
-      const rescanBefore = rescanAll ? new Date().toISOString() : undefined;
-      const title = (rescanAll ? 'Scan Ulang Vendor' : 'Scan Folder Vendor') + (brandName && !vendorFolderId ? ' (brand ' + brandName + ')' : '');
-      const errors = [];
-      let vendors = [], trace = [], missing = 0, done = 0, fatal = null;
-
-      vendorScanUi({ title, pct: 3, text: 'Mencari folder vendor (nama diawali CV / PT) di Google Drive...' });
-      try {
-        // Fase 1: daftar folder vendor
-        if (vendorFolderId) {
-          const row = vendorsData.find(v => v.gdrive_folder_id === vendorFolderId);
-          if (row) vendors = [{ id: row.gdrive_folder_id, name: row.vendor_name, category: row.vendor_category, brand_id: row.brand_id, brand_name: row.brand_name, path: row.gdrive_folder_path }];
-        } else {
-          const r = await callVendorFn({ action: 'discover', brand_id: brandId || undefined });
-          vendors = r.vendors || [];
-          trace = r.trace || [];
-          missing = (r.missing_folders || []).length;
-        }
-
-        // Fase 2: periksa satu vendor per putaran
-        for (const v of vendors) {
-          if (vendorScanCancelled) break;
-          try {
-            for (let guard = 0; guard < 60 && !vendorScanCancelled; guard++) {
-              vendorScanUi({
-                title,
-                pct: Math.round((done / vendors.length) * 100),
-                text: `Memeriksa vendor ${done + 1} dari ${vendors.length}: ${v.name}...`
-              });
-              const r = await callVendorFn({ action: 'process', vendor: v, rescan_all: rescanAll || undefined, rescan_before: rescanBefore });
-              (r.errors || []).forEach(m => errors.push(m));
-              if (!r.pending) break;
-              if (guard === 59) throw new Error('tidak kunjung selesai diproses');
-            }
-          } catch (e) {
-            errors.push(`${v.name}: ${e.message}`);
-          }
-          if (!vendorScanCancelled) done++;
-        }
-      } catch (e) {
-        fatal = e.message;
-      }
-
-      vendorScanRunning = false;
-      setVendorScanButtons(false);
-
-      const lines = [];
-      errors.forEach(m => lines.push(`<p class="text-rose-600">&bull; ${esc(m)}</p>`));
-      if (!vendors.length && trace.length) {
-        lines.push(`<div class="mt-1 p-2 rounded-lg bg-brand-50 border border-brand-200 text-slate-600 space-y-0.5"><p class="font-bold text-brand-800">Hasil penelusuran folder:</p>${trace.map(t => '<p class="whitespace-pre-wrap">' + esc(t) + '</p>').join('')}<p class="text-slate-400 pt-1">Folder vendor dikenali dari nama yang diawali CV atau PT.</p></div>`);
-      }
-      if (missing) lines.push(`<p class="text-amber-700">${missing} vendor ditandai "Folder Tidak Ditemukan" karena foldernya sudah tidak ada di Drive.</p>`);
-      if (fatal) lines.push(`<p class="text-rose-600 font-semibold">Berhenti karena error: ${esc(fatal)}</p>`);
-
-      const state = fatal ? 'Berhenti karena error' : vendorScanCancelled ? 'Dihentikan' : 'Selesai';
-      vendorScanUi({
-        title,
-        pct: vendors.length && !fatal && !vendorScanCancelled ? 100 : (vendors.length ? Math.round((done / vendors.length) * 100) : 0),
-        text: vendors.length ? `${state}: ${done} dari ${vendors.length} vendor diperiksa.` : `${state}: tidak ada folder vendor (CV / PT) yang ditemukan.`,
-        detail: lines.join(''),
-        finished: true
-      });
-      await loadVendorOnboardings();
-      logAudit(rescanAll ? 'Scan Ulang Folder Vendor' : 'Scan Folder Vendor', 'vendor_onboardings', null,
-        { summary: `${done} vendor diperiksa` + (brandName && !vendorFolderId ? ', brand ' + brandName : '') });
-    }
-
-    // ---------- Detail vendor + koreksi jenis dokumen manual ----------
-    async function openVendorDetail(id) {
-      const v = vendorsData.find(x => x.id === id);
-      if (!v) return;
-      const { data: files, error } = await supabaseClient.from('vendor_onboarding_files').select('*').eq('vendor_onboarding_id', id).order('file_name', { ascending: true });
-      if (error) { alert('Gagal memuat file: ' + error.message); return; }
-      vendorFilesCache = files || [];
-      const eid = esc(v.id);
-      const flags = Array.isArray(v.ai_missing_flags) ? v.ai_missing_flags : [];
-      const scanned = v.last_scanned_at ? new Date(v.last_scanned_at).toLocaleString('id-ID') : null;
-
-      document.getElementById('vendor-detail-title').innerText = 'Detail Vendor: ' + (v.vendor_name || '-');
-      document.getElementById('vendor-detail-body').innerHTML = `
-        <div class="space-y-1">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="font-semibold text-slate-800">${esc(v.brand_name || 'General')}</span>
-            <span class="text-slate-500">&middot; ${esc(v.vendor_category || '-')}</span>
-            ${vendorStatusBadge(v.status)}
-          </div>
-          ${v.gdrive_folder_path ? `<p class="text-[10px] text-slate-400 font-mono">${esc(v.gdrive_folder_path)}</p>` : ''}
-        </div>
-        ${flags.length ? `<div class="bg-rose-50 border border-rose-200 rounded-lg p-3 space-y-1"><p class="text-[10px] uppercase font-bold text-rose-700">Yang belum terpenuhi</p>${flags.map(f => '<p class="text-rose-700">&bull; ' + esc(f) + '</p>').join('')}</div>` : ''}
-        <div>
-          <p class="text-[11px] uppercase font-extrabold tracking-wider text-brand-800 mb-2">File di folder (${vendorFilesCache.length})</p>
-          <p class="text-slate-500 mb-2">Jenis dokumen dikenali dari nama file. Jika salah atau belum terklasifikasi, centang jenis yang benar lalu simpan. Koreksi manual tidak ditimpa saat scan ulang.</p>
-          <div class="space-y-2">
-            ${vendorFilesCache.length ? vendorFilesCache.map(f => {
-              const types = Array.isArray(f.doc_types) ? f.doc_types : [];
-              return `
-              <div class="border border-brand-200 rounded-lg p-3 space-y-2">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <a href="${esc(safeUrl(f.web_link))}" target="_blank" rel="noopener" class="font-semibold text-brand-800 hover:underline break-all">${esc(f.file_name)}</a>
-                  ${f.manually_set ? '<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-300 text-[10px] font-bold">&#9998; koreksi manual</span>' : ''}
-                </div>
-                <div class="flex flex-wrap gap-x-4 gap-y-1">
-                  ${VENDOR_DOCS.map(d => `<label class="flex items-center gap-1.5 cursor-pointer text-slate-700 font-medium"><input type="checkbox" data-file="${esc(f.id)}" data-type="${d.key}" ${types.includes(d.key) ? 'checked' : ''} class="rounded text-brand-600"> ${esc(d.label)}</label>`).join('')}
-                </div>
-                ${f.error ? `<p class="text-rose-600">${esc(f.error)}</p>` : (f.ai_note ? `<p class="${/Belum terklasifikasi|Perlu dicek/.test(f.ai_note) ? 'text-amber-700 font-medium' : 'text-slate-400'}">${esc(f.ai_note)}</p>` : '')}
-              </div>`;
-            }).join('') : '<p class="text-slate-400">Tidak ada file.</p>'}
-          </div>
-        </div>
-        <p class="text-[10px] text-slate-400">${scanned ? 'Terakhir di-scan: ' + esc(scanned) + '. ' : ''}Status berdasarkan nama file, isi dokumen belum diverifikasi Legal.</p>
-      `;
-      document.getElementById('vendor-detail-footer').innerHTML = `
-        <button onclick="closeModal('vendor-detail-modal')" class="bg-brand-100 hover:bg-brand-200 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Tutup</button>
-        ${v.gdrive_folder_link ? `<a href="${esc(safeUrl(v.gdrive_folder_link))}" target="_blank" rel="noopener" class="bg-white hover:bg-brand-50 text-brand-800 border border-brand-300 px-4 py-2 rounded-lg text-xs font-bold">Buka Folder</a>` : ''}
-        ${v.gdrive_folder_id ? `<button onclick="closeModal('vendor-detail-modal'); startVendorScan({ rescanAll: true, vendorFolderId: '${esc(v.gdrive_folder_id)}' })" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold">Scan Ulang Vendor Ini</button>` : ''}
-        ${vendorFilesCache.length ? `<button id="btn-save-vendor-files" onclick="saveVendorFileTypes('${eid}')" class="bg-brand hover:bg-brand-600 disabled:opacity-60 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-md shadow-brand/30">Simpan Koreksi</button>` : ''}
-      `;
-      openModal('vendor-detail-modal');
-    }
-
-    async function saveVendorFileTypes(vendorId) {
-      const v = vendorsData.find(x => x.id === vendorId);
-      if (!v) return;
-      const btn = document.getElementById('btn-save-vendor-files');
-      btn.disabled = true;
-      try {
-        const picked = {};
-        document.querySelectorAll('#vendor-detail-body input[data-file]').forEach(el => {
-          (picked[el.dataset.file] = picked[el.dataset.file] || []);
-          if (el.checked) picked[el.dataset.file].push(el.dataset.type);
-        });
-
-        const union = new Set();
-        let changed = 0;
-        for (const f of vendorFilesCache) {
-          const sel = picked[f.id] || [];
-          sel.forEach(t => union.add(t));
-          const old = Array.isArray(f.doc_types) ? f.doc_types : [];
-          if ([...sel].sort().join() !== [...old].sort().join()) {
-            const { error } = await supabaseClient.from('vendor_onboarding_files')
-              .update({ doc_types: sel, manually_set: true, updated_at: new Date().toISOString() }).eq('id', f.id);
-            if (error) throw error;
-            changed++;
-          }
-        }
-        if (!changed) { openVendorDetail(vendorId); return; }
-
-        const { status, flags } = vendorStatusOf(union, vendorFilesCache.length);
-        const upd = { status, ai_missing_flags: flags, updated_at: new Date().toISOString() };
-        VENDOR_DOCS.forEach(d => { upd[d.col] = union.has(d.key); });
-        const { error } = await supabaseClient.from('vendor_onboardings').update(upd).eq('id', vendorId);
-        if (error) throw error;
-
-        Object.assign(v, upd);
-        renderVendorOnboardings();
-        openVendorDetail(vendorId);
-        logAudit('Koreksi Dokumen Vendor', 'vendor_onboardings', vendorId, { summary: v.vendor_name, status, file_dikoreksi: changed });
-      } catch (err) {
-        alert('Gagal menyimpan: ' + err.message);
-        btn.disabled = false;
-      }
-    }
-
-    async function loadArtworkTable() {
-      const tbody = document.getElementById('table-artwork-body');
-      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data artwork...</td></tr>`;
-      try {
-        const { data } = await supabaseClient.from('artwork_prescreenings').select('*').order('created_at', { ascending: false });
-        if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada riwayat artwork.</td></tr>`;
-          return;
-        }
-        tbody.innerHTML = data.map(r => `
-          <tr class="hover:bg-brand-50/50 border-b border-brand-100 text-xs">
-            <td class="px-4 py-3 font-mono text-slate-500">${esc(String(r.id).slice(0, 8))}</td>
-            <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.title || r.product_name)}</td>
-            <td class="px-4 py-3">${esc(r.material_type)}</td>
-            <td class="px-4 py-3">${esc(r.brand_name ?? '-')}</td>
-            <td class="px-4 py-3 font-bold text-purple-600">${r.compliance_score != null ? esc(r.compliance_score) + '/100' : '-'}</td>
-            <td class="px-4 py-3 font-semibold ${artStatusColor(r.bpom_status)}">${esc(r.bpom_status ?? '-')}</td>
-            <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 text-center"><button onclick="showArtworkDetail('${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button></td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
-      }
-    }
-
-    async function loadNpdProductsTable() {
-      const tbody = document.getElementById('table-npd-body');
-      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data NPD...</td></tr>`;
-      try {
-        const { data } = await supabaseClient.from('npd_permit_screenings').select('*').order('created_at', { ascending: false });
-        if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada riwayat NPD.</td></tr>`;
-          return;
-        }
-        tbody.innerHTML = data.map(r => `
-          <tr class="hover:bg-brand-50/50 border-b border-brand-100 text-xs">
-            <td class="px-4 py-3 font-mono text-slate-500">${esc(String(r.id).slice(0, 8))}</td>
-            <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.product_idea_name)}</td>
-            <td class="px-4 py-3">${esc(r.category)}</td>
-            <td class="px-4 py-3">${esc(r.matched_permit_code ?? '-')}</td>
-            <td class="px-4 py-3">${esc(r.created_by || 'system')}</td>
-            <td class="px-4 py-3 font-bold text-emerald-600">${r.feasibility_score != null ? esc(r.feasibility_score) + '/100' : '-'}</td>
-            <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 text-center"><button onclick="showNpdDetail('${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button></td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
-      }
-    }
-
-    async function loadTicketsTable() {
-      const tbody = document.getElementById('table-tickets-body');
-      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data tiket...</td></tr>`;
-      try {
-        const { data } = await supabaseClient.from('tickets').select('*').order('created_at', { ascending: false });
-        if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada tiket.</td></tr>`;
-          return;
-        }
-        tbody.innerHTML = data.map(r => `
-          <tr class="hover:bg-brand-50/50 border-b border-brand-100 text-xs">
-            <td class="px-4 py-3 font-mono text-amber-700 font-bold">${esc(r.ticket_number || ('TKT-' + String(r.id).slice(0, 6)))}</td>
-            <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.title)}</td>
-            <td class="px-4 py-3">${esc(r.category)}</td>
-            <td class="px-4 py-3">${esc(r.priority)}</td>
-            <td class="px-4 py-3">${esc(r.requested_by)}</td>
-            <td class="px-4 py-3 font-bold text-amber-600">${esc(r.status)}</td>
-            <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 text-center"><button onclick="showDetail('tickets', '${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button></td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
-      }
-    }
-
-    async function loadAuditLogs() {
-      const tbody = document.getElementById('table-audit-body');
-      tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400">Memuat log aktivitas...</td></tr>`;
-      try {
-        const { data, error } = await supabaseClient.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(50);
-        if (error) {
-          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-rose-500">Gagal memuat log: ${esc(error.message)}</td></tr>`;
-          return;
-        }
-        if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400">Belum ada log aktivitas.</td></tr>`;
-          return;
-        }
-        tbody.innerHTML = data.map(r => `
-          <tr class="border-b border-brand-100 text-xs hover:bg-brand-50/50">
-            <td class="px-4 py-3 text-slate-500">${r.created_at ? new Date(r.created_at).toLocaleString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.actor_username)}</td>
-            <td class="px-4 py-3">${esc(r.action)}</td>
-            <td class="px-4 py-3">${esc(AUDIT_ENTITY[r.entity_type] || r.entity_type)}${r.payload_after && r.payload_after.summary ? '<div class="text-[10px] text-slate-400">' + esc(r.payload_after.summary) + '</div>' : ''}</td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400">Belum ada log aktivitas.</td></tr>`;
-      }
-    }
-
-    function toggleNpdCountry() {
-      const isImport = document.getElementById('npd-production-scheme').value === 'Impor';
-      const wrap = document.getElementById('npd-country-wrap');
-      const input = document.getElementById('npd-country-origin');
-      wrap.classList.toggle('hidden', !isImport);
-      input.required = isImport;
-      if (!isImport) input.value = '';
-    }
-
-    let currentNpdResult = null;
-
-    function showNpdResult(d, productName, rec = {}) {
-      currentNpdResult = {
-        d, name: productName, id: rec.id || null,
-        brand_id: rec.brand_id || null, brand_name: rec.brand_name || null, target_age: rec.target_age || null,
-        production_scheme: rec.production_scheme || null,
-        country_of_origin: rec.country_of_origin || null,
-        created_at: rec.created_at || new Date().toISOString()
-      };
-      const tb = document.getElementById('btn-npd-ticket');
-      tb.disabled = false;
-      tb.innerHTML = '<i data-lucide="ticket" class="w-4 h-4"></i> Buat Tiket ke Legal';
-      const permits = Array.isArray(d.required_permits) ? d.required_permits : [];
-      const score = Number(d.feasibility_score);
-      const color = score >= 75 ? 'text-emerald-600' : score >= 50 ? 'text-amber-600' : 'text-rose-600';
-      const box = (label, value, extra = '') => `
-        <div class="bg-brand-50 border border-brand-200 rounded-lg p-3">
-          <p class="text-[10px] uppercase font-bold text-brand-700">${label}</p>
-          <p class="font-bold text-slate-800 mt-1 ${extra}">${value}</p>
-        </div>`;
-      document.getElementById('npd-result-body').innerHTML = `
-        <p class="text-slate-500">Produk: <span class="font-semibold text-slate-800">${esc(productName)}</span>${rec.brand_name ? ' &middot; Brand: <span class="font-semibold text-slate-800">' + esc(rec.brand_name) + '</span>' : ''}${rec.target_age ? ' &middot; Usia target: <span class="font-semibold text-slate-800">' + esc(rec.target_age) + '</span>' : ''}${rec.production_scheme ? ' &middot; Produksi: <span class="font-semibold text-slate-800">' + esc(rec.production_scheme) + '</span>' : ''}${rec.country_of_origin ? ' &middot; Negara asal: <span class="font-semibold text-slate-800">' + esc(rec.country_of_origin) + '</span>' : ''}</p>
-        <div class="grid grid-cols-2 gap-3">
-          ${box('Kategori Produk', esc(d.product_category))}
-          ${box('Kecocokan Izin BPOM', esc(d.primary_permit_code))}
-          ${box('Feasibility Skor', esc(score) + '/100' + (d.feasibility_status ? ' <span class="text-[10px] font-semibold text-slate-500">(' + esc(d.feasibility_status) + ')</span>' : ''), 'text-base ' + color)}
-          ${box('Estimasi Waktu Pendaftaran', esc(d.estimated_timeline))}
-        </div>
-        <div>
-          <p class="text-[10px] uppercase font-bold text-brand-700 mb-2">Izin yang Harus Dipenuhi (${permits.length})</p>
-          <div class="space-y-2">
-            ${permits.length ? permits.map(p => `
-              <div class="border border-brand-200 rounded-lg p-3">
-                <p class="font-bold text-slate-800">${esc(p.permit_name)}${p.code ? ' <span class="font-mono text-[10px] text-slate-500">(' + esc(p.code) + ')</span>' : ''}</p>
-                ${p.authority ? '<p class="text-[10px] text-brand-700 font-semibold">' + esc(p.authority) + '</p>' : ''}
-                ${p.description ? '<p class="text-slate-600 mt-1">' + esc(p.description) + '</p>' : ''}
-              </div>`).join('') : '<p class="text-slate-400">Tidak ada izin yang terdaftar.</p>'}
-          </div>
-        </div>
-        <p class="text-[10px] text-slate-400">Ringkasan AI, belum divalidasi Legal.</p>
-      `;
-      openModal('npd-result-modal');
-    }
-
-    async function showNpdDetail(id) {
-      const { data, error } = await supabaseClient
-        .from('npd_permit_screenings').select('*').eq('id', id).single();
-      if (error || !data) { alert('Gagal memuat detail skrining NPD.'); return; }
-
-      const d = data.analysis_result;
-      if (d && d.product_category) {
-        showNpdResult(d, data.product_idea_name, {
-          id: data.id, brand_id: data.brand_id, brand_name: data.brand_name,
-          target_age: data.target_age, production_scheme: data.production_scheme,
-          country_of_origin: data.country_of_origin, created_at: data.created_at
-        });
-      } else {
-        showDetail('npd_permit_screenings', id); // data lama tanpa analysis_result
-      }
-    }
-
-    function artStatusColor(st) {
-      return st === 'Compliant' ? 'text-emerald-600' : st === 'Need Adjustment' ? 'text-amber-600' : st === 'Non-Compliant' ? 'text-rose-600' : 'text-slate-700';
-    }
-
     let currentArtworkResult = null;
 
-    function showArtworkResult(d, title, rec = {}) {
-      currentArtworkResult = {
-        d, title, id: rec.id || null, brand_id: rec.brand_id || null, brand_name: rec.brand_name || null,
-        material_type: rec.material_type || null, file_name: rec.file_name || null,
-        created_at: rec.created_at || new Date().toISOString()
-      };
-      const tb = document.getElementById('btn-artwork-ticket');
-      tb.disabled = false;
-      tb.innerHTML = '<i data-lucide="ticket" class="w-4 h-4"></i> Buat Tiket ke Legal';
-      const score = Number(d.compliance_score);
-      const box = (label, value, cls = '') => `
-        <div class="bg-brand-50 border border-brand-200 rounded-lg p-3">
-          <p class="text-[10px] uppercase font-bold text-brand-700">${label}</p>
-          <p class="font-bold mt-1 ${cls || 'text-slate-800'}">${value}</p>
-        </div>`;
-      const list = (label, arr, cls) => {
-        arr = Array.isArray(arr) ? arr : [];
-        return `<div>
-          <p class="text-[10px] uppercase font-bold ${cls} mb-1">${label} (${arr.length})</p>
-          ${arr.length ? '<ul class="list-disc pl-4 space-y-1 text-slate-700">' + arr.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '<p class="text-slate-400">Tidak ada.</p>'}
-        </div>`;
-      };
-      const info = [rec.brand_name, rec.material_type, rec.file_name].filter(Boolean).map(esc).join(' &middot; ');
-      document.getElementById('artwork-result-body').innerHTML = `
-        <p class="text-slate-500">Materi: <span class="font-semibold text-slate-800">${esc(title)}</span>${info ? ' &middot; ' + info : ''}</p>
-        <div class="grid grid-cols-2 gap-3">
-          ${box('Kategori Produk', esc(d.product_category))}
-          ${box('Skor Kepatuhan', esc(score) + '/100', 'text-base ' + (score >= 75 ? 'text-emerald-600' : score >= 50 ? 'text-amber-600' : 'text-rose-600'))}
-          ${box('Status BPOM', esc(d.bpom_status), artStatusColor(d.bpom_status))}
-          ${box('Status Halal', esc(d.halal_status), artStatusColor(d.halal_status))}
-        </div>
-        ${list('Risiko Tinggi', d.high_risk_items, 'text-rose-600')}
-        ${list('Perlu Penyesuaian', d.need_adjustment_items, 'text-amber-600')}
-        ${list('Sudah Sesuai', d.compliant_items, 'text-emerald-600')}
-        <p class="text-[10px] text-slate-400">Ringkasan AI, belum divalidasi Legal.</p>
-      `;
-      openModal('artwork-result-modal');
-    }
-
-    async function showArtworkDetail(id) {
-      const { data } = await supabaseClient.from('artwork_prescreenings').select('*').eq('id', id).single();
-      if (!data) return;
-      if (data.analysis_result && data.analysis_result.product_category) {
-        showArtworkResult(data.analysis_result, data.title || data.product_name, data);
-      } else {
-        showDetail('artwork_prescreenings', id); // data lama tanpa hasil analisis lengkap
-      }
-    }
-
-    async function createArtworkTicket() {
-      const c = currentArtworkResult;
-      if (!c) return;
-      const btn = document.getElementById('btn-artwork-ticket');
-      btn.disabled = true;
-      try {
-        const d = c.d;
-        const score = Number(d.compliance_score);
-        const title = 'Review Artwork: ' + c.title;
-        const { data: ex } = await supabaseClient.from('tickets').select('ticket_number').eq('title', title).limit(1);
-        if (ex && ex.length) {
-          alert('Tiket untuk artwork ini sudah ada: ' + ex[0].ticket_number);
-          btn.innerHTML = 'Tiket Sudah Ada';
-          return;
-        }
-        const bullets = (arr) => Array.isArray(arr) && arr.length ? arr.map(x => '- ' + x).join('\n') : '-';
-        const description = [
-          'Permintaan review Legal atas hasil pemeriksaan artwork (ringkasan AI, belum divalidasi).',
-          '',
-          'Materi: ' + c.title,
-          c.brand_name ? 'Brand: ' + c.brand_name : null,
-          c.material_type ? 'Jenis materi: ' + c.material_type : null,
-          c.file_name ? 'File: ' + c.file_name : null,
-          'Kategori produk: ' + d.product_category,
-          'Skor kepatuhan: ' + score + '/100',
-          'Status BPOM: ' + d.bpom_status,
-          'Status halal: ' + d.halal_status,
-          '',
-          'Risiko tinggi:',
-          bullets(d.high_risk_items),
-          '',
-          'Perlu penyesuaian:',
-          bullets(d.need_adjustment_items)
-        ].filter(x => x !== null).join('\n');
-
-        const row = {
-          ticket_number: 'TKT-' + Math.floor(1000 + Math.random() * 9000),
-          title,
-          category: 'BPOM Consultation',
-          priority: (d.bpom_status === 'Non-Compliant' || (d.high_risk_items || []).length > 0 || score < 50) ? 'High' : 'Medium',
-          description,
-          status: 'Open',
-          brand_id: c.brand_id || null,
-          brand_name: c.brand_name || null,
-          requested_by: currentUserSession ? currentUserSession.username : 'system'
-        };
-        const { error } = await supabaseClient.from('tickets').insert([row]);
-        if (error) throw error;
-        btn.innerHTML = 'Tiket Terkirim';
-        loadTicketsTable();
-        logAudit('Buat Tiket dari Artwork', 'tickets', null, { summary: c.title, ticket_number: row.ticket_number, artwork_id: c.id });
-        alert('Tiket ke Legal berhasil dibuat!');
-      } catch (err) {
-        alert('Error: ' + err.message);
-        btn.disabled = false;
-      }
-    }
-          async function downloadArtworkPdf() {
-      // Pastikan mengambil object data artwork yang sedang aktif
+    async function downloadArtworkPdf() {
       const c = currentArtworkResult;
       if (!c) return;
       if (!window.jspdf) { alert('Library PDF belum termuat. Muat ulang halaman lalu coba lagi.'); return; }
@@ -2072,11 +1215,9 @@
       const maxW = W - 2 * M;
       let y = 0;
 
-      // Adaptasi Mapping Kolom Data (Mendukung 'analysis_result' maupun 'd')
       const d = c.analysis_result || c.d || {};
       const score = Number(d.compliance_score || c.compliance_score || 0);
 
-      // Extract array temuan evaluasi secara aman
       const highRiskItems = d.high_risk_items || d.high_risk || [];
       const needAdjItems = d.need_adjustment_items || d.need_adjustment || d.medium_risk_items || [];
       const compliantItems = d.compliant_items || d.compliant || d.low_risk_items || [];
@@ -2100,7 +1241,6 @@
       doc.setLineWidth(1);
       doc.roundedRect(M, y, maxW, 26, 4, 4, 'FD');
 
-      // Ikon Warning Vektor
       doc.setFillColor(225, 29, 72);
       doc.circle(M + 15, y + 13, 6, 'F');
       doc.setFont('helvetica', 'bold');
@@ -2121,7 +1261,6 @@
       doc.setDrawColor(226, 232, 240);
       doc.roundedRect(M, y, maxW, cardH, 6, 6, 'FD');
 
-      // Ambil file gambar dari input HTML jika ada
       const fileInput = document.getElementById('artwork-file');
       let imageBase64Data = null;
 
@@ -2132,12 +1271,9 @@
             reader.onload = () => resolve(reader.result);
             reader.readAsDataURL(fileInput.files[0]);
           });
-        } catch (e) {
-          console.warn('Gagal memuat preview gambar:', e);
-        }
+        } catch (e) { console.warn('Gagal memuat image preview:', e); }
       }
 
-      // Preview Gambar di Kiri
       const imgW = 140;
       const imgH = 168;
       const imgX = M + 13;
@@ -2148,14 +1284,11 @@
           doc.addImage(imageBase64Data, 'JPEG', imgX, imgY, imgW, imgH, undefined, 'FAST');
           doc.setDrawColor(203, 213, 225);
           doc.rect(imgX, imgY, imgW, imgH);
-        } catch (e) {
-          drawPlaceholderImage(doc, imgX, imgY, imgW, imgH);
-        }
+        } catch (e) { drawPlaceholderImage(doc, imgX, imgY, imgW, imgH); }
       } else {
         drawPlaceholderImage(doc, imgX, imgY, imgW, imgH);
       }
 
-      // Metadata Produk (Adaptasi Kolom Database)
       const rightX = imgX + imgW + 20;
       let rightY = y + 24;
 
@@ -2169,7 +1302,6 @@
       doc.setTextColor(15, 23, 42);
       doc.text(String(c.title || c.product_name || 'Artwork Product'), rightX, rightY);
 
-      // Detail Versi & Kategori
       rightY += 26;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
@@ -2184,19 +1316,16 @@
       doc.text(`${c.version || 'v1.0'} (${c.material_type || 'Kemasan'})`, rightX, rightY);
       doc.text(String(d.product_category || c.product_category || 'Pangan Olahan'), rightX + 160, rightY);
 
-      // Tanggal Audit
       rightY += 18;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(100, 116, 139);
       doc.text(`Tanggal Audit: ${new Date(c.created_at || Date.now()).toLocaleDateString('id-ID')}`, rightX, rightY);
 
-      // Kotak Metrics (Compliance Score, Status BPOM, Status Halal)
       rightY += 20;
       const metricW = 85;
       const metricH = 42;
 
-      // 1. Compliance Score
       let scoreColor = [225, 29, 72];
       if (score >= 75) scoreColor = [16, 185, 129];
       else if (score >= 50) scoreColor = [217, 119, 6];
@@ -2209,7 +1338,6 @@
       doc.setFontSize(11); doc.setTextColor(...scoreColor);
       doc.text(`${score}/100`, rightX + 6, rightY + 30);
 
-      // 2. Status BPOM
       const bpomStatus = d.bpom_status || c.bpom_status || 'Non-Compliant';
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(rightX + metricW + 8, rightY, metricW + 10, metricH, 4, 4, 'FD');
@@ -2218,7 +1346,6 @@
       doc.setFontSize(8.5); doc.setTextColor(bpomStatus === 'Compliant' ? 16 : 225, bpomStatus === 'Compliant' ? 185 : 29, bpomStatus === 'Compliant' ? 129 : 72);
       doc.text(bpomStatus, rightX + metricW + 14, rightY + 30);
 
-      // 3. Status Halal
       const halalStatus = d.halal_status || c.halal_status || 'Non-Compliant';
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(rightX + (metricW * 2) + 22, rightY, metricW + 10, metricH, 4, 4, 'FD');
@@ -2229,7 +1356,7 @@
 
       y += cardH + 20;
 
-      // --- 4. RINCIAN EVALUASI DALAM BINGKAI EYE-CATCHING ---
+      // --- 4. RINCIAN EVALUASI DALAM BINGKAI ---
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(15, 23, 42);
@@ -2245,7 +1372,6 @@
 
       const drawFramedSection = (title, items, borderRgb, bgRgb, iconType) => {
         items = Array.isArray(items) ? items : [];
-
         let contentH = 28;
         const preparedLines = [];
 
@@ -2273,39 +1399,29 @@
         const iconY = y + 14;
 
         if (iconType === 'high_risk') {
-          doc.setFillColor(225, 29, 72);
-          doc.circle(iconX, iconY, 6.5, 'F');
+          doc.setFillColor(225, 29, 72); doc.circle(iconX, iconY, 6.5, 'F');
           doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
           doc.text('!', iconX - 1.5, iconY + 2.5);
         } else if (iconType === 'adjustment') {
-          doc.setFillColor(217, 119, 6);
-          doc.circle(iconX, iconY, 6.5, 'F');
+          doc.setFillColor(217, 119, 6); doc.circle(iconX, iconY, 6.5, 'F');
           doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
           doc.text('!', iconX - 1.5, iconY + 2.5);
         } else if (iconType === 'compliant') {
-          doc.setFillColor(16, 185, 129);
-          doc.circle(iconX, iconY, 6.5, 'F');
+          doc.setFillColor(16, 185, 129); doc.circle(iconX, iconY, 6.5, 'F');
           doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(255, 255, 255);
           doc.text('v', iconX - 2, iconY + 2.5);
         }
 
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9.5);
-        doc.setTextColor(...borderRgb);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...borderRgb);
         doc.text(`${title} (${items.length})`, M + 32, innerY - 4);
 
         innerY += 12;
 
         if (items.length === 0) {
-          doc.setFont('helvetica', 'italic');
-          doc.setFontSize(8.5);
-          doc.setTextColor(148, 163, 184);
+          doc.setFont('helvetica', 'italic'); doc.setFontSize(8.5); doc.setTextColor(148, 163, 184);
           doc.text('Tidak ditemukan temuan pada kategori ini.', M + 15, innerY);
         } else {
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(8.5);
-          doc.setTextColor(30, 41, 59);
-
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(30, 41, 59);
           preparedLines.forEach((lines) => {
             lines.forEach((line) => {
               doc.text(line, M + 15, innerY);
@@ -2314,22 +1430,16 @@
             innerY += 5;
           });
         }
-
         y += contentH + 12;
       };
 
-      // Render 3 Bingkai Evaluasi Berdasarkan Variabel Adaptif
       drawFramedSection('HIGH RISK (RISIKO TINGGI PELANGGARAN HUKUM)', highRiskItems, [225, 29, 72], [254, 242, 242], 'high_risk');
       drawFramedSection('NEED ADJUSTMENT / REMOVAL (PERLU REVISI/HAPUS)', needAdjItems, [217, 119, 6], [255, 251, 235], 'adjustment');
       drawFramedSection('COMPLIANT (SESUAI ATURAN JDIH BPOM)', compliantItems, [16, 185, 129], [240, 253, 244], 'compliant');
 
-      // --- 5. FOOTER ---
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(7.5);
-      doc.setTextColor(148, 163, 184);
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(7.5); doc.setTextColor(148, 163, 184);
       doc.text('Dokumen ini dihasilkan secara otomatis oleh Enterprise LegalOps AI. Wajib divalidasi oleh Tim Legal sebelum cetak masal.', M, H - 20);
 
-      // Simpan PDF
       const slug = String(c.title || 'artwork').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'artwork';
       doc.save(`Artwork-Evaluation-${slug}.pdf`);
       logAudit('Unduh PDF Artwork', 'artwork_prescreenings', c.id, { summary: c.title });
@@ -2345,333 +1455,19 @@
       doc.text('PREVIEW DESAIN', x + (w / 2), y + (h / 2), { align: 'center' });
     }
 
-    async function createNpdTicket() {
-      const c = currentNpdResult;
-      if (!c) return;
-      const btn = document.getElementById('btn-npd-ticket');
-      btn.disabled = true;
-      try {
-        if (c.id) {
-          const { data: ex } = await supabaseClient.from('tickets').select('ticket_number').eq('npd_product_id', c.id).limit(1);
-          if (ex && ex.length) {
-            alert('Tiket untuk skrining ini sudah ada: ' + ex[0].ticket_number);
-            btn.innerHTML = 'Tiket Sudah Ada';
-            return;
-          }
-        }
-        const d = c.d;
-        const score = Number(d.feasibility_score);
-        const permits = (d.required_permits || []).map((p, i) =>
-          (i + 1) + '. ' + p.permit_name + (p.code ? ' (' + p.code + ')' : '')).join('\n');
-        const description = [
-          'Permintaan review Legal atas hasil skrining regulasi NPD (ringkasan AI, belum divalidasi).',
-          '',
-          'Produk: ' + c.name,
-          c.brand_name ? 'Brand: ' + c.brand_name : null,
-          c.target_age ? 'Usia target: ' + c.target_age : null,
-          c.production_scheme ? 'Skema produksi: ' + c.production_scheme : null,
-          c.country_of_origin ? 'Negara asal: ' + c.country_of_origin : null,
-          'Kategori: ' + d.product_category,
-          'Kecocokan izin BPOM: ' + d.primary_permit_code,
-          'Feasibility skor: ' + score + '/100' + (d.feasibility_status ? ' (' + d.feasibility_status + ')' : ''),
-          'Estimasi waktu pendaftaran: ' + d.estimated_timeline,
-          '',
-          'Izin yang harus dipenuhi:',
-          permits || '-'
-        ].filter(x => x !== null).join('\n');
-
-        const row = {
-          ticket_number: 'TKT-' + Math.floor(1000 + Math.random() * 9000),
-          title: 'Review Skrining NPD: ' + c.name,
-          category: 'BPOM Consultation',
-          priority: score < 50 ? 'High' : 'Medium',
-          description,
-          status: 'Open',
-          npd_product_id: c.id,
-          brand_id: c.brand_id || null,
-          brand_name: c.brand_name || null,
-          requested_by: currentUserSession ? currentUserSession.username : 'system'
-        };
-        let { error } = await supabaseClient.from('tickets').insert([row]);
-        if (error && /foreign key|npd_product_id/i.test(error.message)) {
-          delete row.npd_product_id; // kolom terhubung ke tabel lain: simpan tiket tanpa tautan
-          ({ error } = await supabaseClient.from('tickets').insert([row]));
-        }
-        if (error) throw error;
-        btn.innerHTML = 'Tiket Terkirim';
-        loadTicketsTable();
-        logAudit('Buat Tiket dari Skrining NPD', 'tickets', null, { summary: c.name, ticket_number: row.ticket_number, npd_id: c.id });
-        alert('Tiket ke Legal berhasil dibuat!');
-      } catch (err) {
-        alert('Error: ' + err.message);
-        btn.disabled = false;
-      }
-    }
-    function downloadNpdPdf() {
-      const c = currentNpdResult;
-      if (!c) return;
-      if (!window.jspdf) { alert('Library PDF belum termuat. Muat ulang halaman lalu coba lagi.'); return; }
-      
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-      const W = doc.internal.pageSize.getWidth();
-      const H = doc.internal.pageSize.getHeight();
-      const M = 40;
-      const maxW = W - 2 * M;
-      let y = 0;
-
-      const d = c.d;
-      const score = Number(d.feasibility_score || 0);
-
-      // --- 1. WATERMARK TRANSPARAN "PERLU VALIDASI LEGAL" ---
-      const drawWatermark = () => {
-        doc.saveGraphicsState();
-        doc.setGState(new doc.GState({ opacity: 0.08 })); // Transparansi halus
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(38);
-        doc.setTextColor(225, 29, 72); // Merah/Rose
-        // Tulis diagonal di tengah halaman
-        doc.text('DRAFT - PERLU VALIDASI LEGAL', W / 2, H / 2, { align: 'center', angle: 35 });
-        doc.restoreGraphicsState();
-      };
-
-      drawWatermark();
-
-      // --- 2. HEADER BANNER (Teal Brand `#64bcae`) ---
-      doc.setFillColor(100, 188, 174); // #64bcae
-      doc.rect(0, 0, W, 75, 'F');
-
-      doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(16);
-      doc.text('Laporan Skrining Regulasi NPD', M, 35);
-      
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.text('Enterprise LegalOps & BPOM Compliance Intelligence', M, 52);
-
-      y = 95;
-
-      // --- 3. KARTU INFORMASI PRODUK ---
-      doc.setFillColor(245, 247, 250);
-      doc.setDrawColor(220, 225, 230);
-      doc.roundedRect(M, y, maxW, 70, 6, 6, 'FD');
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      doc.setTextColor(30, 41, 59);
-      doc.text(String(c.name || 'Produk Baru'), M + 15, y + 25);
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(71, 85, 105);
-      doc.text(`Brand: ${c.brand_name || 'General'}   |   Target Usia: ${c.target_age || '-'}`, M + 15, y + 42);
-      doc.text(`Skema Produksi: ${c.production_scheme || '-'}` + (c.country_of_origin ? ` (${c.country_of_origin})` : '') + `   |   Tanggal: ${new Date(c.created_at).toLocaleDateString('id-ID')}`, M + 15, y + 56);
-
-      y += 85;
-
-      // --- 4. METRICS CARDS (3 Kolom Berwarna) ---
-      const colW = (maxW - 20) / 3;
-
-      // Card 1: Kategori
-      doc.setFillColor(240, 249, 248);
-      doc.setDrawColor(188, 228, 223);
-      doc.roundedRect(M, y, colW, 55, 5, 5, 'FD');
-      doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(48, 103, 97);
-      doc.text('KATEGORI PRODUK', M + 10, y + 18);
-      doc.setFontSize(10); doc.setTextColor(30, 41, 59);
-      doc.text(String(d.product_category || '-'), M + 10, y + 36);
-
-      // Card 2: Kode Izin
-      doc.setFillColor(240, 249, 248);
-      doc.setDrawColor(188, 228, 223);
-      doc.roundedRect(M + colW + 10, y, colW, 55, 5, 5, 'FD');
-      doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(48, 103, 97);
-      doc.text('KODE IZIN UTAMA', M + colW + 20, y + 18);
-      doc.setFontSize(10); doc.setTextColor(30, 41, 59);
-      doc.text(String(d.primary_permit_code || '-'), M + colW + 20, y + 36);
-
-      // Card 3: Skor Feasibility
-      let scoreBg = [236, 253, 245], scoreBorder = [167, 243, 208], scoreText = [5, 150, 105];
-      if (score < 50) {
-        scoreBg = [254, 242, 242]; scoreBorder = [254, 202, 202]; scoreText = [225, 29, 72];
-      } else if (score < 75) {
-        scoreBg = [254, 252, 232]; scoreBorder = [254, 240, 138]; scoreText = [202, 138, 4];
-      }
-
-      doc.setFillColor(...scoreBg);
-      doc.setDrawColor(...scoreBorder);
-      doc.roundedRect(M + (colW * 2) + 20, y, colW, 55, 5, 5, 'FD');
-      doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(...scoreText);
-      doc.text('SKOR FEASIBILITY', M + (colW * 2) + 30, y + 18);
-      doc.setFontSize(12);
-      doc.text(`${score}/100`, M + (colW * 2) + 30, y + 38);
-
-      y += 70;
-
-      // --- HELPER UNTUK HALAMAN BARU & WATERMARK ---
-      const checkPageBreak = (neededHeight) => {
-        if (y + neededHeight > H - M) {
-          doc.addPage();
-          drawWatermark(); // Gambar watermark lagi di halaman baru
-          y = M + 10;
-        }
-      };
-
-      const drawSectionHeader = (title) => {
-        checkPageBreak(25);
-        doc.setFillColor(100, 188, 174);
-        doc.rect(M, y, 4, 14, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.setTextColor(30, 41, 59);
-        doc.text(title, M + 10, y + 11);
-        y += 22;
-      };
-
-      // --- 5. ALERT BOX KHUSUS (CATATAN KHUSUS / PERINGATAN REGULASI) ---
-      const warnings = Array.isArray(d.regulatory_warnings) ? d.regulatory_warnings : [];
-      if (warnings.length > 0 || score < 75) {
-        checkPageBreak(60);
-        // Box Merah/Oranye Alert
-        const alertBg = score < 50 ? [254, 242, 242] : [255, 251, 235];
-        const alertBorder = score < 50 ? [248, 113, 113] : [251, 191, 36];
-        const alertHeader = score < 50 ? [185, 28, 28] : [180, 83, 9];
-
-        doc.setFillColor(...alertBg);
-        doc.setDrawColor(...alertBorder);
-        doc.setLineWidth(1);
-
-        // Hitung perkiraan tinggi box alert
-        let warningTextLines = [];
-        warnings.forEach(w => {
-          const lines = doc.splitTextToSize(`• ${w}`, maxW - 40);
-          warningTextLines.push(...lines);
-        });
-        
-        const boxHeight = Math.max(50, 28 + (warningTextLines.length * 12));
-        doc.roundedRect(M, y, maxW, boxHeight, 6, 6, 'FD');
-
-        // Draw Badge Icon Alert [!]
-        doc.setFillColor(...alertBorder);
-        doc.circle(M + 20, y + 20, 10, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.setTextColor(255, 255, 255);
-        doc.text('!', M + 18, y + 24);
-
-        // Header Alert Text
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(10);
-        doc.setTextColor(...alertHeader);
-        doc.text('PERATURAN & ATENSI KHUSUS AI', M + 38, y + 23);
-
-        // Isi Pesan Alert
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8.5);
-        doc.setTextColor(51, 65, 85);
-        
-        let textY = y + 38;
-        warningTextLines.forEach(line => {
-          doc.text(line, M + 38, textY);
-          textY += 12;
-        });
-
-        y += boxHeight + 15;
-      }
-
-      // --- 6. LIST IZIN BPOM YANG HARUS DIPENUHI ---
-      const permits = Array.isArray(d.required_permits) ? d.required_permits : [];
-      drawSectionHeader(`Daftar Izin Wajib (${permits.length})`);
-
-      if (permits.length === 0) {
-        doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.setTextColor(148, 163, 184);
-        doc.text('Tidak ada daftar izin khusus.', M + 10, y);
-        y += 15;
-      } else {
-        permits.forEach((p, idx) => {
-          checkPageBreak(40);
-          doc.setFillColor(250, 250, 250);
-          doc.setDrawColor(230, 230, 230);
-          doc.roundedRect(M + 5, y, maxW - 5, 36, 4, 4, 'FD');
-
-          doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(15, 23, 42);
-          doc.text(`${idx + 1}. ${p.permit_name || 'Izin Regulasi'}` + (p.code ? ` (${p.code})` : ''), M + 15, y + 15);
-
-          if (p.authority) {
-            doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(72, 160, 147);
-            doc.text(`Instansi: ${p.authority}`, M + 15, y + 27);
-          }
-          y += 42;
-        });
-      }
-
-      y += 10;
-
-      // --- 7. FOOTER WATERMARK CATATAN HUKUM ---
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(8);
-      doc.setTextColor(148, 163, 184);
-      doc.text('Dokumen ini dihasilkan otomatis oleh Enterprise LegalOps AI. Wajib divalidasi oleh Tim Legal sebelum pengajuan resmi BPOM.', M, H - 20);
-
-      // Save PDF
-      const slug = String(c.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'produk';
-      doc.save(`Skrining-NPD-${slug}.pdf`);
-      logAudit('Unduh PDF Skrining NPD', 'npd_permit_screenings', c.id, { summary: c.name });
-    }
-
-
-    // Tampilkan nilai dengan rapi (tanpa tanda kutip / kurung JSON)
-    function fmtLabel(k) { return String(k).replace(/_/g, ' '); }
-    function fmtValue(v, key = '') {
-      if (v === null || v === undefined || v === '') return '-';
-      if (typeof v === 'boolean') return v ? 'Ya' : 'Tidak';
-      if (Array.isArray(v)) {
-        if (v.length === 0) return '-';
-        return '<ul class="list-disc pl-4 space-y-1">' +
-          v.map(i => '<li>' + fmtValue(i) + '</li>').join('') + '</ul>';
-      }
-      if (typeof v === 'object') {
-        const rows = Object.entries(v).filter(([, x]) => x !== null && x !== undefined && x !== '');
-        if (rows.length === 0) return '-';
-        return '<div class="space-y-0.5">' + rows.map(([a, b]) =>
-          '<div><span class="text-slate-500 capitalize">' + esc(fmtLabel(a)) + ':</span> ' + fmtValue(b) + '</div>'
-        ).join('') + '</div>';
-      }
-      if (typeof v === 'string' && v.startsWith('data:')) return '(file tersimpan)';
-      if (/_at$/.test(key) && !isNaN(Date.parse(v))) return esc(new Date(v).toLocaleString('id-ID'));
-      return esc(v);
-    }
-
-    async function showDetail(table, id) {
-      const { data } = await supabaseClient.from(table).select('*').eq('id', id).single();
-      const body = document.getElementById('detail-body');
-      if (data) {
-        body.innerHTML = Object.entries(data).map(([k, v]) => `
-          <div class="border-b border-brand-100 pb-1.5">
-            <span class="text-[10px] text-brand-700 uppercase font-bold">${esc(fmtLabel(k))}</span>
-            <div class="text-slate-800 font-medium">${fmtValue(v, k)}</div>
-          </div>
-        `).join('');
-        openModal('detail-modal');
-      }
-    }
-
+    // Handlers Form Utama
     async function handleCreateArtwork(e) {
       e.preventDefault();
-      const form = e.target;
-
       const title = document.getElementById('artwork-title').value.trim();
       const material_type = document.getElementById('artwork-type').value;
       const brandSelectEl = document.getElementById('artwork-brand-select');
       const brand_id = brandSelectEl ? brandSelectEl.value : '';
       if (!brand_id) { alert('Silakan pilih Brand terlebih dahulu!'); return; }
       const selectedBrandObj = masterBrands.find(b => String(b.id) === String(brand_id));
-      const brand_name = selectedBrandObj ? selectedBrandObj.name : (brandSelectEl.selectedOptions[0]?.text || '');
+      const brand_name = selectedBrandObj ? selectedBrandObj.name : '';
 
       const file = document.getElementById('artwork-file').files[0];
-      if (!file) { alert('Pilih file desain (gambar/PDF) terlebih dahulu!'); return; }
-      if (file.size > 3.5 * 1024 * 1024) { alert('Ukuran file melebihi 3.5 MB. Silakan kompres file Anda.'); return; }
+      if (!file) { alert('Pilih file desain!'); return; }
 
       const btn = document.getElementById('btn-submit-artwork');
       btn.disabled = true;
@@ -2686,162 +1482,78 @@
           reader.readAsDataURL(file);
         });
 
-        // Analisis AI + penyimpanan dilakukan oleh Edge Function (tanpa data default / fallback)
         const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/Scan-artwork`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({
-            title,
-            materialType: material_type,
-            imageBase64,
-            mimeType: file.type || 'image/png',
-            fileName: file.name,
-            brand_id,
-            brand_name,
-            username: currentUserSession ? currentUserSession.username : 'system'
-          })
+          headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ title, materialType: material_type, imageBase64, mimeType: file.type || 'image/png', fileName: file.name, brand_id, brand_name, username: currentUserSession ? currentUserSession.username : 'system' })
         });
         const resData = await aiResponse.json().catch(() => ({}));
-        if (!aiResponse.ok || resData.error) {
-          throw new Error(resData.error || ('Edge Function gagal (HTTP ' + aiResponse.status + ')'));
-        }
-        if (!resData.saved_id) throw new Error('Analisis selesai tetapi gagal tersimpan ke database.');
+        if (!aiResponse.ok || resData.error) throw new Error(resData.error || 'Analisis gagal');
 
-        form.reset();
         closeModal('artwork-modal');
         loadArtworkTable();
         showArtworkResult(resData.data, title, { id: resData.saved_id, brand_id, brand_name, material_type, file_name: file.name, created_at: new Date().toISOString() });
-        logAudit('Skrining Artwork', 'artwork_prescreenings', resData.saved_id, { summary: title, status_bpom: resData.data.bpom_status, skor: resData.data.compliance_score });
-      } catch (err) {
-        alert('Error: ' + err.message);
-      } finally {
+        logAudit('Skrining Artwork', 'artwork_prescreenings', resData.saved_id, { summary: title });
+      } catch (err) { alert('Error: ' + err.message); } 
+      finally {
         btn.disabled = false;
         btn.innerHTML = `<i data-lucide="scan-line" class="w-4 h-4"></i> Skrining AI BPOM`;
         lucide.createIcons();
       }
     }
 
-
-
-    async function handleCreateNpd(e) {
-      e.preventDefault();
-      
-      // 1. Ambil nilai elemen select brand
-      const brandSelectEl = document.getElementById('npd-brand-select');
-      const brand_id = brandSelectEl ? brandSelectEl.value : null;
-
-      // Validasi jika user belum memilih brand
-      if (!brand_id) {
-        alert("Silakan pilih Brand terlebih dahulu!");
-        return;
-      }
-
-      // Ambil nama brand dari teks option yang sedang dipilih
-      const selectedOptionText = brandSelectEl.options[brandSelectEl.selectedIndex]?.text;
-      
-      // Cari juga dari masterBrands sebagai pembanding
-      const selectedBrandObj = masterBrands.find(b => String(b.id) === String(brand_id));
-      const brand_name = selectedBrandObj ? selectedBrandObj.name : (selectedOptionText || 'General');
-
-      // Ambil data input form lainnya
-      const product_idea_name = document.getElementById('npd-product-name').value;
-      const target_age = document.getElementById('npd-target-age').value.trim();
-      const production_scheme = document.getElementById('npd-production-scheme').value;
-      const country_origin = production_scheme === 'Impor' ? document.getElementById('npd-country-origin').value.trim() : '';
-      const claims = document.getElementById('npd-claim').value;
-      const ingredients = document.getElementById('npd-ingredients').value;
-
-      // Kumpulkan checklist kanal penjualan
-      const selectedChannels = Array.from(document.querySelectorAll('.npd-channel-cb:checked')).map(cb => cb.value);
-
-      const btn = document.getElementById('btn-submit-npd');
-      btn.disabled = true;
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menganalisis AI BPOM...`;
-      lucide.createIcons();
-
+    async function loadArtworkTable() {
+      const tbody = document.getElementById('table-artwork-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data artwork...</td></tr>`;
       try {
-        // 2. Analisis AI BPOM lewat Edge Function (tanpa data default / fallback).
-        // Edge Function yang menyimpan hasilnya ke database.
-        const claimList = claims.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
-        const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/scan-npd-permit`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({
-            productName: product_idea_name,
-            targetAge: target_age,
-            productionScheme: production_scheme,
-            countryOrigin: country_origin || undefined,
-            claims: claimList,
-            mainIngredients: ingredients,
-            salesChannels: selectedChannels,
-            username: currentUserSession ? currentUserSession.username : 'system',
-            brand_id,
-            brand_name
-          })
-        });
-        const resData = await aiResponse.json().catch(() => ({}));
-        if (!aiResponse.ok || resData.error) {
-          throw new Error(resData.error || ('Edge Function gagal (HTTP ' + aiResponse.status + ')'));
+        const { data } = await supabaseClient.from('artwork_prescreenings').select('*').order('created_at', { ascending: false });
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada riwayat artwork.</td></tr>`;
+          return;
         }
-        if (!resData.saved_id) {
-          throw new Error('Analisis selesai tetapi gagal tersimpan ke database.');
-        }
-
-        e.target.reset();
-        toggleNpdCountry();
-        closeModal('npd-modal');
-        loadNpdProductsTable();
-        showNpdResult(resData.data, product_idea_name, { id: resData.saved_id, brand_id, brand_name, target_age, production_scheme, country_of_origin: country_origin, created_at: new Date().toISOString() });
-        logAudit('Skrining NPD', 'npd_permit_screenings', resData.saved_id, { summary: product_idea_name, brand: brand_name, kategori: resData.data.product_category, skor: resData.data.feasibility_score });
-
-      } catch (err) {
-        alert('Error: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="flask-conical" class="w-4 h-4"></i> Uji Kelayakan Regulasi`;
-        lucide.createIcons();
-      }
+        tbody.innerHTML = data.map(r => `
+          <tr class="hover:bg-brand-50/50 border-b border-brand-100 text-xs">
+            <td class="px-4 py-3 font-mono text-slate-500">${esc(String(r.id).slice(0, 8))}</td>
+            <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.title || r.product_name)}</td>
+            <td class="px-4 py-3">${esc(r.material_type)}</td>
+            <td class="px-4 py-3">${esc(r.brand_name ?? '-')}</td>
+            <td class="px-4 py-3 font-bold text-purple-600">${r.compliance_score != null ? esc(r.compliance_score) + '/100' : '-'}</td>
+            <td class="px-4 py-3 font-semibold ${artStatusColor(r.bpom_status)}">${esc(r.bpom_status ?? '-')}</td>
+            <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
+            <td class="px-4 py-3 text-center"><button onclick="showArtworkDetail('${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button></td>
+          </tr>
+        `).join('');
+      } catch (err) { tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`; }
     }
 
+    function artStatusColor(st) {
+      return st === 'Compliant' ? 'text-emerald-600' : st === 'Need Adjustment' ? 'text-amber-600' : st === 'Non-Compliant' ? 'text-rose-600' : 'text-slate-700';
+    }
 
-    async function handleCreateTicket(e) {
-      e.preventDefault();
-      const title = document.getElementById('ticket-title').value;
-      const category = document.getElementById('ticket-category').value;
-      const priority = document.getElementById('ticket-priority').value;
-      const description = document.getElementById('ticket-description').value;
+    function showArtworkResult(d, title, rec = {}) {
+      currentArtworkResult = { d, title, id: rec.id || null, brand_id: rec.brand_id || null, brand_name: rec.brand_name || null, material_type: rec.material_type || null, file_name: rec.file_name || null, created_at: rec.created_at || new Date().toISOString() };
+      openModal('artwork-result-modal');
+    }
 
-      const btn = document.getElementById('btn-submit-ticket');
-      btn.disabled = true;
+    async function showArtworkDetail(id) {
+      const { data } = await supabaseClient.from('artwork_prescreenings').select('*').eq('id', id).single();
+      if (!data) return;
+      if (data.analysis_result && data.analysis_result.product_category) {
+        showArtworkResult(data.analysis_result, data.title || data.product_name, data);
+      } else { showDetail('artwork_prescreenings', id); }
+    }
 
-      try {
-        const { error } = await supabaseClient.from('tickets').insert([{
-          ticket_number: 'TKT-' + Math.floor(1000 + Math.random() * 9000),
-          title,
-          category,
-          priority,
-          description,
-          status: 'Open',
-          requested_by: currentUserSession ? currentUserSession.username : 'system'
-        }]);
-
-        if (error) throw error;
-        closeModal('ticket-modal');
-        loadTicketsTable();
-        logAudit('Buat Tiket', 'tickets', null, { summary: title, kategori: category, prioritas: priority });
-        alert('Tiket Compliance berhasil dibuat!');
-      } catch (err) {
-        alert('Error: ' + err.message);
-      } finally {
-        btn.disabled = false;
+    async function showDetail(table, id) {
+      const { data } = await supabaseClient.from(table).select('*').eq('id', id).single();
+      const body = document.getElementById('detail-body');
+      if (data) {
+        body.innerHTML = Object.entries(data).map(([k, v]) => `
+          <div class="border-b border-brand-100 pb-1.5">
+            <span class="text-[10px] text-brand-700 uppercase font-bold">${esc(k)}</span>
+            <div class="text-slate-800 font-medium">${esc(v)}</div>
+          </div>
+        `).join('');
+        openModal('detail-modal');
       }
     }
 
