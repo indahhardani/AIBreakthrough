@@ -745,6 +745,7 @@
       <div class="flex border-b border-brand-200 px-6 pt-3 text-xs font-bold gap-4 bg-brand-50/30">
         <button type="button" onclick="switchRegModalMode('manual')" id="tab-reg-manual" class="pb-2 border-b-2 border-brand text-brand-900">Input Manual</button>
         <button type="button" onclick="switchRegModalMode('pdf')" id="tab-reg-pdf" class="pb-2 border-b-2 border-transparent text-slate-500 hover:text-brand-900">⚡ Auto-Extract dari PDF Regulasi</button>
+        <button type="button" onclick="switchRegModalMode('drive')" id="tab-reg-drive" class="pb-2 border-b-2 border-transparent text-slate-500 hover:text-brand-900">📁 Dari Link Google Drive</button>
       </div>
 
       <form id="form-reg-manual" onsubmit="handleSaveRegulation(event)" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
@@ -828,6 +829,25 @@
           <i data-lucide="sparkles" class="w-4 h-4"></i> Ekstrak Pasal via AI
         </button>
       </div>
+
+      <div id="form-reg-drive" class="hidden p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+        <div class="border-2 border-dashed border-brand-300 rounded-xl p-4 bg-brand-50/50 space-y-2">
+          <p class="text-xs font-bold text-slate-700 flex items-center gap-2"><i data-lucide="folder-search" class="w-4 h-4 text-brand"></i> Tempel link file atau folder Google Drive</p>
+          <p class="text-[10px] text-slate-500">Satu link per baris. Link folder akan dibuka otomatis dan semua PDF di dalamnya (termasuk subfolder) ikut di-scan. Folder harus sudah dibagikan ke akun layanan Drive yang dipakai portal ini.</p>
+          <textarea id="reg-drive-links" rows="5" placeholder="https://drive.google.com/drive/folders/...&#10;https://drive.google.com/file/d/.../view" class="w-full bg-white border border-brand-300 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-600"></textarea>
+        </div>
+        <button type="button" onclick="startDriveExtract('regulation')" id="btn-extract-reg-drive" class="w-full bg-brand hover:bg-brand-600 text-white font-bold py-2.5 rounded-lg text-xs transition flex items-center justify-center gap-2 shadow-md shadow-brand/30">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Scan &amp; Ekstrak Pasal dari Drive
+        </button>
+        <div id="drive-extract-panel-regulation" class="hidden space-y-2">
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-[11px] font-bold text-brand-900" id="drive-extract-text-regulation"></p>
+            <button type="button" id="btn-drive-cancel-regulation" onclick="cancelDriveExtract('regulation')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3 py-1 rounded-lg text-[11px] font-bold">Hentikan</button>
+          </div>
+          <div class="w-full bg-brand-100 rounded-full h-2.5 overflow-hidden"><div id="drive-extract-bar-regulation" class="bg-emerald-500 h-2.5 rounded-full transition-all" style="width:0%"></div></div>
+          <div id="drive-extract-detail-regulation" class="text-[11px] space-y-1 max-h-40 overflow-y-auto"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -845,6 +865,23 @@
           <p class="text-xs font-bold text-slate-700">Unggah File PDF Sertifikat / Surat NIE BPOM</p>
           <p class="text-[10px] text-slate-500 mt-0.5">AI akan membaca Nomor NIE, Nama Produk, dan daftar klaim resmi yang disetujui secara otomatis.</p>
           <input type="file" id="nie-pdf-file" accept="application/pdf" class="mt-3 text-xs text-slate-600 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white file:font-bold hover:file:bg-emerald-500 cursor-pointer">
+        </div>
+
+        <div class="border border-brand-200 rounded-xl p-4 bg-white space-y-2">
+          <p class="text-xs font-bold text-slate-700 flex items-center gap-2"><i data-lucide="folder-search" class="w-4 h-4 text-emerald-600"></i> Atau scan dari link Google Drive</p>
+          <p class="text-[10px] text-slate-500">Satu link per baris (file atau folder). Folder akan dibuka otomatis, setiap PDF di dalamnya jadi satu data NIE.</p>
+          <textarea id="nie-drive-links" rows="3" placeholder="https://drive.google.com/drive/folders/..." class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-600"></textarea>
+          <button type="button" onclick="startDriveExtract('nie')" id="btn-extract-nie-drive" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-2 shadow-sm">
+            <i data-lucide="sparkles" class="w-4 h-4"></i> Scan &amp; Ekstrak NIE dari Drive
+          </button>
+          <div id="drive-extract-panel-nie" class="hidden space-y-2 pt-1">
+            <div class="flex items-center justify-between gap-3">
+              <p class="text-[11px] font-bold text-brand-900" id="drive-extract-text-nie"></p>
+              <button type="button" id="btn-drive-cancel-nie" onclick="cancelDriveExtract('nie')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3 py-1 rounded-lg text-[11px] font-bold">Hentikan</button>
+            </div>
+            <div class="w-full bg-brand-100 rounded-full h-2.5 overflow-hidden"><div id="drive-extract-bar-nie" class="bg-emerald-500 h-2.5 rounded-full transition-all" style="width:0%"></div></div>
+            <div id="drive-extract-detail-nie" class="text-[11px] space-y-1 max-h-32 overflow-y-auto"></div>
+          </div>
         </div>
 
         <div class="pt-2 flex justify-end gap-3">
@@ -1058,22 +1095,27 @@
     }
 
     function switchRegModalMode(mode) {
-      const isManual = mode === 'manual';
-      document.getElementById('form-reg-manual').classList.toggle('hidden', !isManual);
-      document.getElementById('form-reg-pdf').classList.toggle('hidden', isManual);
-      document.getElementById('tab-reg-manual').className = isManual ? "pb-2 border-b-2 border-brand text-brand-900" : "pb-2 border-b-2 border-transparent text-slate-500 hover:text-brand-900";
-      document.getElementById('tab-reg-pdf').className = !isManual ? "pb-2 border-b-2 border-brand text-brand-900" : "pb-2 border-b-2 border-transparent text-slate-500 hover:text-brand-900";
+      ['manual', 'pdf', 'drive'].forEach(m => {
+        document.getElementById('form-reg-' + m).classList.toggle('hidden', m !== mode);
+        document.getElementById('tab-reg-' + m).className = m === mode
+          ? "pb-2 border-b-2 border-brand text-brand-900"
+          : "pb-2 border-b-2 border-transparent text-slate-500 hover:text-brand-900";
+      });
     }
 
     function openRegulationModal() {
       document.getElementById('reg-id-input').value = '';
       document.getElementById('form-reg-manual').reset();
       switchRegModalMode('manual');
+      document.getElementById('reg-drive-links').value = '';
+      document.getElementById('drive-extract-panel-regulation').classList.add('hidden');
       openModal('regulation-modal');
     }
 
     function openNieModal() {
       document.getElementById('nie-pdf-file').value = '';
+      document.getElementById('nie-drive-links').value = '';
+      document.getElementById('drive-extract-panel-nie').classList.add('hidden');
       openModal('nie-modal');
     }
 
@@ -1327,6 +1369,112 @@
     }
 
     
+    // =====================================================================
+    // EKSTRAKSI DARI LINK GOOGLE DRIVE (file / folder, antrean satu file per panggilan)
+    // Edge Function: resolve-drive-link (daftar file dari link) + parse-bpom-regulation (driveFileId)
+    // =====================================================================
+    const DRIVE_RESOLVE_URL = `${SUPABASE_URL}/functions/v1/resolve-drive-link`;
+    const driveExtractState = { regulation: { running: false, cancelled: false }, nie: { running: false, cancelled: false } };
+
+    function parseDriveLinks(raw) {
+      const out = [], seen = new Set();
+      String(raw || '').split(/[\s,;]+/).map(x => x.trim()).filter(Boolean).forEach(u => {
+        let m = u.match(/\/folders\/([A-Za-z0-9_-]{10,})/);
+        let kind = 'folder';
+        if (!m) { m = u.match(/\/file\/d\/([A-Za-z0-9_-]{10,})/); kind = 'file'; }
+        if (!m) { m = u.match(/[?&]id=([A-Za-z0-9_-]{10,})/); kind = /\/folders|folderview/.test(u) ? 'folder' : 'file'; }
+        if (!m || seen.has(m[1])) return;
+        seen.add(m[1]);
+        out.push({ id: m[1], kind, url: u });
+      });
+      return out;
+    }
+
+    function driveUi(mode, { pct, text, detail }) {
+      document.getElementById('drive-extract-panel-' + mode).classList.remove('hidden');
+      if (pct !== undefined) document.getElementById('drive-extract-bar-' + mode).style.width = Math.max(0, Math.min(100, pct)) + '%';
+      if (text !== undefined) document.getElementById('drive-extract-text-' + mode).innerText = text;
+      if (detail !== undefined) document.getElementById('drive-extract-detail-' + mode).innerHTML = detail;
+    }
+
+    function cancelDriveExtract(mode) {
+      driveExtractState[mode].cancelled = true;
+      driveUi(mode, { text: 'Menghentikan setelah file yang sedang diproses selesai...' });
+    }
+
+    async function driveFetchJson(url, body) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify(body)
+      });
+      const r = await res.json().catch(() => ({}));
+      if (!res.ok || r.error) throw new Error(r.error || ('Edge Function gagal (HTTP ' + res.status + ')'));
+      return r;
+    }
+
+    async function startDriveExtract(mode) {
+      const st = driveExtractState[mode];
+      if (st.running) return;
+      const raw = document.getElementById(mode === 'nie' ? 'nie-drive-links' : 'reg-drive-links').value;
+      const links = parseDriveLinks(raw);
+      if (!links.length) { alert('Tempel minimal satu link file atau folder Google Drive yang valid.'); return; }
+
+      const btn = document.getElementById(mode === 'nie' ? 'btn-extract-nie-drive' : 'btn-extract-reg-drive');
+      st.running = true; st.cancelled = false; btn.disabled = true;
+      const errors = [];
+      let files = [], done = 0, failed = 0, savedItems = 0, fatal = null;
+
+      try {
+        // Tahap 1: ubah link/folder menjadi daftar file PDF (folder dibuka sampai subfolder)
+        driveUi(mode, { pct: 3, text: 'Membaca daftar file dari Google Drive...', detail: '' });
+        const r = await driveFetchJson(DRIVE_RESOLVE_URL, { items: links.map(l => ({ id: l.id, kind: l.kind })) });
+        files = (r.files || []);
+        (r.errors || []).forEach(m => errors.push(m));
+        if (!files.length) throw new Error(errors[0] || 'Tidak ada file PDF yang ditemukan pada link tersebut.');
+
+        // Tahap 2: proses satu file per panggilan supaya tidak kena batas waktu Edge Function
+        for (let i = 0; i < files.length && !st.cancelled; i++) {
+          const f = files[i];
+          driveUi(mode, {
+            pct: 5 + Math.round((i / files.length) * 95),
+            text: `Memproses ${i + 1} dari ${files.length}: ${f.name} (${failed} gagal)...`
+          });
+          try {
+            const res = await driveFetchJson(`${SUPABASE_URL}/functions/v1/parse-bpom-regulation`, {
+              driveFileId: f.id,
+              mode: mode === 'nie' ? 'nie' : 'regulation',
+              username: currentUserSession ? currentUserSession.username : 'system'
+            });
+            done++;
+            savedItems += mode === 'nie' ? 1 : (res.saved_count || 0);
+          } catch (e) {
+            failed++;
+            errors.push(`${f.name}: ${e.message}`);
+          }
+        }
+      } catch (e) {
+        fatal = e.message;
+      }
+
+      st.running = false; btn.disabled = false;
+      const lines = errors.slice(0, 50).map(m => `<p class="text-rose-600">&bull; ${esc(m)}</p>`);
+      if (errors.length > 50) lines.push(`<p class="text-slate-500">...dan ${errors.length - 50} error lainnya.</p>`);
+      if (fatal) lines.push(`<p class="text-rose-600 font-semibold">Berhenti karena error: ${esc(fatal)}</p>`);
+      const state = fatal ? 'Berhenti karena error' : st.cancelled ? 'Dihentikan' : 'Selesai';
+      const unit = mode === 'nie' ? 'data NIE' : 'pasal';
+      driveUi(mode, {
+        pct: files.length && !fatal && !st.cancelled ? 100 : (files.length ? Math.round(((done + failed) / files.length) * 100) : 0),
+        text: `${state}: ${done} file berhasil (${savedItems} ${unit}), ${failed} gagal${files.length ? ' dari ' + files.length + ' file' : ''}.`,
+        detail: lines.join('')
+      });
+
+      if (mode === 'nie') loadNieRecordsTable(); else loadRegulationsTable();
+      logAudit(mode === 'nie' ? 'Scan Drive NIE' : 'Scan Drive Regulasi', mode === 'nie' ? 'product_nie_records' : 'bpom_regulations', null,
+        { summary: `${done} file berhasil, ${failed} gagal, ${savedItems} ${unit}` });
+      lucide.createIcons();
+    }
+
     function openArtworkModal() { openModal('artwork-modal'); }
     function openNpdModal() { openModal('npd-modal'); }
     function openCreateTicketModal() { openModal('ticket-modal'); }
