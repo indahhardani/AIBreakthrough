@@ -1079,6 +1079,103 @@
     const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // sesi berlaku 8 jam
     const SESSION_KEY = 'supabase_session';
     const escLike = (s) => String(s).replace(/[\\%_]/g, '\\$&'); // jangan biarkan % dan _ jadi wildcard
+    // Toggle Tampilan Form Login / Register
+    function toggleAuthMode(mode) {
+      const isReg = mode === 'register';
+      document.getElementById('form-login').classList.toggle('hidden', isReg);
+      document.getElementById('form-register').classList.toggle('hidden', !isReg);
+      
+      document.getElementById('auth-title').innerText = isReg ? 'Pendaftaran User Baru' : 'LegalOps Intelligence';
+      document.getElementById('auth-subtitle').innerText = isReg ? 'Isi data untuk mengajukan akun baru' : 'Masuk via Supabase Database (`public.users`)';
+      
+      lucide.createIcons();
+    }
+
+    // Handler Submit Pendaftaran Akun
+    async function handleUserRegister(e) {
+      e.preventDefault();
+      const username = document.getElementById('reg-username-input').value.trim();
+      const email = document.getElementById('reg-email-input').value.trim();
+      const deptBrand = document.getElementById('reg-dept-select').value;
+      const pass = document.getElementById('reg-password-input').value;
+      const confirmPass = document.getElementById('reg-confirm-password-input').value;
+      const btn = document.getElementById('btn-submit-register');
+
+      if (!username || !email || !deptBrand || !pass) {
+        alert('Harap isi semua kolom pendaftaran!');
+        return;
+      }
+
+      if (pass !== confirmPass) {
+        alert('Konfirmasi password tidak cocok dengan password yang dimasukkan!');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memproses Pendaftaran...`;
+      lucide.createIcons();
+
+      try {
+        // 1. Cek apakah username sudah dipakai
+        const { data: existingUser } = await supabaseClient.from('users')
+          .select('username')
+          .ilike('username', escLike(username))
+          .limit(1);
+
+        if (existingUser && existingUser.length > 0) {
+          alert(`Username "${username}" sudah digunakan. Silakan gunakan username lain.`);
+          return;
+        }
+
+        // 2. Cari brand_id jika pilihan asal adalah Brand
+        let brand_id = null;
+        const matchedBrand = masterBrands.find(b => b.name.toLowerCase() === deptBrand.toLowerCase());
+        if (matchedBrand) brand_id = matchedBrand.id;
+
+        // 3. Simpan data user baru dengan status PENDING
+        const newUserPayload = {
+          username,
+          email,
+          password: pass, // Menyimpan password (atau disesuaikan dengan skema login Anda)
+          role: 'PENDING', // Role awal belum ditentukan
+          status: 'PENDING', // Butuh approval Admin / Legal
+          brand_id,
+          created_at: new Date().toISOString()
+        };
+
+        const { data: savedUser, error: insertErr } = await supabaseClient
+          .from('users')
+          .insert([newUserPayload])
+          .select()
+          .single();
+
+        if (insertErr) throw insertErr;
+
+        // 4. Kirim notifikasi internal ke tim Legal
+        await supabaseClient.from('notifications').insert([{
+          recipient_role: 'LEGAL',
+          title: 'Pendaftaran Akun Baru',
+          message: `User baru "${username}" (${deptBrand}) mengajukan pendaftaran akun dan menunggu approval.`,
+          entity_type: 'users',
+          entity_id: savedUser.id
+        }]);
+
+        // Audit Log
+        logAudit('Pengajuan Pendaftaran Akun', 'users', savedUser.id, { summary: `Username: ${username}, Divisi/Brand: ${deptBrand}` });
+
+        alert(`Pendaftaran Berhasil!\n\nAkun Anda (${username}) telah dibuat dan sedang menunggu verifikasi serta penentuan Role oleh tim Legal.`);
+        
+        document.getElementById('form-register').reset();
+        toggleAuthMode('login');
+
+      } catch (err) {
+        alert('Gagal melakukan pendaftaran: ' + (err.message || err));
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4"></i> Ajukan Pendaftaran Akun`;
+        lucide.createIcons();
+      }
+    }
 
     async function handlePureSupabaseLogin(e) {
       e.preventDefault();
