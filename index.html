@@ -2164,15 +2164,26 @@
     function openNpdModal() { openModal('npd-modal'); }
     function openCreateTicketModal() { openModal('ticket-modal'); }
 
-    function switchTab(tab) {
-      const allTabs = ['view-vendor-contracts', 'view-vendor-registration', 'view-artwork-prescreening', 'view-npd-screener', 'view-tickets-module', 'view-audit-trail', 'view-bpom-regulations', 'view-user-management'];
+     function switchTab(tab) {
+      const allTabs = [
+        'view-vendor-contracts', 'view-vendor-registration', 'view-artwork-prescreening', 
+        'view-npd-screener', 'view-tickets-module', 'view-audit-trail', 
+        'view-bpom-regulations', 'view-user-management'
+      ];
       allTabs.forEach(id => document.getElementById(id)?.classList.add('hidden'));
 
-      const navIds = ['nav-vendor-contracts', 'nav-vendor-registration', 'nav-artwork-prescreening', 'nav-npd-screener', 'nav-tickets-module', 'nav-audit-trail', 'nav-bpom-regulations', 'nav-user-management'];
+      const navIds = [
+        'nav-vendor-contracts', 'nav-vendor-registration', 'nav-artwork-prescreening', 
+        'nav-npd-screener', 'nav-tickets-module', 'nav-audit-trail', 
+        'nav-bpom-regulations', 'nav-user-management'
+      ];
       navIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition";
       });
+
+      const userRole = String((currentUserSession && currentUserSession.role) || '').toUpperCase();
+      const isLegalOrAdmin = userRole.includes('LEGAL') || userRole.includes('ADMIN');
 
       if (tab === 'vendor-contracts') {
         document.getElementById('view-vendor-contracts')?.classList.remove('hidden');
@@ -2204,31 +2215,23 @@
         document.getElementById('nav-bpom-regulations')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "Legal Standards & NIE";
         switchRegSubTab('rules');
-        } else if (tab === 'audit-trail') {
-        const r = String((currentUserSession && currentUserSession.role) || '').toUpperCase();
-        if (!(r.includes('LEGAL') || r.includes('ADMIN'))) { 
-        switchTab('vendor-contracts'); 
-        return; 
-        }
+      } else if (tab === 'audit-trail') {
+        if (!isLegalOrAdmin) { switchTab('vendor-contracts'); return; }
         document.getElementById('view-audit-trail')?.classList.remove('hidden');
         document.getElementById('nav-audit-trail')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "Audit Trail Log";
         loadAuditLogs();
-      }
       } else if (tab === 'user-management') {
-        const r = String((currentUserSession && currentUserSession.role) || '').toUpperCase();
-        if (!(r.includes('LEGAL') || r.includes('ADMIN'))) { switchTab('vendor-contracts'); return; }
+        if (!isLegalOrAdmin) { switchTab('vendor-contracts'); return; }
         document.getElementById('view-user-management')?.classList.remove('hidden');
         document.getElementById('nav-user-management')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "User Management";
         loadUsersTable();
       }
 
-      // className di atas menimpa class 'hidden' pada menu User Management; pulihkan sesuai role
       if (currentUserSession) checkUserManagementAccess(currentUserSession.role);
-
       if (window.innerWidth < 768) closeSidebar();
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     // =====================================================================
