@@ -2314,13 +2314,13 @@
     const inTab = (c, tab) => tab === 'all' || (Array.isArray(c.agreement_categories) && c.agreement_categories.includes(tab));
 
     // Dipanggil oleh dropdown brand di header (saat ini memfilter tabel Agreement Matrix)
-        function handleBrandFilterChange() { 
+            function handleBrandFilterChange() { 
       renderContracts(); 
       renderVendorOnboardings(); 
       loadArtworkTable();
       loadTicketsTable();
+      updateTicketBadgeCounter();
     }
-
     function setAgrTab(code) { activeAgrTab = code; renderContracts(); }
 
     function renderContracts() {
@@ -4305,12 +4305,24 @@
         lucide.createIcons();
       }
     }
-    async function updateTicketBadgeCounter() {
+        async function updateTicketBadgeCounter() {
       try {
-        const { data, error } = await supabaseClient
+        let query = supabaseClient
           .from('tickets')
           .select('id')
           .eq('status', 'Open');
+
+        // Filter otomatis berdasarkan Role User & Dropdown Header Brand Filter
+        const userRole = String(currentUserSession?.role || '').toUpperCase();
+        const selectedBrand = selectedBrandId();
+
+        if (userRole === 'BRAND_TEAM' && currentUserSession?.brand_id) {
+          query = query.eq('brand_id', currentUserSession.brand_id);
+        } else if (selectedBrand) {
+          query = query.eq('brand_id', selectedBrand);
+        }
+
+        const { data, error } = await query;
 
         if (!error && data) {
           const count = data.length;
@@ -4330,7 +4342,6 @@
         console.warn('Gagal memuat counter tiket:', e);
       }
     }
-
 
     async function handleCreateTicket(e) {
       e.preventDefault();
