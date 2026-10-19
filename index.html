@@ -1700,11 +1700,19 @@
       if (av) av.innerText = String(session.username).slice(0, 2).toUpperCase();
 
       // 1. Cek Akses Menu User Management (Khusus Legal/Admin)
-      checkUserManagementAccess(session.role);
+      const userRole = String(session.role || '').toUpperCase();
+      const isLegalOrAdmin = userRole.includes('LEGAL') || userRole.includes('ADMIN');
 
       // 2. Pembatasan Tombol Aksi untuk Role UMUM
       const userRole = String(session.role || '').toUpperCase();
       const isUmum = userRole === 'UMUM';
+        
+        // Sembunyikan/Tampilkan navigasi khusus Legal/Admin
+      const navUserMgmt = document.getElementById('nav-user-management');
+      if (navUserMgmt) navUserMgmt.classList.toggle('hidden', !isLegalOrAdmin);
+
+      const navAuditTrail = document.getElementById('nav-audit-trail');
+      if (navAuditTrail) navAuditTrail.classList.toggle('hidden', !isLegalOrAdmin);
 
       // Sembunyikan/Tampilkan tombol pengajuan Artwork & NPD
       const btnArtwork = document.querySelector('#view-artwork-prescreening button[onclick="openArtworkModal()"]');
@@ -2196,11 +2204,17 @@
         document.getElementById('nav-bpom-regulations')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "Legal Standards & NIE";
         switchRegSubTab('rules');
-      } else if (tab === 'audit-trail') {
+        } else if (tab === 'audit-trail') {
+        const r = String((currentUserSession && currentUserSession.role) || '').toUpperCase();
+        if (!(r.includes('LEGAL') || r.includes('ADMIN'))) { 
+        switchTab('vendor-contracts'); 
+        return; 
+        }
         document.getElementById('view-audit-trail')?.classList.remove('hidden');
         document.getElementById('nav-audit-trail')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "Audit Trail Log";
         loadAuditLogs();
+      }
       } else if (tab === 'user-management') {
         const r = String((currentUserSession && currentUserSession.role) || '').toUpperCase();
         if (!(r.includes('LEGAL') || r.includes('ADMIN'))) { switchTab('vendor-contracts'); return; }
@@ -2297,7 +2311,13 @@
     const inTab = (c, tab) => tab === 'all' || (Array.isArray(c.agreement_categories) && c.agreement_categories.includes(tab));
 
     // Dipanggil oleh dropdown brand di header (saat ini memfilter tabel Agreement Matrix)
-    function handleBrandFilterChange() { renderContracts(); renderVendorOnboardings(); }
+        function handleBrandFilterChange() { 
+      renderContracts(); 
+      renderVendorOnboardings(); 
+      loadArtworkTable();
+      loadTicketsTable();
+    }
+
     function setAgrTab(code) { activeAgrTab = code; renderContracts(); }
 
     function renderContracts() {
@@ -3147,13 +3167,27 @@
       }
     }
 
-    async function loadArtworkTable() {
+      async function loadArtworkTable() {
       const tbody = document.getElementById('table-artwork-body');
       tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data artwork...</td></tr>`;
       try {
-        const { data } = await supabaseClient.from('artwork_prescreenings').select('*').order('created_at', { ascending: false });
+        let query = supabaseClient.from('artwork_prescreenings').select('*').order('created_at', { ascending: false });
+
+        // Filter otomatis berdasarkan Role & Brand Filter
+        const userRole = String(currentUserSession?.role || '').toUpperCase();
+        const selectedBrand = selectedBrandId();
+
+        if (userRole === 'BRAND_TEAM' && currentUserSession?.brand_id) {
+          query = query.eq('brand_id', currentUserSession.brand_id);
+        } else if (selectedBrand) {
+          query = query.eq('brand_id', selectedBrand);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
         if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada riwayat artwork.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada riwayat artwork untuk brand ini.</td></tr>`;
           return;
         }
         tbody.innerHTML = data.map(r => `
@@ -3199,13 +3233,27 @@
       }
     }
 
-       async function loadTicketsTable() {
+           async function loadTicketsTable() {
       const tbody = document.getElementById('table-tickets-body');
       tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data tiket...</td></tr>`;
       try {
-        const { data } = await supabaseClient.from('tickets').select('*').order('created_at', { ascending: false });
+        let query = supabaseClient.from('tickets').select('*').order('created_at', { ascending: false });
+
+        // Filter otomatis berdasarkan Role & Brand Filter
+        const userRole = String(currentUserSession?.role || '').toUpperCase();
+        const selectedBrand = selectedBrandId();
+
+        if (userRole === 'BRAND_TEAM' && currentUserSession?.brand_id) {
+          query = query.eq('brand_id', currentUserSession.brand_id);
+        } else if (selectedBrand) {
+          query = query.eq('brand_id', selectedBrand);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
         if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada tiket.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada tiket untuk brand ini.</td></tr>`;
           return;
         }
         tbody.innerHTML = data.map(r => `
@@ -3224,6 +3272,7 @@
         tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
       }
     }
+
 
 
     async function loadAuditLogs() {
