@@ -4034,6 +4034,31 @@
         lucide.createIcons();
       }
     }
+    async function updateTicketBadgeCounter() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('tickets')
+          .select('id')
+          .eq('status', 'Open');
+
+        if (!error && data) {
+          const count = data.length;
+          const navTicketBtn = document.getElementById('nav-tickets-module');
+          if (navTicketBtn) {
+            let badge = navTicketBtn.querySelector('.ticket-badge');
+            if (!badge) {
+              badge = document.createElement('span');
+              badge.className = 'ticket-badge ml-auto bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold';
+              navTicketBtn.appendChild(badge);
+            }
+            badge.innerText = count;
+            badge.classList.toggle('hidden', count === 0);
+          }
+        }
+      } catch (e) {
+        console.warn('Gagal memuat counter tiket:', e);
+      }
+    }
 
 
     async function handleCreateTicket(e) {
