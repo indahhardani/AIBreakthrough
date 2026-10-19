@@ -56,7 +56,7 @@
         <p class="text-xs text-brand-700" id="auth-subtitle">Masuk via Supabase Database (`public.users`)</p>
       </div>
 
-      <!-- FORM 1: LOGIN -->
+           <!-- FORM 1: LOGIN -->
       <form id="form-login" onsubmit="handlePureSupabaseLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-brand-800 mb-1">Username</label>
@@ -73,6 +73,61 @@
           <i data-lucide="log-in" class="w-4 h-4"></i> Masuk via Supabase DB
         </button>
 
+        <!-- PANEL QUICK LOGIN 8 AKUN DEMO -->
+        <div class="pt-2 border-t border-brand-100 space-y-2">
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">⚡ Quick Login (Pilih Akun Demo)</p>
+          
+          <div class="grid grid-cols-2 gap-1.5 text-xs">
+            <!-- 1. Legal -->
+            <button type="button" onclick="document.getElementById('username-input').value='legal'; document.getElementById('password-input').value='legal123'; document.getElementById('btn-submit').click();" 
+                    class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-semibold py-1.5 px-2 rounded-lg transition text-left flex items-center justify-between">
+              <span>👑 legal</span> <span class="text-[9px] bg-amber-200 px-1 rounded font-bold">Legal</span>
+            </button>
+
+            <!-- 2. Admin -->
+            <button type="button" onclick="document.getElementById('username-input').value='admin'; document.getElementById('password-input').value='admin123'; document.getElementById('btn-submit').click();" 
+                    class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-semibold py-1.5 px-2 rounded-lg transition text-left flex items-center justify-between">
+              <span>⚙️ admin</span> <span class="text-[9px] bg-slate-200 px-1 rounded font-bold">Admin</span>
+            </button>
+
+            <!-- 3. Brand Cessa -->
+            <button type="button" onclick="document.getElementById('username-input').value='brand_cessa'; document.getElementById('password-input').value='cessa123'; document.getElementById('btn-submit').click();" 
+                    class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 font-semibold py-1.5 px-2 rounded-lg transition text-left flex items-center justify-between">
+              <span>🏷️ brand_cessa</span> <span class="text-[9px] bg-emerald-200 px-1 rounded font-bold">Brand</span>
+            </button>
+
+            <!-- 4. NPD -->
+            <button type="button" onclick="document.getElementById('username-input').value='npd'; document.getElementById('password-input').value='npd123'; document.getElementById('btn-submit').click();" 
+                    class="bg-purple-100 hover:bg-purple-200 text-purple-900 border border-purple-300 font-semibold py-1.5 px-2 rounded-lg transition text-left flex items-center justify-between">
+              <span>🧪 npd</span> <span class="text-[9px] bg-purple-200 px-1 rounded font-bold">NPD</span>
+            </button>
+
+            <!-- 5. Brand User -->
+            <button type="button" onclick="document.getElementById('username-input').value='brand_user'; document.getElementById('password-input').value='brand123'; document.getElementById('btn-submit').click();" 
+                    class="bg-blue-100 hover:bg-blue-200 text-blue-900 border border-blue-300 font-semibold py-1.5 px-2 rounded-lg transition text-left flex items-center justify-between">
+              <span>👤 brand_user</span> <span class="text-[9px] bg-blue-200 px-1 rounded font-bold">Umum</span>
+            </button>
+
+            <!-- 6. Retops User -->
+            <button type="button" onclick="document.getElementById('username-input').value='retops_user'; document.getElementById('password-input').value='retops123'; document.getElementById('btn-submit').click();" 
+                    class="bg-blue-100 hover:bg-blue-200 text-blue-900 border border-blue-300 font-semibold py-1.5 px-2 rounded-lg transition text-left flex items-center justify-between">
+              <span>📦 retops_user</span> <span class="text-[9px] bg-blue-200 px-1 rounded font-bold">Umum</span>
+            </button>
+
+            <!-- 7. CEO -->
+            <button type="button" onclick="document.getElementById('username-input').value='ceo'; document.getElementById('password-input').value='ceo123'; document.getElementById('btn-submit').click();" 
+                    class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 border border-indigo-300 font-semibold py-1.5 px-2 rounded-lg transition text-left flex items-center justify-between">
+              <span>💼 ceo</span> <span class="text-[9px] bg-indigo-200 px-1 rounded font-bold">CEO</span>
+            </button>
+
+            <!-- 8. Adul (Pending) -->
+            <button type="button" onclick="document.getElementById('username-input').value='Adul'; document.getElementById('password-input').value='123'; document.getElementById('btn-submit').click();" 
+                    class="bg-rose-100 hover:bg-rose-200 text-rose-900 border border-rose-300 font-semibold py-1.5 px-2 rounded-lg transition text-left flex items-center justify-between">
+              <span>⏳ Adul</span> <span class="text-[9px] bg-rose-200 px-1 rounded font-bold">Pending</span>
+            </button>
+          </div>
+        </div>
+
         <div class="text-center pt-2 border-t border-brand-100">
           <p class="text-xs text-slate-600">
             Belum punya akun? 
@@ -80,6 +135,7 @@
           </p>
         </div>
       </form>
+
 
       <!-- FORM 2: PENDAFTARAN / REGISTER (Hidden by default) -->
       <form id="form-register" onsubmit="handleUserRegister(event)" class="space-y-3 hidden">
