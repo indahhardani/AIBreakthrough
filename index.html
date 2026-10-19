@@ -71,33 +71,7 @@
         </button>
       </form>
 
-      <div class="border-t border-brand-100 pt-4 space-y-2">
-        <p class="text-xs text-brand-800 text-center font-semibold">⚡ Uji Coba Login Langsung (Per Role & Brand):</p>
-        <div class="grid grid-cols-2 gap-2">
-          <button type="button" onclick="quickLoginRole('admin', 'admin123')" class="px-2 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-lg text-xs text-amber-800 font-semibold text-center flex items-center justify-center gap-1 transition">
-            <i data-lucide="crown" class="w-3.5 h-3.5"></i> Admin
-          </button>
-          <button type="button" onclick="quickLoginRole('legal', 'legal123')" class="px-2 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-300 rounded-lg text-xs text-blue-800 font-semibold text-center flex items-center justify-center gap-1 transition">
-            <i data-lucide="scale" class="w-3.5 h-3.5"></i> Legal
-          </button>
-          <button type="button" onclick="quickLoginRole('ceo', 'ceo123')" class="px-2 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-lg text-xs text-emerald-800 font-semibold text-center flex items-center justify-center gap-1 transition">
-            <i data-lucide="building-2" class="w-3.5 h-3.5"></i> CEO Office
-          </button>
-          <button type="button" onclick="quickLoginRole('retops_user', 'retops123')" class="px-2 py-1.5 bg-brand-100 hover:bg-brand-200 border border-brand-300 rounded-lg text-xs text-brand-900 font-semibold text-center flex items-center justify-center gap-1 transition">
-            <i data-lucide="users" class="w-3.5 h-3.5"></i> Umum
-          </button>
-        </div>
-
-        <div class="pt-1 grid grid-cols-2 gap-2">
-          <button type="button" onclick="quickLoginRole('brand_user', 'brand123')" class="px-2 py-1.5 bg-purple-50 hover:bg-purple-100 border border-purple-300 rounded-lg text-xs text-purple-800 font-semibold text-center flex items-center justify-center gap-1 transition">
-            <i data-lucide="tag" class="w-3.5 h-3.5"></i> Brand Luxcrime
-          </button>
-          <button type="button" onclick="quickLoginRole('brand_cessa', 'cessa123')" class="px-2 py-1.5 bg-pink-50 hover:bg-pink-100 border border-pink-300 rounded-lg text-xs text-pink-800 font-semibold text-center flex items-center justify-center gap-1 transition">
-            <i data-lucide="tag" class="w-3.5 h-3.5"></i> Brand Cessa
-          </button>
-        </div>
-      </div>
-    </div>
+          </div>
   </div>
 
   <!-- 2. MAIN APP DASHBOARD -->
@@ -1007,12 +981,6 @@
       } catch (e) {}
     }
 
-    function quickLoginRole(username, password) {
-      document.getElementById('username-input').value = username;
-      document.getElementById('password-input').value = password;
-      document.getElementById('form-login').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-    }
-
     // ---------- Audit Trail: catat aktivitas user ke tabel audit_logs ----------
     const AUDIT_ENTITY = {
       users: 'Pengguna', npd_permit_screenings: 'Skrining NPD', tickets: 'Tiket',
@@ -1035,19 +1003,74 @@
       }
     }
 
+    // ---------- Login & sesi ----------
+    // false = mode lama (cek tabel users). true = pakai fungsi RPC login_user / validate_session
+    // dari security_migration.sql (password di-hash, sesi bertoken). Ubah ke true SETELAH SQL dijalankan.
+    const USE_HASHED_LOGIN = false;
+    const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // sesi berlaku 8 jam
+    const SESSION_KEY = 'supabase_session';
+    const escLike = (s) => String(s).replace(/[\\%_]/g, '\\$&'); // jangan biarkan % dan _ jadi wildcard
+
     async function handlePureSupabaseLogin(e) {
       e.preventDefault();
       const u = document.getElementById('username-input').value.trim();
-      const p = document.getElementById('password-input').value.trim();
+      const p = document.getElementById('password-input').value;
+      const btn = document.getElementById('btn-submit');
+      if (!u || !p) return;
+      if (btn) btn.disabled = true;
 
-      const { data: users } = await supabaseClient.from('users').select('*').ilike('username', u).eq('password', p);
-      if (users && users.length > 0) {
-        const session = { username: users[0].username, role: users[0].role, brand_id: users[0].brand_id, avatar: users[0].username.slice(0, 2).toUpperCase() };
-        localStorage.setItem('supabase_session', JSON.stringify(session));
+      try {
+        let session = null;
+        if (USE_HASHED_LOGIN) {
+          const { data, error } = await supabaseClient.rpc('login_user', { p_username: u, p_password: p });
+          if (error) throw error;
+          if (data) session = { username: data.username, role: data.role, brand_id: data.brand_id, token: data.token };
+        } else {
+          const { data: users, error } = await supabaseClient.from('users')
+            .select('username, role, brand_id')           // jangan ambil kolom password
+            .ilike('username', escLike(u)).eq('password', p).limit(5);
+          if (error) throw error;
+          const row = (users || []).find(x => String(x.username).toLowerCase() === u.toLowerCase());
+          if (row) session = { username: row.username, role: row.role, brand_id: row.brand_id };
+        }
+
+        if (!session) { alert('Username / Password Salah'); return; }
+        session.avatar = session.username.slice(0, 2).toUpperCase();
+        session.exp = Date.now() + SESSION_TTL_MS;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        document.getElementById('password-input').value = '';
         showApp(session);
         logAudit('Login', 'users', null, { summary: 'Peran: ' + (session.role || '-') });
-      } else {
-        alert('Username / Password Salah');
+      } catch (err) {
+        alert('Tidak bisa masuk: ' + (err && err.message ? err.message : 'periksa koneksi internet Anda.'));
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    // Saat halaman dibuka: sesi dari localStorage tidak dipercaya begitu saja.
+    // Cek kedaluwarsa, lalu ambil ulang username/role dari database (role di localStorage diabaikan).
+    async function restoreSession() {
+      let s = null;
+      try { s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (e) { s = null; }
+      if (!s || !s.username || !s.exp || s.exp < Date.now()) { localStorage.removeItem(SESSION_KEY); return; }
+      try {
+        let fresh = null;
+        if (USE_HASHED_LOGIN) {
+          if (!s.token) throw new Error('no token');
+          const { data, error } = await supabaseClient.rpc('validate_session', { p_token: s.token });
+          if (error) throw error;
+          fresh = data;
+        } else {
+          const { data, error } = await supabaseClient.from('users')
+            .select('username, role, brand_id').eq('username', s.username).limit(1);
+          if (error) throw error;
+          fresh = data && data[0];
+        }
+        if (!fresh) throw new Error('sesi tidak valid');
+        showApp({ ...s, username: fresh.username, role: fresh.role, brand_id: fresh.brand_id });
+      } catch (e) {
+        localStorage.removeItem(SESSION_KEY);
       }
     }
 
@@ -1056,16 +1079,22 @@
       document.getElementById('login-view').classList.add('hidden');
       document.getElementById('app-view').classList.remove('hidden');
       document.getElementById('user-display').innerText = session.username;
-      document.getElementById('role-display').innerText = session.role;
+      document.getElementById('role-display').innerText = session.role || '-';
+      const badge = document.getElementById('access-badge'); if (badge) badge.innerText = session.role || '-';
+      const av = document.getElementById('user-avatar'); if (av) av.innerText = String(session.username).slice(0, 2).toUpperCase();
       loadMasterBrands();
       switchTab('vendor-contracts');
     }
 
     function handleLogout() {
-      localStorage.removeItem('supabase_session');
+      localStorage.removeItem(SESSION_KEY);
       location.reload();
     }
 
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.add('hidden');
+    }
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('-translate-x-full');
       document.getElementById('sidebar-overlay').classList.toggle('hidden');
@@ -1526,7 +1555,7 @@
         loadAuditLogs();
       }
 
-      if (window.innerWidth < 768) toggleSidebar();
+      if (window.innerWidth < 768) closeSidebar();
       lucide.createIcons();
     }
 
@@ -3566,10 +3595,7 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem('supabase_session');
-      if (saved) showApp(JSON.parse(saved));
-    });
+    document.addEventListener('DOMContentLoaded', restoreSession);
   </script>
 </body>
 </html>
