@@ -1148,6 +1148,115 @@
         }
       } catch (e) {}
     }
+        // Menampilkan detail tiket beserta form tindakan khusus Legal
+    async function showTicketDetail(ticketId) {
+      const { data: ticket, error } = await supabaseClient
+        .from('tickets')
+        .select('*')
+        .eq('id', ticketId)
+        .single();
+
+      if (error || !ticket) {
+        alert('Gagal memuat detail tiket.');
+        return;
+      }
+
+      const userRole = String(currentUserSession?.role || '').toUpperCase();
+      const isLegalOrAdmin = userRole.includes('LEGAL') || userRole.includes('ADMIN');
+
+      const body = document.getElementById('detail-body');
+      body.innerHTML = `
+        <div class="space-y-4 text-xs">
+          <div class="flex items-center justify-between border-b border-brand-200 pb-2">
+            <div>
+              <span class="font-mono text-amber-700 font-bold">${esc(ticket.ticket_number || 'TKT-' + String(ticket.id).slice(0,6))}</span>
+              <h3 class="text-sm font-bold text-slate-800 mt-0.5">${esc(ticket.title)}</h3>
+            </div>
+            <span class="px-2.5 py-1 rounded font-bold text-[10px] bg-amber-100 text-amber-800 border border-amber-300">
+              ${esc(ticket.status)}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 bg-brand-50/50 p-3 rounded-lg border border-brand-200">
+            <div><span class="text-slate-500">Pengaju:</span> <b>${esc(ticket.requested_by || '-')}</b></div>
+            <div><span class="text-slate-500">Kategori:</span> <b>${esc(ticket.category || '-')}</b></div>
+            <div><span class="text-slate-500">Prioritas:</span> <b>${esc(ticket.priority || '-')}</b></div>
+            <div><span class="text-slate-500">Tanggal:</span> <b>${ticket.created_at ? new Date(ticket.created_at).toLocaleString('id-ID') : '-'}</b></div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-brand-800 mb-1">Rincian Permintaan:</label>
+            <div class="p-3 bg-white border border-brand-200 rounded-lg whitespace-pre-line text-slate-700">
+              ${esc(ticket.description)}
+            </div>
+          </div>
+
+          ${ticket.resolution_notes ? `
+            <div>
+              <label class="block font-bold text-emerald-800 mb-1">Catatan Penyelesaian Legal:</label>
+              <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg whitespace-pre-line text-emerald-900 font-medium">
+                ${esc(ticket.resolution_notes)}
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- FORM AKSI KHUSUS LEGAL / ADMIN -->
+          ${isLegalOrAdmin && ticket.status !== 'Closed' ? `
+            <div class="pt-3 border-t border-brand-200 space-y-3 bg-brand-50/30 p-3 rounded-lg">
+              <p class="font-bold text-brand-900">Tindak Lanjut / Penyelesaian (Khusus Legal)</p>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-600 mb-1">Status Baru</label>
+                <select id="update-ticket-status" class="w-full bg-white border border-brand-300 rounded px-2.5 py-1.5 text-xs font-medium">
+                  <option value="In Progress" ${ticket.status === 'In Progress' ? 'selected' : ''}>In Progress (Sedang Diproses)</option>
+                  <option value="Resolved" ${ticket.status === 'Resolved' ? 'selected' : ''}>Resolved (Selesai Disetujui)</option>
+                  <option value="Closed" ${ticket.status === 'Closed' ? 'selected' : ''}>Closed (Tutup Tiket)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-600 mb-1">Catatan / Tanggapan Legal</label>
+                <textarea id="update-ticket-notes" rows="3" placeholder="Masukkan tanggapan hukum, nomor izin BPOM, atau instruksi tindak lanjut..." class="w-full bg-white border border-brand-300 rounded p-2 text-xs">${esc(ticket.resolution_notes || '')}</textarea>
+              </div>
+              <button onclick="submitTicketResolution('${ticket.id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded text-xs shadow-sm">
+                Simpan Perubahan & Selesaikan Tiket
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      openModal('detail-modal');
+    }
+
+    // Fungsi menyimpan status baru tiket dari Tim Legal
+    async function submitTicketResolution(ticketId) {
+      const status = document.getElementById('update-ticket-status').value;
+      const notes = document.getElementById('update-ticket-notes').value.trim();
+
+      try {
+        const payload = {
+          status: status,
+          resolution_notes: notes,
+          resolved_by: currentUserSession ? currentUserSession.username : 'system',
+          updated_at: new Date().toISOString()
+        };
+
+        const { error } = await supabaseClient
+          .from('tickets')
+          .update(payload)
+          .eq('id', ticketId);
+
+        if (error) throw error;
+
+        alert(`Tiket berhasil diperbarui ke status "${status}"!`);
+        closeModal('detail-modal');
+        loadTicketsTable();
+        updateTicketBadgeCounter(); // Refresh counter badge di sidebar
+        logAudit('Update Ticket Status', 'tickets', ticketId, { summary: `Status: ${status}` });
+      } catch (err) {
+        alert('Gagal memperbarui tiket: ' + err.message);
+      }
+    }
+
         // Atur visibilitas menu User Management berdasarkan Role
         function checkUserManagementAccess(role) {
       const navBtn = document.getElementById('nav-user-management');
@@ -3059,6 +3168,7 @@
     }
 
     async function loadTicketsTable() {
+      <button onclick="showTicketDetail('${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail & Aksi</button>
       const tbody = document.getElementById('table-tickets-body');
       tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data tiket...</td></tr>`;
       try {
