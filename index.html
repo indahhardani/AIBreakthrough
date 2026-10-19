@@ -1198,8 +1198,6 @@
         if (window.lucide) lucide.createIcons();
       }
     }
-
-
     async function handlePureSupabaseLogin(e) {
       e.preventDefault();
       const u = document.getElementById('username-input').value.trim();
@@ -1213,17 +1211,30 @@
         if (USE_HASHED_LOGIN) {
           const { data, error } = await supabaseClient.rpc('login_user', { p_username: u, p_password: p });
           if (error) throw error;
-          if (data) session = { username: data.username, role: data.role, brand_id: data.brand_id, token: data.token };
+          if (data) session = { username: data.username, role: data.role, brand_id: data.brand_id, token: data.token, status: data.status };
         } else {
+          // Ambil status juga dari public.users
           const { data: users, error } = await supabaseClient.from('users')
-            .select('username, role, brand_id')           // jangan ambil kolom password
+            .select('username, role, brand_id, status')
             .ilike('username', escLike(u)).eq('password', p).limit(5);
           if (error) throw error;
           const row = (users || []).find(x => String(x.username).toLowerCase() === u.toLowerCase());
-          if (row) session = { username: row.username, role: row.role, brand_id: row.brand_id };
+          if (row) session = { username: row.username, role: row.role, brand_id: row.brand_id, status: row.status };
         }
 
         if (!session) { alert('Username / Password Salah'); return; }
+
+        // VALIDASI STATUS AKUN
+        const accStatus = (session.status || 'PENDING').toUpperCase();
+        if (accStatus === 'PENDING') {
+          alert(`Akun "${session.username}" masih menunggu persetujuan dari tim Legal/Admin.\n\nSilakan hubungi tim Legal untuk verifikasi akun Anda.`);
+          return;
+        }
+        if (accStatus === 'REJECTED') {
+          alert(`Pengajuan akun "${session.username}" ditolak. Silakan hubungi tim Legal untuk informasi lebih lanjut.`);
+          return;
+        }
+
         session.avatar = session.username.slice(0, 2).toUpperCase();
         session.exp = Date.now() + SESSION_TTL_MS;
         localStorage.setItem(SESSION_KEY, JSON.stringify(session));
@@ -1237,8 +1248,6 @@
       }
     }
 
-    // Saat halaman dibuka: sesi dari localStorage tidak dipercaya begitu saja.
-    // Cek kedaluwarsa, lalu ambil ulang username/role dari database (role di localStorage diabaikan).
     async function restoreSession() {
       let s = null;
       try { s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (e) { s = null; }
@@ -1252,16 +1261,24 @@
           fresh = data;
         } else {
           const { data, error } = await supabaseClient.from('users')
-            .select('username, role, brand_id').eq('username', s.username).limit(1);
+            .select('username, role, brand_id, status').eq('username', s.username).limit(1);
           if (error) throw error;
           fresh = data && data[0];
         }
-        if (!fresh) throw new Error('sesi tidak valid');
-        showApp({ ...s, username: fresh.username, role: fresh.role, brand_id: fresh.brand_id });
+        
+        // Blokir jika akun yang tersimpan sesi-nya ternyata diubah ke PENDING/REJECTED
+        if (!fresh || (fresh.status && fresh.status.toUpperCase() !== 'ACTIVE')) {
+          throw new Error('sesi tidak valid atau akun belum aktif');
+        }
+        
+        showApp({ ...s, username: fresh.username, role: fresh.role, brand_id: fresh.brand_id, status: fresh.status });
       } catch (e) {
         localStorage.removeItem(SESSION_KEY);
       }
     }
+
+
+  
 
     function showApp(session) {
       currentUserSession = session;
