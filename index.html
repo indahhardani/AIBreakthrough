@@ -1489,18 +1489,53 @@
 
   
 
-    function showApp(session) {
+      function showApp(session) {
       currentUserSession = session;
       document.getElementById('login-view').classList.add('hidden');
       document.getElementById('app-view').classList.remove('hidden');
       document.getElementById('user-display').innerText = session.username;
       document.getElementById('role-display').innerText = session.role || '-';
-      const badge = document.getElementById('access-badge'); if (badge) badge.innerText = session.role || '-';
-      const av = document.getElementById('user-avatar'); if (av) av.innerText = String(session.username).slice(0, 2).toUpperCase();
+      
+      const badge = document.getElementById('access-badge'); 
+      if (badge) badge.innerText = session.role || '-';
+      
+      const av = document.getElementById('user-avatar'); 
+      if (av) av.innerText = String(session.username).slice(0, 2).toUpperCase();
+
+      // 1. Cek Akses Menu User Management (Khusus Legal/Admin)
       checkUserManagementAccess(session.role);
-      loadMasterBrands();
-      switchTab('vendor-contracts');
+
+      // 2. Pembatasan Tombol Aksi untuk Role UMUM
+      const userRole = String(session.role || '').toUpperCase();
+      const isUmum = userRole === 'UMUM';
+
+      // Sembunyikan/Tampilkan tombol pengajuan Artwork & NPD
+      const btnArtwork = document.querySelector('#view-artwork-prescreening button[onclick="openArtworkModal()"]');
+      if (btnArtwork) btnArtwork.classList.toggle('hidden', isUmum);
+
+      const btnNpd = document.querySelector('#view-npd-screener button[onclick="openNpdModal()"]');
+      if (btnNpd) btnNpd.classList.toggle('hidden', isUmum);
+
+      // 3. Pemuatan Brand & Lock Header Filter untuk BRAND_TEAM
+      loadMasterBrands().then(() => {
+        const brandFilter = document.getElementById('header-brand-filter');
+        if (brandFilter) {
+          if (userRole === 'BRAND_TEAM' && session.brand_id) {
+            brandFilter.value = session.brand_id;
+            brandFilter.disabled = true; // Kunci dropdown filter brand
+            brandFilter.classList.add('opacity-75', 'cursor-not-allowed');
+          } else {
+            brandFilter.disabled = false;
+            brandFilter.classList.remove('opacity-75', 'cursor-not-allowed');
+          }
+        }
+        switchTab('vendor-contracts');
+      });
+
+      // 4. Hitung Badge Notifikasi Tiket (untuk Legal)
+      updateTicketBadgeCounter();
     }
+
 
     function handleLogout() {
       localStorage.removeItem(SESSION_KEY);
@@ -2120,16 +2155,28 @@
       }).join('');
     }
 
-    async function loadContracts() {
+        async function loadContracts() {
       const tbody = document.getElementById('table-contracts-body');
       tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-8 text-center text-slate-400">Memuat data kontrak...</td></tr>`;
+      
       try {
+        // Query dasar
+        let query = supabaseClient.from('vendor_contracts').select('*').order('created_at', { ascending: false });
+
+        // Penguncian Akses Data: Jika user ber-role BRAND_TEAM, kunci query berdasarkan brand_id milik user
+        const userRole = String(currentUserSession?.role || '').toUpperCase();
+        if (userRole === 'BRAND_TEAM' && currentUserSession?.brand_id) {
+          query = query.eq('brand_id', currentUserSession.brand_id);
+        }
+
         const [defsRes, conRes] = await Promise.all([
           supabaseClient.from('agreement_field_defs').select('*').order('sort_order', { ascending: true }),
-          supabaseClient.from('vendor_contracts').select('*').order('created_at', { ascending: false })
+          query
         ]);
-        if (defsRes.error) throw new Error('Tabel agreement_field_defs belum siap (' + defsRes.error.message + '). Jalankan SQL tahap 1.');
+
+        if (defsRes.error) throw new Error('Tabel agreement_field_defs belum siap: ' + defsRes.error.message);
         if (conRes.error) throw conRes.error;
+
         agreementDefs = defsRes.data || [];
         contractsData = conRes.data || [];
         renderContracts();
@@ -2138,6 +2185,7 @@
         tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-6 text-center text-rose-500">Gagal memuat: ${esc(err.message)}</td></tr>`;
       }
     }
+
 
     // ---------- Detail & edit satu perjanjian ----------
     function openContractModal(id, edit = false) {
