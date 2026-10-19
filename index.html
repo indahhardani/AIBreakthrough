@@ -162,6 +162,14 @@
         </div>
 
         <nav class="space-y-1">
+                    <!-- Navigasi khusus Admin / Legal (Hidden by default) -->
+          <button onclick="switchTab('user-management')" id="nav-user-management" class="hidden w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
+            <span class="flex items-center gap-3">
+              <i data-lucide="users" class="w-4 h-4"></i> User Management
+            </span>
+            <span id="user-pending-badge" class="hidden bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">0</span>
+          </button>
+
           <button onclick="switchTab('vendor-contracts')" id="nav-vendor-contracts" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-brand-800 text-white text-sm font-bold shadow-sm transition">
             <i data-lucide="file-text" class="w-4 h-4"></i> Agreement Matrix
           </button>
@@ -579,6 +587,41 @@
             </table>
           </div>
         </section>
+                <!-- 7. USER MANAGEMENT TAB (Khusus Legal / Admin) -->
+        <section id="view-user-management" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-2 border-brand-200 rounded-xl p-5 shadow-sm">
+            <div>
+              <h2 class="text-base font-bold text-brand-900 flex items-center gap-2">
+                <i data-lucide="users" class="w-5 h-5 text-brand"></i> User Management & Approval
+              </h2>
+              <p class="text-xs text-brand-700 mt-1">Kelola persetujuan akun pendaftar baru dan atur hak akses (role) pengguna.</p>
+            </div>
+            <button onclick="loadUsersTable()" class="bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Data
+            </button>
+          </div>
+
+          <div class="bg-white border-2 border-brand-200 rounded-xl overflow-hidden shadow-sm">
+            <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+              <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                <thead class="bg-brand-100 text-brand-900 uppercase tracking-wider border-b border-brand-200 text-[10px] font-bold sticky top-0 z-10">
+                  <tr>
+                    <th class="px-4 py-3.5 font-bold min-w-[130px]">Username & Email</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[110px]">Tanggal Daftar</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[100px]">Status</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[140px]">Role Akses</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[140px]">Brand Constraint</th>
+                    <th class="px-4 py-3.5 font-bold text-center min-w-[160px]">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="table-users-body" class="divide-y divide-brand-100">
+                  <tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">Memuat data pengguna...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
 
       </div>
     </main>
@@ -1049,6 +1092,170 @@
         }
       } catch (e) {}
     }
+        // Atur visibilitas menu User Management berdasarkan Role
+    function checkUserManagementAccess(role) {
+      const navBtn = document.getElementById('nav-user-management');
+      const upperRole = String(role || '').toUpperCase();
+      const isLegalOrAdmin = upperRole === 'LEGAL' || upperRole === 'ADMIN' || upperRole === 'LEGAL & COMPLIANCE';
+      
+      if (navBtn) {
+        navBtn.classList.toggle('hidden', !isLegalOrAdmin);
+      }
+    }
+
+    // Panggil di showApp()
+    // Pastikan di dalam fungsi showApp(session) ditambahkan pemanggilan ini:
+    // checkUserManagementAccess(session.role);
+
+    // Update fungsi switchTab untuk mendukung 'user-management'
+    // Tambahkan kondisi ini di dalam switchTab(tab):
+    /*
+      else if (tab === 'user-management') {
+        document.getElementById('view-user-management')?.classList.remove('hidden');
+        document.getElementById('nav-user-management')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
+        document.getElementById('page-title').innerText = "User Management";
+        loadUsersTable();
+      }
+    */
+
+    let allUsersData = [];
+
+    async function loadUsersTable() {
+      const tbody = document.getElementById('table-users-body');
+      tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">Memuat data pengguna...</td></tr>`;
+      
+      try {
+        const { data, error } = await supabaseClient
+          .from('users')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        allUsersData = data || [];
+        
+        // Update badge penanda pending pendaftar
+        const pendingCount = allUsersData.filter(u => String(u.status).toUpperCase() === 'PENDING').length;
+        const badge = document.getElementById('user-pending-badge');
+        if (badge) {
+          badge.innerText = pendingCount;
+          badge.classList.toggle('hidden', pendingCount === 0);
+        }
+
+        renderUsersTable();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-rose-500">Gagal memuat pengguna: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    function renderUsersTable() {
+      const tbody = document.getElementById('table-users-body');
+      if (!allUsersData.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">Belum ada pendaftar akun.</td></tr>`;
+        return;
+      }
+
+      const brandOptionsHtml = masterBrands.map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('');
+
+      tbody.innerHTML = allUsersData.map(u => {
+        const statusUpper = String(u.status || 'PENDING').toUpperCase();
+        const isPending = statusUpper === 'PENDING';
+        const isRejected = statusUpper === 'REJECTED';
+        const uid = esc(u.id);
+
+        let statusBadge = `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold text-[10px]">🟢 ACTIVE</span>`;
+        if (isPending) statusBadge = `<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-300 font-bold text-[10px]">🔴 PENDING</span>`;
+        if (isRejected) statusBadge = `<span class="px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-rose-300 font-bold text-[10px]">⚪ REJECTED</span>`;
+
+        return `
+          <tr class="hover:bg-brand-50/50 border-b border-brand-100 text-xs">
+            <td class="px-4 py-3 align-top">
+              <div class="font-bold text-slate-800">${esc(u.username)}</div>
+              <div class="text-[10px] text-slate-500">${esc(u.email || '-')}</div>
+            </td>
+            <td class="px-4 py-3 align-top text-slate-600">
+              ${u.created_at ? new Date(u.created_at).toLocaleDateString('id-ID') : '-'}
+            </td>
+            <td class="px-4 py-3 align-top">${statusBadge}</td>
+            <td class="px-4 py-3 align-top">
+              <select id="sel-role-${uid}" class="w-full bg-brand-50/50 border border-brand-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-brand-600 font-medium">
+                <option value="UMUM" ${u.role === 'UMUM' ? 'selected' : ''}>Umum</option>
+                <option value="BRAND_TEAM" ${u.role === 'BRAND_TEAM' ? 'selected' : ''}>Brand Team</option>
+                <option value="LEGAL" ${u.role === 'LEGAL' ? 'selected' : ''}>Legal & Compliance</option>
+                <option value="CEO_OFFICE" ${u.role === 'CEO_OFFICE' ? 'selected' : ''}>CEO Office</option>
+              </select>
+            </td>
+            <td class="px-4 py-3 align-top">
+              <select id="sel-brand-${uid}" class="w-full bg-brand-50/50 border border-brand-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-brand-600 font-medium">
+                <option value="">-- Tanpa Constraint --</option>
+                ${masterBrands.map(b => `<option value="${b.id}" ${String(u.brand_id) === String(b.id) ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}
+              </select>
+            </td>
+            <td class="px-4 py-3 align-top text-center space-y-1">
+              <button onclick="approveUser('${uid}')" class="w-full px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-[10px] shadow-sm">
+                ${isPending ? 'Approve Akun' : 'Simpan Perubahan'}
+              </button>
+              ${isPending ? `
+                <button onclick="rejectUser('${uid}')" class="w-full px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold rounded text-[10px]">
+                  Reject
+                </button>
+              ` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function approveUser(userId) {
+      const roleSel = document.getElementById(`sel-role-${userId}`).value;
+      const brandSel = document.getElementById(`sel-brand-${userId}`).value;
+
+      try {
+        const payload = {
+          role: roleSel,
+          brand_id: brandSel || null,
+          status: 'ACTIVE',
+          approved_by: currentUserSession ? currentUserSession.username : 'system',
+          approved_at: new Date().toISOString()
+        };
+
+        const { error } = await supabaseClient
+          .from('users')
+          .update(payload)
+          .eq('id', userId);
+
+        if (error) throw error;
+
+        alert('Status akun dan Role berhasil diperbarui menjadi ACTIVE!');
+        loadUsersTable();
+        logAudit('Approve User Account', 'users', userId, { summary: `Role: ${roleSel}, BrandID: ${brandSel || 'None'}` });
+      } catch (err) {
+        alert('Gagal memperbarui akun: ' + err.message);
+      }
+    }
+
+    async function rejectUser(userId) {
+      if (!confirm('Apakah Anda yakin ingin menolak pendaftaran akun ini?')) return;
+
+      try {
+        const { error } = await supabaseClient
+          .from('users')
+          .update({
+            status: 'REJECTED',
+            approved_by: currentUserSession ? currentUserSession.username : 'system',
+            approved_at: new Date().toISOString()
+          })
+          .eq('id', userId);
+
+        if (error) throw error;
+
+        alert('Pendaftaran akun telah ditolak.');
+        loadUsersTable();
+        logAudit('Reject User Account', 'users', userId, { summary: 'Status: REJECTED' });
+      } catch (err) {
+        alert('Gagal menolak akun: ' + err.message);
+      }
+    }
+
 
     // ---------- Audit Trail: catat aktivitas user ke tabel audit_logs ----------
     const AUDIT_ENTITY = {
