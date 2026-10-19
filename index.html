@@ -43,7 +43,7 @@
 </head>
 <body class="bg-brand-50 text-slate-800 font-sans antialiased min-h-screen flex">
 
-    <!-- 1. LOGIN & REGISTER CONTAINER -->
+  <!-- 1. LOGIN & REGISTER CONTAINER -->
   <div id="login-view" class="fixed inset-0 z-50 bg-brand-50 flex items-center justify-center p-4">
     <div class="bg-white border-2 border-brand-200 w-full max-w-md rounded-2xl p-6 shadow-xl space-y-6">
       
@@ -1090,6 +1090,22 @@
       
       lucide.createIcons();
     }
+    // Toggle Tampilan Form Login / Register
+    function toggleAuthMode(mode) {
+      const isReg = mode === 'register';
+      const formLogin = document.getElementById('form-login');
+      const formRegister = document.getElementById('form-register');
+      const authTitle = document.getElementById('auth-title');
+      const authSubtitle = document.getElementById('auth-subtitle');
+
+      if (formLogin) formLogin.classList.toggle('hidden', isReg);
+      if (formRegister) formRegister.classList.toggle('hidden', !isReg);
+      
+      if (authTitle) authTitle.innerText = isReg ? 'Pendaftaran User Baru' : 'LegalOps Intelligence';
+      if (authSubtitle) authSubtitle.innerText = isReg ? 'Isi data untuk mengajukan akun baru' : 'Masuk via Supabase Database (`public.users`)';
+      
+      if (window.lucide) lucide.createIcons();
+    }
 
     // Handler Submit Pendaftaran Akun
     async function handleUserRegister(e) {
@@ -1113,14 +1129,17 @@
 
       btn.disabled = true;
       btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memproses Pendaftaran...`;
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
 
       try {
         // 1. Cek apakah username sudah dipakai
-        const { data: existingUser } = await supabaseClient.from('users')
+        const { data: existingUser, error: checkErr } = await supabaseClient
+          .from('users')
           .select('username')
           .ilike('username', escLike(username))
           .limit(1);
+
+        if (checkErr) throw checkErr;
 
         if (existingUser && existingUser.length > 0) {
           alert(`Username "${username}" sudah digunakan. Silakan gunakan username lain.`);
@@ -1129,16 +1148,18 @@
 
         // 2. Cari brand_id jika pilihan asal adalah Brand
         let brand_id = null;
-        const matchedBrand = masterBrands.find(b => b.name.toLowerCase() === deptBrand.toLowerCase());
-        if (matchedBrand) brand_id = matchedBrand.id;
+        if (Array.isArray(masterBrands) && masterBrands.length > 0) {
+          const matchedBrand = masterBrands.find(b => b.name && b.name.toLowerCase() === deptBrand.toLowerCase());
+          if (matchedBrand) brand_id = matchedBrand.id;
+        }
 
         // 3. Simpan data user baru dengan status PENDING
         const newUserPayload = {
           username,
           email,
-          password: pass, // Menyimpan password (atau disesuaikan dengan skema login Anda)
-          role: 'PENDING', // Role awal belum ditentukan
-          status: 'PENDING', // Butuh approval Admin / Legal
+          password: pass,
+          role: 'PENDING',
+          status: 'PENDING',
           brand_id,
           created_at: new Date().toISOString()
         };
@@ -1160,8 +1181,9 @@
           entity_id: savedUser.id
         }]);
 
-        // Audit Log
-        logAudit('Pengajuan Pendaftaran Akun', 'users', savedUser.id, { summary: `Username: ${username}, Divisi/Brand: ${deptBrand}` });
+        if (typeof logAudit === 'function') {
+          logAudit('Pengajuan Pendaftaran Akun', 'users', savedUser.id, { summary: `Username: ${username}, Divisi/Brand: ${deptBrand}` });
+        }
 
         alert(`Pendaftaran Berhasil!\n\nAkun Anda (${username}) telah dibuat dan sedang menunggu verifikasi serta penentuan Role oleh tim Legal.`);
         
@@ -1173,9 +1195,10 @@
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4"></i> Ajukan Pendaftaran Akun`;
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
       }
     }
+
 
     async function handlePureSupabaseLogin(e) {
       e.preventDefault();
