@@ -1093,10 +1093,12 @@
       } catch (e) {}
     }
         // Atur visibilitas menu User Management berdasarkan Role
-    function checkUserManagementAccess(role) {
+        function checkUserManagementAccess(role) {
       const navBtn = document.getElementById('nav-user-management');
       const upperRole = String(role || '').toUpperCase();
-      const isLegalOrAdmin = upperRole === 'LEGAL' || upperRole === 'ADMIN' || upperRole === 'LEGAL & COMPLIANCE';
+      
+      // Mengecek apakah role mengandung LEGAL atau ADMIN
+      const isLegalOrAdmin = upperRole.includes('LEGAL') || upperRole.includes('ADMIN');
       
       if (navBtn) {
         navBtn.classList.toggle('hidden', !isLegalOrAdmin);
@@ -1495,6 +1497,7 @@
       document.getElementById('role-display').innerText = session.role || '-';
       const badge = document.getElementById('access-badge'); if (badge) badge.innerText = session.role || '-';
       const av = document.getElementById('user-avatar'); if (av) av.innerText = String(session.username).slice(0, 2).toUpperCase();
+      checkUserManagementAccess(session.role);
       loadMasterBrands();
       switchTab('vendor-contracts');
     }
