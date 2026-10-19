@@ -464,6 +464,7 @@
                   <tr>
                     <th class="px-4 py-3.5 font-bold min-w-[110px]">ID Skrining</th>
                     <th class="px-4 py-3.5 font-bold min-w-[200px]">Ide Produk</th>
+                    <th class="px-4 py-3.5 font-bold min-w-[200px]">Brand</th>
                     <th class="px-4 py-3.5 font-bold min-w-[130px]">Kategori BPOM</th>
                     <th class="px-4 py-3.5 font-bold min-w-[120px]">Kode Izin Utama</th>
                     <th class="px-4 py-3.5 font-bold min-w-[110px]">Pengaju</th>
@@ -3209,31 +3210,52 @@
       }
     }
 
-    async function loadNpdProductsTable() {
+       async function loadNpdProductsTable() {
       const tbody = document.getElementById('table-npd-body');
-      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data NPD...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-8 text-center text-slate-400">Memuat data NPD...</td></tr>`;
       try {
-        const { data } = await supabaseClient.from('npd_permit_screenings').select('*').order('created_at', { ascending: false });
+        let query = supabaseClient.from('npd_permit_screenings').select('*').order('created_at', { ascending: false });
+
+        // Filter otomatis berdasarkan Role User & Dropdown Header Brand Filter
+        const userRole = String(currentUserSession?.role || '').toUpperCase();
+        const selectedBrand = selectedBrandId();
+
+        if (userRole === 'BRAND_TEAM' && currentUserSession?.brand_id) {
+          query = query.eq('brand_id', currentUserSession.brand_id);
+        } else if (selectedBrand) {
+          query = query.eq('brand_id', selectedBrand);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
         if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada riwayat NPD.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-8 text-center text-slate-400">Belum ada riwayat NPD untuk brand ini.</td></tr>`;
           return;
         }
+
         tbody.innerHTML = data.map(r => `
           <tr class="hover:bg-brand-50/50 border-b border-brand-100 text-xs">
             <td class="px-4 py-3 font-mono text-slate-500">${esc(String(r.id).slice(0, 8))}</td>
             <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.product_idea_name)}</td>
+            <td class="px-4 py-3 font-medium text-brand-800">${esc(r.brand_name ?? '-')}</td>
             <td class="px-4 py-3">${esc(r.category)}</td>
             <td class="px-4 py-3">${esc(r.matched_permit_code ?? '-')}</td>
             <td class="px-4 py-3">${esc(r.created_by || 'system')}</td>
             <td class="px-4 py-3 font-bold text-emerald-600">${r.feasibility_score != null ? esc(r.feasibility_score) + '/100' : '-'}</td>
             <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 text-center"><button onclick="showNpdDetail('${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button></td>
+            <td class="px-4 py-3 text-center">
+              <button onclick="showNpdDetail('${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">
+                Detail
+              </button>
+            </td>
           </tr>
         `).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
       }
     }
+
 
            async function loadTicketsTable() {
       const tbody = document.getElementById('table-tickets-body');
