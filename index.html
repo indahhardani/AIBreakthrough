@@ -3167,8 +3167,7 @@
       }
     }
 
-    async function loadTicketsTable() {
-      <button onclick="showTicketDetail('${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail & Aksi</button>
+       async function loadTicketsTable() {
       const tbody = document.getElementById('table-tickets-body');
       tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data tiket...</td></tr>`;
       try {
@@ -3186,13 +3185,14 @@
             <td class="px-4 py-3">${esc(r.requested_by)}</td>
             <td class="px-4 py-3 font-bold text-amber-600">${esc(r.status)}</td>
             <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
-            <td class="px-4 py-3 text-center"><button onclick="showDetail('tickets', '${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail</button></td>
+            <td class="px-4 py-3 text-center"><button onclick="showTicketDetail('${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail & Aksi</button></td>
           </tr>
         `).join('');
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
       }
     }
+
 
     async function loadAuditLogs() {
       const tbody = document.getElementById('table-audit-body');
