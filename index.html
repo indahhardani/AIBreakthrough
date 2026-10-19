@@ -1148,7 +1148,11 @@
         }
       } catch (e) {}
     }
-        // Menampilkan detail tiket beserta form tindakan khusus Legal
+           // =====================================================================
+    // SKRIP PENANGANAN TIKET COMPLIANCE
+    // =====================================================================
+
+    // 1. Menampilkan detail tiket beserta form tindakan khusus Legal
     async function showTicketDetail(ticketId) {
       const { data: ticket, error } = await supabaseClient
         .from('tickets')
@@ -1227,7 +1231,7 @@
       openModal('detail-modal');
     }
 
-    // Fungsi menyimpan status baru tiket dari Tim Legal
+    // 2. Fungsi menyimpan status baru tiket dari Tim Legal
     async function submitTicketResolution(ticketId) {
       const status = document.getElementById('update-ticket-status').value;
       const notes = document.getElementById('update-ticket-notes').value.trim();
@@ -1250,12 +1254,40 @@
         alert(`Tiket berhasil diperbarui ke status "${status}"!`);
         closeModal('detail-modal');
         loadTicketsTable();
-        updateTicketBadgeCounter(); // Refresh counter badge di sidebar
+        updateTicketBadgeCounter();
         logAudit('Update Ticket Status', 'tickets', ticketId, { summary: `Status: ${status}` });
       } catch (err) {
         alert('Gagal memperbarui tiket: ' + err.message);
       }
     }
+
+    // 3. Pemuatan Tabel Tiket (Sekitar baris 3170 di index.html)
+    async function loadTicketsTable() {
+      const tbody = document.getElementById('table-tickets-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat data tiket...</td></tr>`;
+      try {
+        const { data } = await supabaseClient.from('tickets').select('*').order('created_at', { ascending: false });
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada tiket.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = data.map(r => `
+          <tr class="hover:bg-brand-50/50 border-b border-brand-100 text-xs">
+            <td class="px-4 py-3 font-mono text-amber-700 font-bold">${esc(r.ticket_number || ('TKT-' + String(r.id).slice(0, 6)))}</td>
+            <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.title)}</td>
+            <td class="px-4 py-3">${esc(r.category)}</td>
+            <td class="px-4 py-3">${esc(r.priority)}</td>
+            <td class="px-4 py-3">${esc(r.requested_by)}</td>
+            <td class="px-4 py-3 font-bold text-amber-600">${esc(r.status)}</td>
+            <td class="px-4 py-3">${r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-'}</td>
+            <td class="px-4 py-3 text-center"><button onclick="showTicketDetail('${r.id}')" class="px-2 py-1 bg-brand-100 hover:bg-brand-200 text-brand-900 border border-brand-300 rounded text-[10px]">Detail & Aksi</button></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-rose-500">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
 
         // Atur visibilitas menu User Management berdasarkan Role
         function checkUserManagementAccess(role) {
