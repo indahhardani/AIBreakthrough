@@ -393,7 +393,7 @@
                     <th class="px-2 py-3.5 font-bold text-center">Akta Pendirian</th>
                     <th class="px-2 py-3.5 font-bold text-center">Akta Perubahan (opsional)</th>
                     <th class="px-2 py-3.5 font-bold text-center">NIB</th>
-                    <th class="px-2 py-3.5 font-bold text-center">Izin Usaha</th>
+                    <th class="px-2 py-3.5 font-bold text-center">Izin Usaha (Opsional)</th>
                     <th class="px-3 py-3.5 font-bold text-center min-w-[150px]">Status</th>
                     <th class="px-3 py-3.5 font-bold text-center min-w-[150px]">Aksi</th>
                   </tr>
@@ -2836,7 +2836,7 @@
       { key: 'akta_pendirian', col: 'akta_pendirian_exists', label: 'Akta Pendirian', required: true },
       { key: 'akta_perubahan', col: 'akta_perubahan_exists', label: 'Akta Perubahan', required: false },
       { key: 'nib',            col: 'nib_exists',            label: 'NIB',            required: true },
-      { key: 'izin_usaha',     col: 'izin_usaha_exists',     label: 'Izin Usaha',     required: true }
+      { key: 'izin_usaha',     col: 'izin_usaha_exists',     label: 'Izin Usaha (opsional)',     required: false }
     ];
     let vendorsData = [];
     let vendorFilesCache = [];
@@ -2871,7 +2871,7 @@
       }
     }
 
-    function renderVendorOnboardings() {
+       function renderVendorOnboardings() {
       const tbody = document.getElementById('table-vendor-onboarding-body');
       if (!tbody) return;
       const sel = selectedBrandId();
@@ -2881,9 +2881,13 @@
         tbody.innerHTML = `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400">${msg}</td></tr>`;
         return;
       }
+
+      // Pengaturan simbol ceklis
       const cell = (v, d) => v[d.col]
-        ? '<span class="text-emerald-600 font-bold">🟢 Ada</span>'
-        : (d.required ? '<span class="text-rose-500 font-bold">🔴 Tidak</span>' : '<span class="text-slate-400 font-semibold">⚪ Opsional</span>');
+        ? '<span class="text-emerald-600 font-bold text-sm" title="Ada">✅</span>'
+        : (d.required 
+            ? '<span class="text-rose-500 font-bold text-sm" title="Tidak Ada (Wajib)">❌</span>' 
+            : '<span class="text-slate-400 font-semibold text-xs" title="Opsional">➖</span>');
 
       tbody.innerHTML = list.map(v => {
         const isReady = v.status === 'Ready for Agreement';
@@ -2911,6 +2915,7 @@
           </tr>`;
       }).join('');
     }
+
 
     // Buat baris perjanjian kosong dari vendor yang dokumennya lengkap, tautkan ke vendor,
     // lalu buka formulir edit di Agreement Matrix agar Legal bisa melengkapinya.
