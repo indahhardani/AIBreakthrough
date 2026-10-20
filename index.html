@@ -258,7 +258,9 @@ async function handleAuditIklanSubmit(event) {
     button, input, select, textarea { font-family: inherit; }
 
     /* Background utama: gradient biru -> teal (60% teal, 40% biru) */
-    body, #login-view, main.bg-brand-50 { background-image: var(--grad-page); background-attachment: fixed; }
+    body, main.bg-brand-50 { background-image: var(--grad-page); background-attachment: fixed; }
+    /* Halaman login: gradasi penuh sesuai gambar acuan (biru -> teal, 60% teal / 40% biru) */
+    #login-view { background-image: linear-gradient(135deg, #275dda 0%, #4e8dc5 20%, #67a8b7 40%, #76b8b1 60%, #79bbae 100%); }
     .bg-brand { background-image: var(--grad-brand); }
     #sidebar.bg-brand { background-image: var(--grad-brand-v); }
     button.bg-brand:hover { filter: brightness(0.92); }
