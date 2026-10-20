@@ -916,56 +916,53 @@ async function handleAuditIklanSubmit(event) {
     </div>
   </div>
 
-  <!-- MODAL 2: ARTWORK PRE-SCREENING -->
-  <div id="artwork-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white border-2 border-brand-200 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
-        <h3 class="text-sm font-bold text-brand-900">Pemeriksaan Artwork / Periklanan Baru</h3>
-        <button onclick="closeModal('artwork-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+<!-- MODAL: ARTWORK PRE-SCREENING (UPDATED) -->
+<div id="artwork-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+  <div class="bg-white border-2 border-brand-200 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+    <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
+      <h3 class="text-sm font-bold text-brand-900">Pemeriksaan Kemasan / Artwork Baru</h3>
+      <button type="button" onclick="closeModal('artwork-modal')" class="text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <form onsubmit="handleCreateArtwork(event)" class="p-6 space-y-4 text-xs">
+      <!-- 1. Dropdown Master NIE (Otomatis Sync Brand & Kategori BPOM) -->
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Pilih Produk (Master NIE) <span class="text-rose-500">*</span></label>
+        <select id="artwork-product-select" required class="w-full bg-brand-50/50 border border-brand-300 rounded-lg p-2.5 font-semibold focus:outline-none focus:border-purple-500">
+          <option value="">-- Pilih Produk Terdaftar --</option>
+        </select>
       </div>
 
-      <form onsubmit="handleCreateArtwork(event)" class="p-6 space-y-4">
+      <!-- 2. Judul Materi / Versi Kemasan -->
+      <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Produk / Materi</label>
-          <input type="text" id="artwork-title" required placeholder="Contoh: Design Kemasan Cushion Vol. 2" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-500">
+          <label class="block font-semibold text-slate-600 mb-1">Nama Materi / Desain <span class="text-rose-500">*</span></label>
+          <input type="text" id="artwork-title" required placeholder="Contoh: Label Depan Kemasan Vol. 2" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:border-purple-500">
         </div>
-
-                   <!-- Tambahkan field Versi di sebelah Jenis dan Brand -->
-        <div class="grid grid-cols-3 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Materi</label>
-            <select id="artwork-type" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-500">
-              <option value="Kemasan">Kemasan</option>
-              <option value="Iklan / Advertising">Iklan / Advertising</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Brand</label>
-            <select id="artwork-brand-select" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-500"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Versi Artwork</label>
-            <input type="text" id="artwork-version" required placeholder="v1.0" defaultValue="v1.0" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-500">
-          </div>
-        </div>
-          
-
-
-
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Unggah Desain (Gambar/PDF)</label>
-          <input type="file" id="artwork-file" required accept="image/*,application/pdf" class="w-full text-xs text-slate-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:font-bold hover:file:bg-purple-500 cursor-pointer border border-brand-200 rounded-lg">
+          <label class="block font-semibold text-slate-600 mb-1">Versi Artwork <span class="text-rose-500">*</span></label>
+          <input type="text" id="artwork-version" required value="v1.0" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:border-purple-500">
         </div>
+      </div>
 
-        <div class="pt-3 border-t border-brand-200 flex justify-end gap-3">
-          <button type="button" onclick="closeModal('artwork-modal')" class="bg-brand-100 text-brand-900 px-4 py-2 rounded-lg text-xs font-bold">Batal</button>
-          <button type="submit" id="btn-submit-artwork" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
-            <i data-lucide="scan-line" class="w-4 h-4"></i> Skrining AI BPOM
-          </button>
-        </div>
-      </form>
-    </div>
+      <!-- 3. Upload File -->
+      <div>
+        <label class="block font-semibold text-slate-600 mb-1">Unggah Desain Kemasan (Gambar/PDF) <span class="text-rose-500">*</span></label>
+        <input type="file" id="artwork-file" required accept="image/*,application/pdf" class="w-full text-slate-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:font-bold hover:file:bg-purple-500 cursor-pointer border border-brand-200 rounded-lg">
+      </div>
+
+      <div class="pt-3 border-t border-brand-200 flex justify-end gap-3">
+        <button type="button" onclick="closeModal('artwork-modal')" class="bg-brand-100 text-brand-900 px-4 py-2 rounded-lg font-bold">Batal</button>
+        <button type="submit" id="btn-submit-artwork" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-lg font-bold transition flex items-center gap-2 shadow-sm">
+          <i data-lucide="scan-line" class="w-4 h-4"></i> Skrining AI BPOM
+        </button>
+      </div>
+    </form>
   </div>
+</div>
+
 
   <!-- MODAL 3: NPD PERMIT SCREENER -->
   <div id="npd-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
@@ -2410,7 +2407,43 @@ async function handleAuditIklanSubmit(event) {
       lucide.createIcons();
     }
 
-    function openArtworkModal() { openModal('artwork-modal'); }
+    // Function Buka Modal Artwork + Auto Populate Dropdown NIE
+async function openArtworkModal() {
+  openModal('artwork-modal');
+  const selectEl = document.getElementById('artwork-product-select');
+  if (!selectEl) return;
+
+  try {
+    let query = supabaseClient.from('product_nie_records').select('*');
+    const userRole = String(currentUserSession?.role || '').toUpperCase();
+    const selBrand = selectedBrandId();
+
+    // Filter otomatis berdasarkan Role & Brand Session
+    if (userRole === 'BRAND_TEAM' && currentUserSession?.brand_id) {
+      query = query.eq('brand_id', currentUserSession.brand_id);
+    } else if (selBrand) {
+      query = query.eq('brand_id', selBrand);
+    }
+
+    const { data, error } = await query.order('product_name', { ascending: true });
+    if (error) throw error;
+
+    cachedNieProducts = data || [];
+    selectEl.innerHTML = '<option value="">-- Pilih Produk Terdaftar --</option>';
+
+    if (cachedNieProducts.length === 0) {
+      selectEl.innerHTML = '<option value="">-- Tidak Ada Produk NIE Terdaftar --</option>';
+      return;
+    }
+
+    cachedNieProducts.forEach(prod => {
+      selectEl.innerHTML += `<option value="${prod.id}">${esc(prod.product_name)} (${esc(prod.nie_number)})</option>`;
+    });
+  } catch (err) {
+    console.error('Error load NIE products:', err.message);
+  }
+}
+
     function openNpdModal() { openModal('npd-modal'); }
     function openCreateTicketModal() { openModal('ticket-modal'); }
 
@@ -4398,82 +4431,99 @@ async function handleAuditIklanSubmit(event) {
       }
     }
 
-    async function handleCreateArtwork(e) {
-      e.preventDefault();
-      const form = e.target;
+  async function handleCreateArtwork(e) {
+  e.preventDefault();
 
-      const title = document.getElementById('artwork-title').value.trim();
-      const material_type = document.getElementById('artwork-type').value;
-      const brandSelectEl = document.getElementById('artwork-brand-select');
-      const brand_id = brandSelectEl ? brandSelectEl.value : '';
-      if (!brand_id) { alert('Silakan pilih Brand terlebih dahulu!'); return; }
-      const selectedBrandObj = masterBrands.find(b => String(b.id) === String(brand_id));
-      const brand_name = selectedBrandObj ? selectedBrandObj.name : (brandSelectEl.selectedOptions[0]?.text || '');
+  const productId = document.getElementById('artwork-product-select').value;
+  const selectedProduct = cachedNieProducts.find(p => String(p.id) === String(productId));
 
-      const file = document.getElementById('artwork-file').files[0];
-      if (!file) { alert('Pilih file desain (gambar/PDF) terlebih dahulu!'); return; }
-      if (file.size > 3.5 * 1024 * 1024) { alert('Ukuran file melebihi 3.5 MB. Silakan kompres file Anda.'); return; }
+  if (!selectedProduct) {
+    alert('Silakan pilih produk dari Master NIE terlebih dahulu!');
+    return;
+  }
 
-      const btn = document.getElementById('btn-submit-artwork');
-      btn.disabled = true;
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menganalisis AI BPOM...`;
-      lucide.createIcons();
+  const title = document.getElementById('artwork-title').value.trim();
+  const version = document.getElementById('artwork-version').value.trim();
+  const file = document.getElementById('artwork-file').files[0];
 
-      try {
-        // Thumbnail untuk pratinjau di PDF (null bila file bukan gambar)
-        const thumbnail = await makeThumbnail(file);
+  if (!file) {
+    alert('Pilih file desain (gambar/PDF) terlebih dahulu!');
+    return;
+  }
 
-        const imageBase64 = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(String(reader.result).split(',')[1]);
-          reader.onerror = () => reject(new Error('Gagal membaca file.'));
-          reader.readAsDataURL(file);
-        });
+  const btn = document.getElementById('btn-submit-artwork');
+  btn.disabled = true;
+  btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menganalisis AI BPOM...`;
+  if (window.lucide) lucide.createIcons();
 
-        // Analisis AI + penyimpanan dilakukan oleh Edge Function (tanpa data default / fallback)
-        const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/Scan-artwork`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({
-            title,
-            materialType: material_type,
-            imageBase64,
-            mimeType: file.type || 'image/png',
-            fileName: file.name,
-            brand_id,
-            brand_name,
-            username: currentUserSession ? currentUserSession.username : 'system'
-          })
-        });
-        const resData = await aiResponse.json().catch(() => ({}));
-        if (!aiResponse.ok || resData.error) {
-          throw new Error(resData.error || ('Edge Function gagal (HTTP ' + aiResponse.status + ')'));
-        }
-        if (!resData.saved_id) throw new Error('Analisis selesai tetapi gagal tersimpan ke database.');
+  try {
+    const thumbnail = await makeThumbnail(file);
+    const imageBase64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(',')[1]);
+      reader.onerror = () => reject(new Error('Gagal membaca file.'));
+      reader.readAsDataURL(file);
+    });
 
-        // Simpan thumbnail agar PDF dari riwayat juga punya gambar (butuh kolom artwork_prescreenings.thumbnail)
-        if (thumbnail) {
-          const { error: thErr } = await supabaseClient.from('artwork_prescreenings').update({ thumbnail }).eq('id', resData.saved_id);
-          if (thErr) console.warn('Thumbnail artwork gagal disimpan:', thErr.message);
-        }
+    const aiResponse = await fetch(`${SUPABASE_URL}/functions/v1/Scan-artwork`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({
+        title: `${title} (${version})`,
+        materialType: 'Kemasan',
+        productName: selectedProduct.product_name,
+        nieNumber: selectedProduct.nie_number,
+        category: selectedProduct.product_category,
+        imageBase64,
+        mimeType: file.type || 'image/png',
+        fileName: file.name,
+        brand_id: selectedProduct.brand_id,
+        brand_name: selectedProduct.brand_name,
+        username: currentUserSession ? currentUserSession.username : 'system'
+      })
+    });
 
-        form.reset();
-        closeModal('artwork-modal');
-        loadArtworkTable();
-        showArtworkResult(resData.data, title, { id: resData.saved_id, brand_id, brand_name, material_type, file_name: file.name, thumbnail, created_at: new Date().toISOString() });
-        logAudit('Skrining Artwork', 'artwork_prescreenings', resData.saved_id, { summary: title, status_bpom: resData.data.bpom_status, skor: resData.data.compliance_score });
-      } catch (err) {
-        alert('Error: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="scan-line" class="w-4 h-4"></i> Skrining AI BPOM`;
-        lucide.createIcons();
-      }
+    const resData = await aiResponse.json().catch(() => ({}));
+    if (!aiResponse.ok || resData.error) {
+      throw new Error(resData.error || ('Edge Function gagal (HTTP ' + aiResponse.status + ')'));
     }
+
+    if (thumbnail && resData.saved_id) {
+      await supabaseClient.from('artwork_prescreenings').update({ thumbnail }).eq('id', resData.saved_id);
+    }
+
+    e.target.reset();
+    closeModal('artwork-modal');
+    loadArtworkTable();
+    showArtworkResult(resData.data, title, {
+      id: resData.saved_id,
+      brand_id: selectedProduct.brand_id,
+      brand_name: selectedProduct.brand_name,
+      material_type: 'Kemasan',
+      file_name: file.name,
+      thumbnail,
+      created_at: new Date().toISOString()
+    });
+
+    logAudit('Skrining Artwork', 'artwork_prescreenings', resData.saved_id, {
+      summary: `${title} (${version})`,
+      status_bpom: resData.data.bpom_status,
+      skor: resData.data.compliance_score
+    });
+
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i data-lucide="scan-line" class="w-4 h-4"></i> Skrining AI BPOM`;
+    if (window.lucide) lucide.createIcons();
+  }
+}
+
 
 
 
