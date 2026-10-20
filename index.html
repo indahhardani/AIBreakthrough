@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enterprise LegalOps & Compliance Intelligence</title>
   
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -222,19 +225,22 @@ async function handleAuditIklanSubmit(event) {
     tailwind.config = {
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['Sora', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          },
           colors: {
             brand: {
-              DEFAULT: '#64bcae',
-              50: '#f0f9f8',
-              100: '#dcf2ef',
-              200: '#bce4df',
-              300: '#91ceca',
-              400: '#64bcae',
-              500: '#48a093',
-              600: '#388077',
-              700: '#306761',
-              800: '#2a534f',
-              900: '#1d3e3b',
+              DEFAULT: '#79bbae',
+              50: '#f0f8f7',
+              100: '#ddeff0',
+              200: '#c0e1e3',
+              300: '#9bd0cc',
+              400: '#79bbae',
+              500: '#4fa0a8',
+              600: '#3b82b0',
+              700: '#2f68b4',
+              800: '#2a56b0',
+              900: '#1c3a7a',
             }
           }
         }
@@ -243,10 +249,24 @@ async function handleAuditIklanSubmit(event) {
   </script>
   
   <style>
+    :root {
+      --grad-brand: linear-gradient(90deg, #275dda 0%, #4e8dc5 20%, #67a8b7 40%, #76b8b1 60%, #79bbae 100%);
+      --grad-brand-v: linear-gradient(180deg, #275dda 0%, #4e8dc5 20%, #67a8b7 40%, #76b8b1 60%, #79bbae 100%);
+      --grad-page: linear-gradient(135deg, #e6eefc 0%, #e8f2f8 25%, #ebf6f6 50%, #eef8f6 75%, #f0f8f7 100%);
+    }
+    html, body { font-family: 'Sora', ui-sans-serif, system-ui, sans-serif; }
+    button, input, select, textarea { font-family: inherit; }
+
+    /* Background utama: gradient biru -> teal (60% teal, 40% biru) */
+    body, #login-view, main.bg-brand-50 { background-image: var(--grad-page); background-attachment: fixed; }
+    .bg-brand { background-image: var(--grad-brand); }
+    #sidebar.bg-brand { background-image: var(--grad-brand-v); }
+    button.bg-brand:hover { filter: brightness(0.92); }
+
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #dcf2ef; }
-    ::-webkit-scrollbar-thumb { background: #64bcae; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #388077; }
+    ::-webkit-scrollbar-track { background: #ddeff0; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #4e8dc5, #79bbae); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2f68b4; }
   </style>
 </head>
 <body class="bg-brand-50 text-slate-800 font-sans antialiased min-h-screen flex">
@@ -410,7 +430,7 @@ async function handleAuditIklanSubmit(event) {
   <!-- 2. MAIN APP DASHBOARD -->
   <div id="app-view" class="hidden flex-1 flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
     
-    <!-- SIDEBAR - FULL BRAND #64BCAE -->
+    <!-- SIDEBAR - GRADIENT BIRU-TEAL -->
     <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-brand border-r border-brand-600 text-white flex flex-col justify-between p-4 flex-shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out shadow-lg">
       <div class="space-y-6">
         <div class="flex items-center justify-between px-2 py-2 border-b border-brand-500/50 pb-4">
@@ -487,7 +507,7 @@ async function handleAuditIklanSubmit(event) {
 
     <main class="flex-1 flex flex-col bg-brand-50 overflow-y-auto w-full">
       
-      <!-- HEADER - FULL BRAND #64BCAE -->
+      <!-- HEADER - GRADIENT BIRU-TEAL -->
       <header class="h-16 bg-brand text-white border-b border-brand-600 flex items-center justify-between px-4 md:px-6 flex-shrink-0 sticky top-0 z-20 shadow-md">
         <div class="flex items-center gap-3">
           <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700">
@@ -4595,8 +4615,8 @@ async function openArtworkModal() {
 
       drawWatermark();
 
-      // --- 2. HEADER BANNER (Teal Brand `#64bcae`) ---
-      doc.setFillColor(100, 188, 174); // #64bcae
+      // --- 2. HEADER BANNER (Teal Brand `#79bbae`) ---
+      doc.setFillColor(121, 187, 174); // #79bbae
       doc.rect(0, 0, W, 75, 'F');
 
       doc.setTextColor(255, 255, 255);
