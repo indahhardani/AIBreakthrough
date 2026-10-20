@@ -617,7 +617,7 @@ async function handleAuditIklanSubmit(event) {
           </div>
         </section>
 
-        <!-- 3. ARTWORK PRE-SCREENING TAB -->
+
         <!-- 3. ARTWORK PRE-SCREENING TAB -->
 <section id="view-artwork-prescreening" class="hidden space-y-6">
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-2 border-brand-200 rounded-xl p-5 shadow-sm">
@@ -1253,6 +1253,107 @@ async function handleAuditIklanSubmit(event) {
       </div>
     </div>
   </div>
+  <!-- SECTION: MEMO LEGAL -->
+<div id="section-legal-memo" class="p-6 space-y-6">
+  <!-- Header & Action Bar -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-bold text-slate-800">Direktori Memo Legal</h2>
+      <p class="text-xs text-slate-500">Penyimpanan dan pencatatan memo internal tim Legal</p>
+    </div>
+    <button onclick="openMemoModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 self-start md:self-auto shadow-sm">
+      <i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Memo Baru
+    </button>
+  </div>
+
+  <!-- Filter & Search Bar -->
+  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3">
+    <div class="flex-1">
+      <input type="text" id="memo-search" oninput="filterMemoTable()" placeholder="Cari judul, perihal, atau ringkasan memo..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-purple-500">
+    </div>
+    <div class="w-full md:w-48">
+      <input type="date" id="memo-filter-date" onchange="filterMemoTable()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600 focus:outline-none focus:border-purple-500">
+    </div>
+    <button onclick="resetMemoFilter()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs font-semibold">Reset</button>
+  </div>
+
+  <!-- Table Memos -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+            <th class="p-3 w-12 text-center">No</th>
+            <th class="p-3">Judul Memo</th>
+            <th class="p-3 w-32">Tgl Dikeluarkan</th>
+            <th class="p-3">Perihal</th>
+            <th class="p-3">Summary</th>
+            <th class="p-3 w-28 text-center">Link Drive</th>
+            <th class="p-3 w-24 text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="memo-table-body" class="divide-y divide-slate-100 text-slate-700">
+          <tr>
+            <td colspan="7" class="p-4 text-center text-slate-400">Memuat data memo...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD / EDIT MEMO -->
+<div id="memo-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+  <div class="bg-white border border-slate-200 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+      <h3 id="memo-modal-title" class="text-sm font-bold text-slate-800">Tambah Memo Legal Baru</h3>
+      <button type="button" onclick="closeModal('memo-modal')" class="text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <form onsubmit="handleSaveMemo(event)" class="p-6 space-y-4 text-xs">
+      <input type="hidden" id="memo-id">
+
+      <!-- Judul Memo -->
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">Judul Memo <span class="text-rose-500">*</span></label>
+        <input type="text" id="memo-title" required placeholder="Contoh: Memo Internal Kepatuhan Promosi Kosmetik" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:border-purple-500">
+      </div>
+
+      <!-- Tanggal & Perihal -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Tanggal Dikeluarkan <span class="text-rose-500">*</span></label>
+          <input type="date" id="memo-date" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:border-purple-500">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Perihal <span class="text-rose-500">*</span></label>
+          <input type="text" id="memo-perihal" required placeholder="Contoh: Petunjuk Teknis Klaim BPOM" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:border-purple-500">
+        </div>
+      </div>
+
+      <!-- Link Drive -->
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">Link Google Drive / Dokumen <span class="text-rose-500">*</span></label>
+        <input type="url" id="memo-drive-url" required placeholder="https://drive.google.com/file/d/..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:border-purple-500">
+      </div>
+
+      <!-- Summary -->
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">Ringkasan / Summary Memo</label>
+        <textarea id="memo-summary" rows="3" placeholder="Tuliskan ringkasan singkat poin-poin utama isi memo..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-slate-800 focus:outline-none focus:border-purple-500 resize-none"></textarea>
+      </div>
+
+      <!-- Actions -->
+      <div class="pt-3 border-t border-slate-200 flex justify-end gap-2">
+        <button type="button" onclick="closeModal('memo-modal')" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold hover:bg-slate-200">Batal</button>
+        <button type="submit" id="btn-save-memo" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-lg font-bold transition">Simpan Memo</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
   <!-- MODAL: HASIL SKRINING ARTWORK -->
   <div id="artwork-result-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
@@ -1366,6 +1467,178 @@ async function handleAuditIklanSubmit(event) {
         }
       } catch (e) {}
     }
+    let rawMemosData = []; // State simpan data memo lokal untuk pencarian/filter
+
+// 1. Fetch & Load Data Memo dari Supabase
+async function loadLegalMemos() {
+  const tbody = document.getElementById('memo-table-body');
+  if (!tbody) return;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('legal_memos')
+      .select('*')
+      .order('tanggal_memo', { ascending: false });
+
+    if (error) throw error;
+
+    rawMemosData = data || [];
+    renderMemoTable(rawMemosData);
+  } catch (err) {
+    console.error('Error load memos:', err.message);
+    tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-500">Gagal memuat memo: ${err.message}</td></tr>`;
+  }
+}
+
+// 2. Render Tabel Data Memo
+function renderMemoTable(memos) {
+  const tbody = document.getElementById('memo-table-body');
+  if (!tbody) return;
+
+  if (memos.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Tidak ada memo legal ditemukan.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = memos.map((item, index) => {
+    const formattedDate = new Date(item.tanggal_memo).toLocaleDateString('id-ID', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+
+    return `
+      <tr class="hover:bg-slate-50 transition">
+        <td class="p-3 text-center font-semibold text-slate-400">${index + 1}</td>
+        <td class="p-3 font-bold text-slate-800">${esc(item.judul_memo)}</td>
+        <td class="p-3 text-slate-600">${formattedDate}</td>
+        <td class="p-3 font-semibold text-purple-700">${esc(item.perihal)}</td>
+        <td class="p-3 text-slate-600 max-w-xs truncate" title="${esc(item.summary || '-')}">${esc(item.summary || '-')}</td>
+        <td class="p-3 text-center">
+          <a href="${esc(item.drive_url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 bg-purple-50 text-purple-600 hover:bg-purple-100 px-2.5 py-1 rounded-md font-semibold transition">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Buka
+          </a>
+        </td>
+        <td class="p-3 text-center">
+          <div class="flex items-center justify-center gap-1">
+            <button onclick="editMemo('${item.id}')" title="Edit" class="p-1.5 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
+              <i data-lucide="pencil" class="w-4 h-4"></i>
+            </button>
+            <button onclick="deleteMemo('${item.id}')" title="Hapus" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
+}
+
+// 3. Open Modal (Tambah Baru vs Edit)
+function openMemoModal(memoData = null) {
+  const form = document.querySelector('#memo-modal form');
+  form.reset();
+
+  if (memoData) {
+    document.getElementById('memo-modal-title').innerText = 'Edit Memo Legal';
+    document.getElementById('memo-id').value = memoData.id;
+    document.getElementById('memo-title').value = memoData.judul_memo;
+    document.getElementById('memo-date').value = memoData.tanggal_memo;
+    document.getElementById('memo-perihal').value = memoData.perihal;
+    document.getElementById('memo-drive-url').value = memoData.drive_url;
+    document.getElementById('memo-summary').value = memoData.summary || '';
+  } else {
+    document.getElementById('memo-modal-title').innerText = 'Tambah Memo Legal Baru';
+    document.getElementById('memo-id').value = '';
+    document.getElementById('memo-date').value = new Date().toISOString().split('T')[0];
+  }
+
+  openModal('memo-modal');
+}
+
+// 4. Save (Insert / Update) Handler
+async function handleSaveMemo(e) {
+  e.preventDefault();
+
+  const id = document.getElementById('memo-id').value;
+  const payload = {
+    judul_memo: document.getElementById('memo-title').value.trim(),
+    tanggal_memo: document.getElementById('memo-date').value,
+    perihal: document.getElementById('memo-perihal').value.trim(),
+    drive_url: document.getElementById('memo-drive-url').value.trim(),
+    summary: document.getElementById('memo-summary').value.trim(),
+    created_by: currentUserSession ? currentUserSession.username : 'legal_team',
+    updated_at: new Date().toISOString()
+  };
+
+  const btn = document.getElementById('btn-save-memo');
+  btn.disabled = true;
+  btn.innerText = 'Menyimpan...';
+
+  try {
+    let result;
+    if (id) {
+      result = await supabaseClient.from('legal_memos').update(payload).eq('id', id);
+    } else {
+      result = await supabaseClient.from('legal_memos').insert([payload]);
+    }
+
+    if (result.error) throw result.error;
+
+    closeModal('memo-modal');
+    loadLegalMemos();
+  } catch (err) {
+    alert('Gagal menyimpan memo: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = 'Simpan Memo';
+  }
+}
+
+// 5. Edit Memo Action
+function editMemo(id) {
+  const target = rawMemosData.find(m => String(m.id) === String(id));
+  if (target) openMemoModal(target);
+}
+
+// 6. Delete Memo Action
+async function deleteMemo(id) {
+  if (!confirm('Apakah kamu yakin ingin menghapus memo ini?')) return;
+
+  try {
+    const { error } = await supabaseClient.from('legal_memos').delete().eq('id', id);
+    if (error) throw error;
+    loadLegalMemos();
+  } catch (err) {
+    alert('Gagal menghapus memo: ' + err.message);
+  }
+}
+
+// 7. Filtering & Search Logic
+function filterMemoTable() {
+  const searchVal = document.getElementById('memo-search').value.toLowerCase();
+  const dateVal = document.getElementById('memo-filter-date').value;
+
+  const filtered = rawMemosData.filter(item => {
+    const matchSearch = 
+      item.judul_memo.toLowerCase().includes(searchVal) ||
+      item.perihal.toLowerCase().includes(searchVal) ||
+      (item.summary && item.summary.toLowerCase().includes(searchVal));
+
+    const matchDate = !dateVal || item.tanggal_memo === dateVal;
+
+    return matchSearch && matchDate;
+  });
+
+  renderMemoTable(filtered);
+}
+
+function resetMemoFilter() {
+  document.getElementById('memo-search').value = '';
+  document.getElementById('memo-filter-date').value = '';
+  renderMemoTable(rawMemosData);
+}
+
            // =====================================================================
     // SKRIP PENANGANAN TIKET COMPLIANCE
     // =====================================================================
