@@ -452,7 +452,11 @@ async function handleAuditIklanSubmit(event) {
           </button>
 
           <button onclick="switchTab('tickets-module')" id="nav-tickets-module" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
-            <i data-lucide="ticket" class="w-4 h-4"></i> Compliance Tickets
+            <i data-lucide="ticket" class="w-4 h-4"></i> L & C Tickets
+          </button>
+
+          <button onclick="switchTab('legal-memo')" id="nav-legal-memo" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
+            <i data-lucide="file-text" class="w-4 h-4"></i> Internal Memo
           </button>
 
           <button onclick="switchTab('bpom-regulations')" id="nav-bpom-regulations" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
@@ -461,10 +465,6 @@ async function handleAuditIklanSubmit(event) {
 
           <button onclick="switchTab('audit-trail')" id="nav-audit-trail" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
             <i data-lucide="history" class="w-4 h-4"></i> Audit Trail Log
-          </button>
-
-          <button onclick="switchTab('legal-memo')" id="nav-legal-memo" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
-            <i data-lucide="file-text" class="w-4 h-4"></i> Memo Legal
           </button>
         </nav>
       </div>
@@ -703,7 +703,7 @@ async function handleAuditIklanSubmit(event) {
           </div>
         </section>
 
-        <!-- 5. COMPLIANCE TICKETS TAB -->
+        <!-- 5. L & C TICKETS TAB -->
         <section id="view-tickets-module" class="hidden space-y-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-2 border-brand-200 rounded-xl p-5 shadow-sm">
             <div>
@@ -868,12 +868,12 @@ async function handleAuditIklanSubmit(event) {
             </table>
           </div>
         </section>
-        <!-- MEMO LEGAL TAB -->
+        <!-- INTERNAL MEMO TAB -->
 <section id="view-legal-memo" class="hidden space-y-6">
   <!-- Header & Action Bar -->
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
-      <h2 class="text-xl font-bold text-slate-800">Direktori Memo Legal</h2>
+      <h2 class="text-xl font-bold text-slate-800">Direktori Internal Memo</h2>
       <p class="text-xs text-slate-500">Penyimpanan dan pencatatan memo internal tim Legal</p>
     </div>
     <button onclick="openMemoModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 self-start md:self-auto shadow-sm">
@@ -1020,7 +1020,7 @@ async function handleAuditIklanSubmit(event) {
 <div id="memo-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
   <div class="bg-white border border-slate-200 w-full max-w-lg rounded-2xl flex flex-col shadow-2xl overflow-hidden">
     <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-      <h3 id="memo-modal-title" class="text-sm font-bold text-slate-800">Tambah Memo Legal Baru</h3>
+      <h3 id="memo-modal-title" class="text-sm font-bold text-slate-800">Tambah Internal Memo Baru</h3>
       <button type="button" onclick="closeModal('memo-modal')" class="text-slate-400 hover:text-slate-600">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -1502,7 +1502,7 @@ function renderMemoTable(memos) {
   if (!tbody) return;
 
   if (memos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Tidak ada memo legal ditemukan.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Tidak ada internal memo ditemukan.</td></tr>`;
     return;
   }
 
@@ -1546,7 +1546,7 @@ function openMemoModal(memoData = null) {
   form.reset();
 
   if (memoData) {
-    document.getElementById('memo-modal-title').innerText = 'Edit Memo Legal';
+    document.getElementById('memo-modal-title').innerText = 'Edit Internal Memo';
     document.getElementById('memo-id').value = memoData.id;
     document.getElementById('memo-title').value = memoData.judul_memo;
     document.getElementById('memo-date').value = memoData.tanggal_memo;
@@ -1554,7 +1554,7 @@ function openMemoModal(memoData = null) {
     document.getElementById('memo-drive-url').value = memoData.drive_url;
     document.getElementById('memo-summary').value = memoData.summary || '';
   } else {
-    document.getElementById('memo-modal-title').innerText = 'Tambah Memo Legal Baru';
+    document.getElementById('memo-modal-title').innerText = 'Tambah Internal Memo Baru';
     document.getElementById('memo-id').value = '';
     document.getElementById('memo-date').value = new Date().toISOString().split('T')[0];
   }
@@ -2759,7 +2759,7 @@ async function openArtworkModal() {
       } else if (tab === 'tickets-module') {
         document.getElementById('view-tickets-module')?.classList.remove('hidden');
         document.getElementById('nav-tickets-module')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
-        document.getElementById('page-title').innerText = "Compliance Tickets";
+        document.getElementById('page-title').innerText = "L & C Tickets";
         loadTicketsTable();
       } else if (tab === 'bpom-regulations') {
         document.getElementById('view-bpom-regulations')?.classList.remove('hidden');
@@ -2779,7 +2779,7 @@ async function openArtworkModal() {
       } else if (tab === 'legal-memo') {
         document.getElementById('view-legal-memo')?.classList.remove('hidden');
         document.getElementById('nav-legal-memo')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
-        document.getElementById('page-title').innerText = "Memo Legal";
+        document.getElementById('page-title').innerText = "Internal Memo";
         loadLegalMemos();
       } else if (tab === 'user-management') {
         const r = String((currentUserSession && currentUserSession.role) || '').toUpperCase();
