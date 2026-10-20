@@ -462,6 +462,10 @@ async function handleAuditIklanSubmit(event) {
           <button onclick="switchTab('audit-trail')" id="nav-audit-trail" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
             <i data-lucide="history" class="w-4 h-4"></i> Audit Trail Log
           </button>
+
+          <button onclick="switchTab('legal-memo')" id="nav-legal-memo" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition">
+            <i data-lucide="file-text" class="w-4 h-4"></i> Memo Legal
+          </button>
         </nav>
       </div>
 
@@ -864,6 +868,55 @@ async function handleAuditIklanSubmit(event) {
             </table>
           </div>
         </section>
+        <!-- MEMO LEGAL TAB -->
+<section id="view-legal-memo" class="hidden space-y-6">
+  <!-- Header & Action Bar -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-bold text-slate-800">Direktori Memo Legal</h2>
+      <p class="text-xs text-slate-500">Penyimpanan dan pencatatan memo internal tim Legal</p>
+    </div>
+    <button onclick="openMemoModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 self-start md:self-auto shadow-sm">
+      <i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Memo Baru
+    </button>
+  </div>
+
+  <!-- Filter & Search Bar -->
+  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3">
+    <div class="flex-1">
+      <input type="text" id="memo-search" oninput="filterMemoTable()" placeholder="Cari judul, perihal, atau ringkasan memo..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-purple-500">
+    </div>
+    <div class="w-full md:w-48">
+      <input type="date" id="memo-filter-date" onchange="filterMemoTable()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600 focus:outline-none focus:border-purple-500">
+    </div>
+    <button onclick="resetMemoFilter()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs font-semibold">Reset</button>
+  </div>
+
+  <!-- Table Memos -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+            <th class="p-3 w-12 text-center">No</th>
+            <th class="p-3">Judul Memo</th>
+            <th class="p-3 w-32">Tgl Dikeluarkan</th>
+            <th class="p-3">Perihal</th>
+            <th class="p-3">Summary</th>
+            <th class="p-3 w-28 text-center">Link Drive</th>
+            <th class="p-3 w-24 text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="memo-table-body" class="divide-y divide-slate-100 text-slate-700">
+          <tr>
+            <td colspan="7" class="p-4 text-center text-slate-400">Memuat data memo...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
                 <!-- 7. USER MANAGEMENT TAB (Khusus Legal / Admin) -->
         <section id="view-user-management" class="hidden space-y-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-2 border-brand-200 rounded-xl p-5 shadow-sm">
@@ -960,54 +1013,6 @@ async function handleAuditIklanSubmit(event) {
         </button>
       </div>
     </form>
-  </div>
-</div>
-   <!-- SECTION: MEMO LEGAL -->
-<div id="section-legal-memo" class="p-6 space-y-6">
-  <!-- Header & Action Bar -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <div>
-      <h2 class="text-xl font-bold text-slate-800">Direktori Memo Legal</h2>
-      <p class="text-xs text-slate-500">Penyimpanan dan pencatatan memo internal tim Legal</p>
-    </div>
-    <button onclick="openMemoModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 self-start md:self-auto shadow-sm">
-      <i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Memo Baru
-    </button>
-  </div>
-
-  <!-- Filter & Search Bar -->
-  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3">
-    <div class="flex-1">
-      <input type="text" id="memo-search" oninput="filterMemoTable()" placeholder="Cari judul, perihal, atau ringkasan memo..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-purple-500">
-    </div>
-    <div class="w-full md:w-48">
-      <input type="date" id="memo-filter-date" onchange="filterMemoTable()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600 focus:outline-none focus:border-purple-500">
-    </div>
-    <button onclick="resetMemoFilter()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs font-semibold">Reset</button>
-  </div>
-
-  <!-- Table Memos -->
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse text-xs">
-        <thead>
-          <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
-            <th class="p-3 w-12 text-center">No</th>
-            <th class="p-3">Judul Memo</th>
-            <th class="p-3 w-32">Tgl Dikeluarkan</th>
-            <th class="p-3">Perihal</th>
-            <th class="p-3">Summary</th>
-            <th class="p-3 w-28 text-center">Link Drive</th>
-            <th class="p-3 w-24 text-center">Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="memo-table-body" class="divide-y divide-slate-100 text-slate-700">
-          <tr>
-            <td colspan="7" class="p-4 text-center text-slate-400">Memuat data memo...</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
   </div>
 </div>
 
@@ -2722,10 +2727,10 @@ async function openArtworkModal() {
     function openCreateTicketModal() { openModal('ticket-modal'); }
 
     function switchTab(tab) {
-      const allTabs = ['view-vendor-contracts', 'view-vendor-registration', 'view-artwork-prescreening', 'view-npd-screener', 'view-tickets-module', 'view-audit-trail', 'view-bpom-regulations', 'view-user-management'];
+      const allTabs = ['view-vendor-contracts', 'view-vendor-registration', 'view-artwork-prescreening', 'view-npd-screener', 'view-tickets-module', 'view-audit-trail', 'view-bpom-regulations', 'view-user-management', 'view-legal-memo'];
       allTabs.forEach(id => document.getElementById(id)?.classList.add('hidden'));
 
-      const navIds = ['nav-vendor-contracts', 'nav-vendor-registration', 'nav-artwork-prescreening', 'nav-npd-screener', 'nav-tickets-module', 'nav-audit-trail', 'nav-bpom-regulations', 'nav-user-management'];
+      const navIds = ['nav-vendor-contracts', 'nav-vendor-registration', 'nav-artwork-prescreening', 'nav-npd-screener', 'nav-tickets-module', 'nav-audit-trail', 'nav-bpom-regulations', 'nav-user-management', 'nav-legal-memo'];
       navIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-100 hover:bg-brand-600 hover:text-white text-sm font-semibold transition";
@@ -2771,6 +2776,11 @@ async function openArtworkModal() {
         document.getElementById('nav-audit-trail')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
         document.getElementById('page-title').innerText = "Audit Trail Log";
         loadAuditLogs();
+      } else if (tab === 'legal-memo') {
+        document.getElementById('view-legal-memo')?.classList.remove('hidden');
+        document.getElementById('nav-legal-memo')?.classList.add('bg-brand-800', 'text-white', 'font-bold');
+        document.getElementById('page-title').innerText = "Memo Legal";
+        loadLegalMemos();
       } else if (tab === 'user-management') {
         const r = String((currentUserSession && currentUserSession.role) || '').toUpperCase();
         if (!(r.includes('LEGAL') || r.includes('ADMIN'))) { switchTab('vendor-contracts'); return; }
