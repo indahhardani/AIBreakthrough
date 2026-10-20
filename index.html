@@ -260,7 +260,7 @@ async function handleAuditIklanSubmit(event) {
         <div class="inline-flex p-3 bg-brand text-white rounded-xl border border-brand-600 mb-1 shadow-md shadow-brand/30">
           <i data-lucide="shield-check" class="w-8 h-8"></i>
         </div>
-        <h2 class="text-2xl font-bold tracking-tight text-brand-900" id="auth-title">LegalOps Intelligence</h2>
+        <h2 class="text-2xl font-bold tracking-tight text-brand-900" id="auth-title">HypeLex</h2>
         <p class="text-xs text-brand-700" id="auth-subtitle">Masuk via Supabase Database (`public.users`)</p>
       </div>
 
@@ -2119,7 +2119,7 @@ function resetMemoFilter() {
       document.getElementById('form-login').classList.toggle('hidden', isReg);
       document.getElementById('form-register').classList.toggle('hidden', !isReg);
       
-      document.getElementById('auth-title').innerText = isReg ? 'Pendaftaran User Baru' : 'LegalOps Intelligence';
+      document.getElementById('auth-title').innerText = isReg ? 'Pendaftaran User Baru' : 'HypeLex';
       document.getElementById('auth-subtitle').innerText = isReg ? 'Isi data untuk mengajukan akun baru' : 'Masuk via Supabase Database (`public.users`)';
       
       lucide.createIcons();
@@ -2135,7 +2135,7 @@ function resetMemoFilter() {
       if (formLogin) formLogin.classList.toggle('hidden', isReg);
       if (formRegister) formRegister.classList.toggle('hidden', !isReg);
       
-      if (authTitle) authTitle.innerText = isReg ? 'Pendaftaran User Baru' : 'LegalOps Intelligence';
+      if (authTitle) authTitle.innerText = isReg ? 'Pendaftaran User Baru' : 'HypeLex';
       if (authSubtitle) authSubtitle.innerText = isReg ? 'Isi data untuk mengajukan akun baru' : 'Masuk via Supabase Database (`public.users`)';
       
       if (window.lucide) lucide.createIcons();
