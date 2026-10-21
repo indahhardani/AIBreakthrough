@@ -134,6 +134,16 @@ function renderMediaOptions(groupKey) {
   });
 }
 
+// Samakan status dari AI dengan label yang dipakai tabel artwork
+function mapAdStatus(raw, score, redFlagCount) {
+  const t = String(raw || '').toLowerCase();
+  if (/non|tidak|reject|tolak|high|bahaya|langgar/.test(t)) return 'Non-Compliant';
+  if (/adjust|revisi|perlu|need|warn|perbaik/.test(t)) return 'Need Adjustment';
+  if (/compliant|sesuai|lolos|pass|aman/.test(t)) return 'Compliant';
+  if (redFlagCount > 0 && score < 50) return 'Non-Compliant';
+  return score >= 75 ? 'Compliant' : score >= 50 ? 'Need Adjustment' : 'Non-Compliant';
+}
+
 // 4. Submit Handler ke Edge Function (API Key Terjaga Aman)
 async function handleAuditIklanSubmit(event) {
   event.preventDefault();
@@ -191,22 +201,77 @@ async function handleAuditIklanSubmit(event) {
 
     if (error) throw new Error(error.message);
 
-    // Tampilkan Hasil via Modal / Alert
-    const redFlagsText = auditResult.red_flags?.length 
-      ? `\n\n🚨 Red Flags (Kata Terlarang / Overclaim):\n- ` + auditResult.red_flags.join('\n- ')
-      : '\n\n✅ Tidak ditemukan indikasi kata kunci terlarang.';
+    if (!auditResult || auditResult.error) throw new Error(auditResult?.error || 'Respons audit kosong.');
 
-    const recsText = auditResult.recommendations?.length 
-      ? `\n\n💡 Rekomendasi Perbaikan:\n- ` + auditResult.recommendations.join('\n- ')
-      : '';
+    // Normalisasi hasil audit iklan ke format yang sama dengan hasil artwork
+    const score = Math.max(0, Math.min(100, Math.round(Number(auditResult.compliance_score) || 0)));
+    const redFlags = Array.isArray(auditResult.red_flags) ? auditResult.red_flags : [];
+    const recs = Array.isArray(auditResult.recommendations) ? auditResult.recommendations : [];
+    const bpomStatus = mapAdStatus(auditResult.status, score, redFlags.length);
+    const mediaLabel = mediaDetail || mediaGroup || 'Iklan';
+    const materialType = 'Iklan - ' + mediaLabel;
+    const productName = selectedProduct?.product_name || '';
+    const title = `${productName} - ${mediaLabel} (${version})`;
+    const analysis = {
+      product_category: selectedProduct?.product_category || 'Iklan',
+      compliance_score: score,
+      bpom_status: bpomStatus,
+      halal_status: 'N/A',
+      high_risk_items: redFlags,
+      need_adjustment_items: recs,
+      compliant_items: [],
+      summary_notes: auditResult.summary_notes || ''
+    };
+    const adFile = fileInput.files[0] || null;
+    const thumbnail = await makeThumbnail(adFile);
 
-    alert(`[Hasil Audit Compliance Iklan]\nStatus: ${auditResult.status}\nSkor Compliance: ${auditResult.compliance_score}%${redFlagsText}${recsText}\n\nCatatan: ${auditResult.summary_notes}`);
-    
+    // Simpan ke tabel artwork_prescreenings (muncul di tabel riwayat)
+    let savedId = null, saveWarn = '';
+    try {
+      const { data: saved, error: saveErr } = await supabaseClient.from('artwork_prescreenings').insert([{
+        title,
+        product_name: productName,
+        material_type: materialType,
+        brand_id: selectedProduct?.brand_id || null,
+        brand_name: selectedProduct?.brand_name || null,
+        category: analysis.product_category,
+        design_version: version,
+        compliance_score: score,
+        bpom_status: bpomStatus,
+        halal_status: 'N/A',
+        high_risk_items: redFlags.length ? redFlags.map(x => '- ' + x).join('\n') : null,
+        need_adjustment_items: recs.length ? recs.map(x => '- ' + x).join('\n') : null,
+        analysis_result: analysis,
+        image_base64: base64Data ? `data:${mimeType};base64,${base64Data}` : null,
+        thumbnail,
+        file_name: adFile ? adFile.name : title,
+        created_by: currentUserSession ? currentUserSession.username : 'system'
+      }]).select('id').single();
+      if (saveErr) throw saveErr;
+      savedId = saved?.id || null;
+    } catch (e) {
+      console.error('Gagal menyimpan hasil audit iklan:', e);
+      saveWarn = 'Hasil audit tampil, tetapi gagal disimpan ke tabel: ' + (e.message || e);
+    }
+
     closeModalScanIklan();
-    logAudit('Audit Compliance Iklan', 'artwork_prescreenings', null, { 
-      summary: `Iklan ${selectedProduct?.product_name || ''} (${version})`, 
-      status: auditResult.status, 
-      score: auditResult.compliance_score 
+    loadArtworkTable();
+    showArtworkResult(analysis, title, {
+      id: savedId,
+      brand_id: selectedProduct?.brand_id || null,
+      brand_name: selectedProduct?.brand_name || null,
+      material_type: materialType,
+      file_name: adFile ? adFile.name : null,
+      thumbnail,
+      version,
+      created_at: new Date().toISOString()
+    });
+    if (saveWarn) alert(saveWarn);
+
+    logAudit('Audit Compliance Iklan', 'artwork_prescreenings', savedId, {
+      summary: `Iklan ${productName} (${version})`,
+      status: bpomStatus,
+      score
     });
 
   } catch (err) {
@@ -1001,12 +1066,18 @@ async function handleAuditIklanSubmit(event) {
     </div>
 
     <form onsubmit="handleCreateArtwork(event)" class="p-6 space-y-4 text-xs">
-      <!-- 1. Dropdown Master NIE (Otomatis Sync Brand & Kategori BPOM) -->
-      <div>
-        <label class="block font-bold text-slate-700 mb-1">Pilih Produk (Master NIE) <span class="text-rose-500">*</span></label>
-        <select id="artwork-product-select" required class="w-full bg-brand-50/50 border border-brand-300 rounded-lg p-2.5 font-semibold focus:outline-none focus:border-purple-500">
-          <option value="">-- Pilih Produk Terdaftar --</option>
-        </select>
+      <!-- 1. Nama produk diketik manual + brand -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nama Produk <span class="text-rose-500">*</span></label>
+          <input type="text" id="artwork-product-name" required placeholder="Ketik nama produk" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2.5 font-semibold text-slate-800 focus:outline-none focus:border-purple-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Brand <span class="text-rose-500">*</span></label>
+          <select id="artwork-brand-select" required class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2.5 font-semibold text-slate-800 focus:outline-none focus:border-purple-500 disabled:opacity-60">
+            <option value="">-- Pilih Brand --</option>
+          </select>
+        </div>
       </div>
 
       <!-- 2. Judul Materi / Versi Kemasan -->
@@ -1419,7 +1490,7 @@ async function handleAuditIklanSubmit(event) {
   <div id="artwork-result-modal" class="fixed inset-0 z-50 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white border-2 border-brand-200 w-full max-w-xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-6 py-4 border-b border-brand-200 flex items-center justify-between bg-brand-50">
-        <h3 class="text-sm font-bold text-brand-900">Hasil Pemeriksaan Artwork</h3>
+        <h3 id="artwork-result-title" class="text-sm font-bold text-brand-900">Hasil Pemeriksaan Artwork</h3>
         <button onclick="closeModal('artwork-result-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div id="artwork-result-body" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs"></div>
@@ -1522,7 +1593,8 @@ async function handleAuditIklanSubmit(event) {
           masterBrands = brands;
           const optionsHtml = brands.map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('');
           document.getElementById('header-brand-filter').innerHTML = `<option value="ALL">Semua Brand</option>` + optionsHtml;
-          document.getElementById('artwork-brand-select').innerHTML = optionsHtml;
+          const artBrandEl = document.getElementById('artwork-brand-select');
+          if (artBrandEl) artBrandEl.innerHTML = `<option value="">-- Pilih Brand --</option>` + optionsHtml;
           document.getElementById('npd-brand-select').innerHTML = optionsHtml;
         }
       } catch (e) {}
@@ -2846,39 +2918,18 @@ async function handlePureSupabaseLogin(e) {
     }
 
     // Function Buka Modal Artwork + Auto Populate Dropdown NIE
-async function openArtworkModal() {
+function openArtworkModal() {
   openModal('artwork-modal');
-  const selectEl = document.getElementById('artwork-product-select');
-  if (!selectEl) return;
-
-  try {
-    let query = supabaseClient.from('product_nie_records').select('*');
-    const userRole = String(currentUserSession?.role || '').toUpperCase();
-    const selBrand = selectedBrandId();
-
-    // Filter otomatis berdasarkan Role & Brand Session
-    if (userRole === 'BRAND_TEAM' && currentUserSession?.brand_id) {
-      query = query.eq('brand_id', currentUserSession.brand_id);
-    } else if (selBrand) {
-      query = query.eq('brand_id', selBrand);
-    }
-
-    const { data, error } = await query.order('product_name', { ascending: true });
-    if (error) throw error;
-
-    cachedNieProducts = data || [];
-    selectEl.innerHTML = '<option value="">-- Pilih Produk Terdaftar --</option>';
-
-    if (cachedNieProducts.length === 0) {
-      selectEl.innerHTML = '<option value="">-- Tidak Ada Produk NIE Terdaftar --</option>';
-      return;
-    }
-
-    cachedNieProducts.forEach(prod => {
-      selectEl.innerHTML += `<option value="${prod.id}">${esc(prod.product_name)} (${esc(prod.nie_number)})</option>`;
-    });
-  } catch (err) {
-    console.error('Error load NIE products:', err.message);
+  const brandEl = document.getElementById('artwork-brand-select');
+  if (!brandEl) return;
+  const userRole = String(currentUserSession?.role || '').toUpperCase();
+  if (userRole === 'BRAND_TEAM' && currentUserSession?.brand_id) {
+    brandEl.value = String(currentUserSession.brand_id);
+    brandEl.disabled = true; // tim brand hanya boleh brand sendiri
+  } else {
+    brandEl.disabled = false;
+    const sel = selectedBrandId();
+    if (sel) brandEl.value = String(sel);
   }
 }
 
@@ -4138,8 +4189,13 @@ async function openArtworkModal() {
         d, title, id: rec.id || null, brand_id: rec.brand_id || null, brand_name: rec.brand_name || null,
         material_type: rec.material_type || null, file_name: rec.file_name || null,
         thumbnail: rec.thumbnail || null,
+        version: rec.version || null,
+        is_ad: /^iklan/i.test(rec.material_type || ''),
         created_at: rec.created_at || new Date().toISOString()
       };
+      const isAd = currentArtworkResult.is_ad;
+      const titleEl = document.getElementById('artwork-result-title');
+      if (titleEl) titleEl.textContent = isAd ? 'Hasil Audit Iklan' : 'Hasil Pemeriksaan Artwork';
       const tb = document.getElementById('btn-artwork-ticket');
       tb.disabled = false;
       tb.innerHTML = '<i data-lucide="ticket" class="w-4 h-4"></i> Buat Tiket ke Legal';
@@ -4163,11 +4219,12 @@ async function openArtworkModal() {
           ${box('Kategori Produk', esc(d.product_category))}
           ${box('Skor Kepatuhan', esc(score) + '/100', 'text-base ' + (score >= 75 ? 'text-emerald-600' : score >= 50 ? 'text-amber-600' : 'text-rose-600'))}
           ${box('Status BPOM', esc(d.bpom_status), artStatusColor(d.bpom_status))}
-          ${box('Status Halal', esc(d.halal_status), artStatusColor(d.halal_status))}
+          ${isAd ? '' : box('Status Halal', esc(d.halal_status), artStatusColor(d.halal_status))}
         </div>
         ${list('Risiko Tinggi', d.high_risk_items, 'text-rose-600')}
-        ${list('Perlu Penyesuaian', d.need_adjustment_items, 'text-amber-600')}
-        ${list('Sudah Sesuai', d.compliant_items, 'text-emerald-600')}
+        ${list(isAd ? 'Rekomendasi Perbaikan' : 'Perlu Penyesuaian', d.need_adjustment_items, 'text-amber-600')}
+        ${isAd ? '' : list('Sudah Sesuai', d.compliant_items, 'text-emerald-600')}
+        ${d.summary_notes ? `<div class="bg-slate-50 border border-slate-200 rounded-lg p-3"><p class="text-[10px] uppercase font-bold text-slate-500 mb-1">Catatan AI</p><p class="text-slate-700 whitespace-pre-line">${esc(d.summary_notes)}</p></div>` : ''}
         <p class="text-[10px] text-slate-400">Ringkasan AI, belum divalidasi Legal.</p>
       `;
       openModal('artwork-result-modal');
@@ -4191,7 +4248,8 @@ async function openArtworkModal() {
       try {
         const d = c.d;
         const score = Number(d.compliance_score);
-        const title = 'Review Artwork: ' + c.title;
+        const label = c.is_ad ? 'Iklan' : 'Artwork';
+        const title = 'Review ' + label + ': ' + c.title;
         const { data: ex } = await supabaseClient.from('tickets').select('ticket_number').eq('title', title).limit(1);
         if (ex && ex.length) {
           alert('Tiket untuk artwork ini sudah ada: ' + ex[0].ticket_number);
@@ -4200,7 +4258,7 @@ async function openArtworkModal() {
         }
         const bullets = (arr) => Array.isArray(arr) && arr.length ? arr.map(x => '- ' + x).join('\n') : '-';
         const description = [
-          'Permintaan review Legal atas hasil pemeriksaan artwork (ringkasan AI, belum divalidasi).',
+          'Permintaan review Legal atas hasil ' + (c.is_ad ? 'audit materi iklan' : 'pemeriksaan artwork') + ' (ringkasan AI, belum divalidasi).',
           '',
           'Materi: ' + c.title,
           c.brand_name ? 'Brand: ' + c.brand_name : null,
@@ -4209,13 +4267,15 @@ async function openArtworkModal() {
           'Kategori produk: ' + d.product_category,
           'Skor kepatuhan: ' + score + '/100',
           'Status BPOM: ' + d.bpom_status,
-          'Status halal: ' + d.halal_status,
+          c.is_ad ? null : 'Status halal: ' + d.halal_status,
           '',
           'Risiko tinggi:',
           bullets(d.high_risk_items),
           '',
           'Perlu penyesuaian:',
-          bullets(d.need_adjustment_items)
+          bullets(d.need_adjustment_items),
+          d.summary_notes ? '' : null,
+          d.summary_notes ? 'Catatan AI: ' + d.summary_notes : null
         ].filter(x => x !== null).join('\n');
 
         const row = {
@@ -4362,7 +4422,7 @@ async function openArtworkModal() {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9.5);
       doc.setTextColor(15, 23, 42);
-      doc.text(`${c.version || 'v1.0'} (${c.material_type || 'Kemasan'})`, rightX, rightY);
+      doc.text(c.version ? `${c.version} (${c.material_type || 'Kemasan'})` : String(c.material_type || 'Kemasan'), rightX, rightY);
       doc.text(String(d.product_category || c.product_category || 'Pangan Olahan'), rightX + 160, rightY);
 
       // Tanggal Audit
@@ -4400,12 +4460,14 @@ async function openArtworkModal() {
       doc.text(bpomStatus, rightX + metricW + 14, rightY + 30);
 
       // 3. Status Halal
-      const halalStatus = d.halal_status || c.halal_status || 'Non-Compliant';
+      const halalStatus = d.halal_status || c.halal_status || (c.is_ad ? 'N/A' : 'Non-Compliant');
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(rightX + (metricW * 2) + 22, rightY, metricW + 10, metricH, 4, 4, 'FD');
       doc.setFontSize(6.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 116, 139);
       doc.text('Status Halal:', rightX + (metricW * 2) + 28, rightY + 12);
-      doc.setFontSize(8.5); doc.setTextColor(halalStatus === 'Compliant' || halalStatus === 'Certified' ? 16 : 225, halalStatus === 'Compliant' || halalStatus === 'Certified' ? 185 : 29, halalStatus === 'Compliant' || halalStatus === 'Certified' ? 129 : 72);
+      doc.setFontSize(8.5);
+      if (halalStatus === 'N/A') doc.setTextColor(100, 116, 139);
+      else doc.setTextColor(halalStatus === 'Compliant' || halalStatus === 'Certified' ? 16 : 225, halalStatus === 'Compliant' || halalStatus === 'Certified' ? 185 : 29, halalStatus === 'Compliant' || halalStatus === 'Certified' ? 129 : 72);
       doc.text(halalStatus, rightX + (metricW * 2) + 28, rightY + 30);
 
       y += cardH + 20;
@@ -4501,8 +4563,22 @@ async function openArtworkModal() {
 
       // Render 3 Bingkai Evaluasi Berdasarkan Variabel Adaptif
       drawFramedSection('HIGH RISK (RISIKO TINGGI PELANGGARAN HUKUM)', highRiskItems, [225, 29, 72], [254, 242, 242], 'high_risk');
-      drawFramedSection('NEED ADJUSTMENT / REMOVAL (PERLU REVISI/HAPUS)', needAdjItems, [217, 119, 6], [255, 251, 235], 'adjustment');
-      drawFramedSection('COMPLIANT (SESUAI ATURAN JDIH BPOM)', compliantItems, [16, 185, 129], [240, 253, 244], 'compliant');
+      drawFramedSection(c.is_ad ? 'REKOMENDASI PERBAIKAN' : 'NEED ADJUSTMENT / REMOVAL (PERLU REVISI/HAPUS)', needAdjItems, [217, 119, 6], [255, 251, 235], 'adjustment');
+      if (!c.is_ad) drawFramedSection('COMPLIANT (SESUAI ATURAN JDIH BPOM)', compliantItems, [16, 185, 129], [240, 253, 244], 'compliant');
+
+      if (d.summary_notes) {
+        checkPageBreak(40);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(15, 23, 42);
+        doc.text('CATATAN AI', M, y);
+        y += 13;
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(30, 41, 59);
+        doc.splitTextToSize(String(d.summary_notes), maxW).forEach(line => {
+          checkPageBreak(14);
+          doc.text(line, M, y);
+          y += 11;
+        });
+        y += 8;
+      }
 
       // --- 5. FOOTER ---
       doc.setFont('helvetica', 'italic');
@@ -4877,13 +4953,20 @@ async function openArtworkModal() {
   async function handleCreateArtwork(e) {
   e.preventDefault();
 
-  const productId = document.getElementById('artwork-product-select').value;
-  const selectedProduct = cachedNieProducts.find(p => String(p.id) === String(productId));
+  const productName = document.getElementById('artwork-product-name').value.trim();
+  const brandId = document.getElementById('artwork-brand-select').value;
+  const brandObj = masterBrands.find(b => String(b.id) === String(brandId));
 
-  if (!selectedProduct) {
-    alert('Silakan pilih produk dari Master NIE terlebih dahulu!');
+  if (!productName) {
+    alert('Nama produk wajib diisi!');
     return;
   }
+  if (!brandObj) {
+    alert('Silakan pilih brand terlebih dahulu!');
+    return;
+  }
+  // Produk diketik manual (tidak lagi dari Master NIE): NIE & kategori dikosongkan, kategori disimpulkan AI.
+  const selectedProduct = { product_name: productName, nie_number: '', product_category: '', brand_id: brandObj.id, brand_name: brandObj.name };
 
   const title = document.getElementById('artwork-title').value.trim();
   const version = document.getElementById('artwork-version').value.trim();
@@ -4893,6 +4976,8 @@ async function openArtworkModal() {
     alert('Pilih file desain (gambar/PDF) terlebih dahulu!');
     return;
   }
+
+  const fullTitle = `${productName} - ${title} (${version})`;
 
   const btn = document.getElementById('btn-submit-artwork');
   btn.disabled = true;
@@ -4916,7 +5001,8 @@ async function openArtworkModal() {
         "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
-        title: `${title} (${version})`,
+        title: fullTitle,
+        designVersion: version,
         materialType: 'Kemasan',
         productName: selectedProduct.product_name,
         nieNumber: selectedProduct.nie_number,
@@ -4935,25 +5021,27 @@ async function openArtworkModal() {
       throw new Error(resData.error || ('Edge Function gagal (HTTP ' + aiResponse.status + ')'));
     }
 
-    if (thumbnail && resData.saved_id) {
-      await supabaseClient.from('artwork_prescreenings').update({ thumbnail }).eq('id', resData.saved_id);
+    if (resData.saved_id) {
+      // edge function mengisi product_name = title; samakan dengan nama produk yang diketik
+      await supabaseClient.from('artwork_prescreenings').update(thumbnail ? { thumbnail, product_name: productName } : { product_name: productName }).eq('id', resData.saved_id);
     }
 
     e.target.reset();
     closeModal('artwork-modal');
     loadArtworkTable();
-    showArtworkResult(resData.data, title, {
+    showArtworkResult(resData.data, fullTitle, {
       id: resData.saved_id,
       brand_id: selectedProduct.brand_id,
       brand_name: selectedProduct.brand_name,
       material_type: 'Kemasan',
       file_name: file.name,
       thumbnail,
+      version,
       created_at: new Date().toISOString()
     });
 
     logAudit('Skrining Artwork', 'artwork_prescreenings', resData.saved_id, {
-      summary: `${title} (${version})`,
+      summary: fullTitle,
       status_bpom: resData.data.bpom_status,
       skor: resData.data.compliance_score
     });
