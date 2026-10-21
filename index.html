@@ -2251,7 +2251,7 @@ function resetMemoFilter() {
         if (window.lucide) lucide.createIcons();
       }
     }
-    async function handlePureSupabaseLogin(e) {
+async function handlePureSupabaseLogin(e) {
       e.preventDefault();
       const u = document.getElementById('username-input').value.trim();
       const p = document.getElementById('password-input').value;
@@ -2266,36 +2266,56 @@ function resetMemoFilter() {
           if (error) throw error;
           if (data) session = { username: data.username, role: data.role, brand_id: data.brand_id, token: data.token, status: data.status };
         } else {
-          // Ambil status juga dari public.users
+          // Ambil data user beserta status dari public.users
           const { data: users, error } = await supabaseClient.from('users')
             .select('username, role, brand_id, status')
-            .ilike('username', escLike(u)).eq('password', p).limit(5);
+            .ilike('username', escLike(u))
+            .eq('password', p)
+            .limit(1);
+
           if (error) throw error;
-          const row = (users || []).find(x => String(x.username).toLowerCase() === u.toLowerCase());
-          if (row) session = { username: row.username, role: row.role, brand_id: row.brand_id, status: row.status };
+
+          if (users && users.length > 0) {
+            const user = users[0];
+            const statusUpper = String(user.status || '').toUpperCase();
+
+            // Cek jika status masih PENDING
+            if (statusUpper === 'PENDING') {
+              alert('Akun Anda masih dalam status PENDING dan menunggu persetujuan dari tim Legal/Admin.');
+              if (btn) btn.disabled = false;
+              return;
+            }
+
+            // Cek jika status REJECTED atau NON-AKTIF
+            if (statusUpper === 'REJECTED' || statusUpper === 'INACTIVE') {
+              alert('Akun Anda telah dinonaktifkan atau ditolak. Silakan hubungi tim Legal/Admin.');
+              if (btn) btn.disabled = false;
+              return;
+            }
+
+            session = {
+              username: user.username,
+              role: user.role,
+              brand_id: user.brand_id,
+              status: user.status
+            };
+          } else {
+            alert('Username atau password salah.');
+            if (btn) btn.disabled = false;
+            return;
+          }
         }
 
-        if (!session) { alert('Username / Password Salah'); return; }
-
-        // VALIDASI STATUS AKUN
-        const accStatus = (session.status || 'PENDING').toUpperCase();
-        if (accStatus === 'PENDING') {
-          alert(`Akun "${session.username}" masih menunggu persetujuan dari tim Legal/Admin.\n\nSilakan hubungi tim Legal untuk verifikasi akun Anda.`);
-          return;
+        if (session) {
+          currentUserSession = session;
+          localStorage.setItem(SESSION_KEY, JSON.stringify({
+            ...session,
+            timestamp: Date.now()
+          }));
+          showApp(session);
         }
-        if (accStatus === 'REJECTED') {
-          alert(`Pengajuan akun "${session.username}" ditolak. Silakan hubungi tim Legal untuk informasi lebih lanjut.`);
-          return;
-        }
-
-        session.avatar = session.username.slice(0, 2).toUpperCase();
-        session.exp = Date.now() + SESSION_TTL_MS;
-        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-        document.getElementById('password-input').value = '';
-        showApp(session);
-        logAudit('Login', 'users', null, { summary: 'Peran: ' + (session.role || '-') });
       } catch (err) {
-        alert('Tidak bisa masuk: ' + (err && err.message ? err.message : 'periksa koneksi internet Anda.'));
+        alert('Gagal login: ' + (err.message || err));
       } finally {
         if (btn) btn.disabled = false;
       }
