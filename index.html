@@ -1374,6 +1374,11 @@ async function handleAuditIklanSubmit(event) {
       </div>
 
       <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-[10px] font-bold uppercase text-brand-800 mb-1">Brand untuk NIE ini</label>
+          <select id="nie-brand-select" class="w-full bg-brand-50/50 border border-brand-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500"></select>
+          <p class="text-[10px] text-slate-500 mt-1">Semua NIE yang diekstrak (PDF maupun Drive) akan disimpan ke brand ini, supaya muncul di Artwork dan Audit Iklan.</p>
+        </div>
         <div class="border-2 border-dashed border-brand-300 rounded-xl p-6 text-center bg-brand-50/50">
           <i data-lucide="file-check-2" class="w-8 h-8 mx-auto text-emerald-600 mb-2"></i>
           <p class="text-xs font-bold text-slate-700">Unggah File PDF Sertifikat / Surat NIE BPOM</p>
@@ -2466,6 +2471,11 @@ async function handlePureSupabaseLogin(e) {
     }
 
     function openNieModal() {
+      const nieBrandEl = document.getElementById('nie-brand-select');
+      const headerBrand = document.getElementById('header-brand-filter')?.value;
+      nieBrandEl.innerHTML = `<option value="">-- Pilih brand --</option>` +
+        masterBrands.map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('');
+      nieBrandEl.value = (headerBrand && headerBrand !== 'ALL') ? headerBrand : '';
       document.getElementById('nie-pdf-file').value = '';
       document.getElementById('nie-drive-links').value = '';
       document.getElementById('drive-extract-panel-nie').classList.add('hidden');
@@ -2676,6 +2686,8 @@ async function handlePureSupabaseLogin(e) {
         alert('Pilih file PDF dokumen NIE terlebih dahulu!');
         return;
       }
+      const nieBrandId = document.getElementById('nie-brand-select').value;
+      if (!nieBrandId) { alert('Pilih brand untuk NIE ini terlebih dahulu!'); return; }
 
       const btn = document.getElementById('btn-extract-nie-pdf');
       btn.disabled = true;
@@ -2700,6 +2712,7 @@ async function handlePureSupabaseLogin(e) {
           body: JSON.stringify({
             pdfBase64,
             mode: 'nie',
+            brand_id: nieBrandId,
             username: currentUserSession ? currentUserSession.username : 'system'
           })
         });
@@ -2773,6 +2786,9 @@ async function handlePureSupabaseLogin(e) {
       const links = parseDriveLinks(raw);
       if (!links.length) { alert('Tempel minimal satu link file atau folder Google Drive yang valid.'); return; }
 
+      const driveBrandId = mode === 'nie' ? document.getElementById('nie-brand-select').value : null;
+      if (mode === 'nie' && !driveBrandId) { alert('Pilih brand untuk NIE ini terlebih dahulu!'); return; }
+
       const btn = document.getElementById(mode === 'nie' ? 'btn-extract-nie-drive' : 'btn-extract-reg-drive');
       st.running = true; st.cancelled = false; btn.disabled = true;
       const errors = [];
@@ -2797,6 +2813,7 @@ async function handlePureSupabaseLogin(e) {
             const res = await driveFetchJson(`${SUPABASE_URL}/functions/v1/parse-bpom-regulation`, {
               driveFileId: f.id,
               mode: mode === 'nie' ? 'nie' : 'regulation',
+              brand_id: driveBrandId || undefined,
               username: currentUserSession ? currentUserSession.username : 'system'
             });
             done++;
