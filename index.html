@@ -222,6 +222,14 @@ async function handleAuditIklanSubmit(event) {
       compliant_items: [],
       summary_notes: auditResult.summary_notes || ''
     };
+    // Tentukan brand: akun brand > brand di data NIE > cocokkan nama brand > filter header
+    const isBrandUser = String(currentUserSession?.role || '').toUpperCase() === 'BRAND_TEAM' && currentUserSession?.brand_id;
+    const byName = selectedProduct?.brand_name
+      ? masterBrands.find(b => String(b.name).trim().toLowerCase() === String(selectedProduct.brand_name).trim().toLowerCase())
+      : null;
+    const adBrandId = (isBrandUser ? currentUserSession.brand_id : null) || selectedProduct?.brand_id || byName?.id || selectedBrandId() || null;
+    const adBrandObj = masterBrands.find(b => String(b.id) === String(adBrandId));
+    const adBrandName = adBrandObj?.name || selectedProduct?.brand_name || null;
     const adFile = fileInput.files[0] || null;
     const thumbnail = await makeThumbnail(adFile);
 
@@ -232,8 +240,8 @@ async function handleAuditIklanSubmit(event) {
         title,
         product_name: productName,
         material_type: materialType,
-        brand_id: selectedProduct?.brand_id || null,
-        brand_name: selectedProduct?.brand_name || null,
+        brand_id: adBrandId,
+        brand_name: adBrandName,
         category: analysis.product_category,
         design_version: version,
         compliance_score: score,
@@ -258,8 +266,8 @@ async function handleAuditIklanSubmit(event) {
     loadArtworkTable();
     showArtworkResult(analysis, title, {
       id: savedId,
-      brand_id: selectedProduct?.brand_id || null,
-      brand_name: selectedProduct?.brand_name || null,
+      brand_id: adBrandId,
+      brand_name: adBrandName,
       material_type: materialType,
       file_name: adFile ? adFile.name : null,
       thumbnail,
