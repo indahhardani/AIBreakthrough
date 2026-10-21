@@ -438,7 +438,7 @@ async function handleAuditIklanSubmit(event) {
             <div class="p-2 bg-brand-800 text-brand-100 rounded-lg shadow-inner">
               <i data-lucide="shield-check" class="w-5 h-5"></i>
             </div>
-            <span class="font-bold text-base tracking-wide text-white">LegalOps AI</span>
+            <span class="font-bold text-base tracking-wide text-white">SmartGate</span>
           </div>
           <button onclick="toggleSidebar()" class="md:hidden text-brand-100 hover:text-white p-1">
             <i data-lucide="x" class="w-5 h-5"></i>
@@ -4469,7 +4469,7 @@ async function openArtworkModal() {
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(7.5);
       doc.setTextColor(148, 163, 184);
-      doc.text('Dokumen ini dihasilkan secara otomatis oleh Enterprise LegalOps AI. Wajib divalidasi oleh Tim Legal sebelum cetak masal.', M, H - 20);
+      doc.text('Dokumen ini dihasilkan secara otomatis oleh Enterprise SmartGate. Wajib divalidasi oleh Tim Legal sebelum cetak masal.', M, H - 20);
 
       // Simpan PDF
       const slug = String(c.title || 'artwork').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'artwork';
@@ -4790,7 +4790,7 @@ async function openArtworkModal() {
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
-      doc.text('Dokumen ini dihasilkan otomatis oleh Enterprise LegalOps AI. Wajib divalidasi oleh Tim Legal sebelum pengajuan resmi BPOM.', M, H - 20);
+      doc.text('Dokumen ini dihasilkan otomatis oleh Enterprise SmartGate. Wajib divalidasi oleh Tim Legal sebelum pengajuan resmi BPOM.', M, H - 20);
 
       // Save PDF
       const slug = String(c.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'produk';
